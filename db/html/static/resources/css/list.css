@@ -1,0 +1,356 @@
+* {
+	font-family:Arial;
+	/* enable border to debug CSS */
+	/*border : 1px dashed black;*/ 
+}
+
+
+.active td, div.active { 
+    background-color:#E1EEf4;  /* blue */
+}
+.running td, div.running { 
+    background-color:#DFD; 
+}
+.testing td, div.testing { 
+    background-color:#FFD; 
+}
+.error td, div.error { 
+    background-color:#FDD; 
+}
+
+
+div.clear { clear:both; }
+
+
+body {
+	padding:0px;
+	margin:0px;
+	font-family:sans;
+	font-size:10pt;
+}
+#addbtn { margin:0.5em;padding:0.2em;}
+table#main { 
+	width:100%;
+	/*border-collapse:collapse;*/
+	border-color:#AAA;
+}
+
+table#main td{
+	padding:0.5em;
+	/*border-bottom:0px solid;*/
+	/*border-color:#b8d1f3;*/
+}
+table#main th {
+	padding:0.8em 0.5em;
+	/*border-bottom:1px solid;
+	border-color:inherit;*/
+}
+
+/* Make the cursor over the list appear like a pointer */
+table#main tr {
+	cursor:pointer;
+	/*background:;*/
+}
+
+/* Left hand table styling */
+div#leftpane { 
+	/*width : 500px; */
+	overflow:auto;
+}
+
+.btn {
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px;
+}
+
+#startbtn {
+	background-color: green;
+	float : left;
+}
+
+#testbtn {
+	background-color: blue;
+	float : left;
+}
+
+#stopbtn {
+	background-color: red;
+	float : left;
+}
+
+#copybtn {
+	background-color: blue;
+}
+
+input.btn:hover {
+	box-shadow: 0px 0px 15px black;
+}
+
+
+
+.firstRowOfday {
+	border-top : 1px solid black;
+}
+
+.colDate {
+    width : 50px;
+    background: #FFF;
+}
+
+.colTime {
+	width : 75px;
+}
+
+.colID {
+	width : 50px;
+}
+
+.colSubj {
+	width : 100px;
+	font-size : 10pt;
+	font-family:Arial;
+}
+#subjects {
+	width : 100px;
+}
+
+.colTask {
+	width : 200px;
+	text-align : left;
+}
+#tasks {
+	width : 200px;
+	text-align : left;
+}
+
+
+div#rightpane { 
+	margin-left : 555px; 
+	width : 900px; 
+	height : 100%;
+	position : fixed;
+	overflow : auto;
+}
+
+
+table#main tbody>tr:hover {
+	background:#DDD;
+}
+
+
+table#main tr#newentry {
+	display:none;
+}
+th { text-align:left;}
+
+
+.rowactive td { 
+	position:relative; 
+	z-index:10;
+}
+
+input[type="text"] {
+    width: 50px;
+}
+
+input[type="number"] {
+    width: 50px;
+}
+
+#report td:first-child {
+	font-weight:bold;
+}
+
+
+
+div#content {
+	transition:all 0.25s ease-in-out;
+	min-height:100%;
+	border-left:1px solid #AAA;
+	display:none;
+}
+form#experiment { 
+	padding:0.5em; /* padding around the entire right pane */
+}
+ul {
+	margin:0px;
+	padding:0px;
+	list-style-type:none;
+}
+fieldset { 
+	margin:0.5em;
+	border:1px solid; 
+	border-radius:3px;
+}
+
+
+/*options class is used for div containing Features/Sequence/Parameters fieldsets*/
+.options { 
+	float:left; 
+	width:300px; 
+}
+
+#parameters table,#sequence table {
+	/*width:100%;*/
+	border-collapse:collapse;
+}
+td.param_label {
+	width:40%;
+}
+td.param_label+td {
+	width:60%;
+}
+td.param_label+td select { width:100%; }
+input[type=text], input[type=number] { 
+	border:1px solid;
+	border-color:#888;
+	padding:2px;
+	border-radius:2px;
+	transition:all 0.25s ease-in-out;
+	-webkit-transition:all 0.25s ease-in-out;
+	-moz-transition:all 0.25s ease-in-out;
+}
+
+/*rightside contains Report, Notes, Linked Files*/
+div.rightside { 
+	float:left; 
+	width:500px;
+}
+
+fieldset#notes textarea {
+	width:100%;
+	height:12em;
+	font-family:sans;
+	border:none;
+	background-color:inherit;
+	outline:none;
+}
+fieldset#files { display:none; }
+input:invalid {
+	box-shadow:0px 0px 10px red;
+}
+
+
+
+
+#report table.option {
+	font-size:10pt;
+}
+
+fieldset#report {
+    max-height:500px;
+    /*width:100%;*/
+    /*width : 460px;*/
+    overflow:auto;
+}
+
+#report td {
+	/*width : 200px;*/
+}
+
+.report_table {
+	font-size:10pt;
+	width : 450px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+input#toggle_table
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari and Chrome */
+  -o-transform: scale(2); /* Opera */
+  padding: 10px;
+}
+
+.checkboxtext
+{
+  /* Checkbox text */
+  font-size: 110%;
+  display: inline;
+}
+
+/*Rolling wheel when you click a task entry, visible before the server responds*/
+#wait_wheel_img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -(X/2)px;
+    margin-top: -(Y/2)px;
+}
+
+
+
+
+/* 
+ * BMI styling 
+*/
+
+.bmibtn { float:left; }
+#bmiwrap {
+    float:left;
+}
+#cellselect {
+    float:left;
+}
+#cellselect select {
+    width:100px;
+    max-height:200px;
+    height:150px;
+    font-size:75%;
+}
+#cellnames {
+    width:100%;
+    height:8em;
+    font-size:80%;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
+}
+#channelnames {
+    width:100%;
+    height:8em;
+    font-size:80%;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
+}
+
+fieldset#bmi {
+    border:1px solid;
+    border-radius:4px;
+    padding:0.5em;
+    margin:0.5em;
+}
+
+#tselect input,div {
+    float:left;
+}
+#tselect input {
+    border:none;
+    padding:none;
+    width:3em;
+}
+#tstart {
+    text-align:right;
+}
+#tslider { 
+    width:15em;
+    margin: .25em .75em;
+}
