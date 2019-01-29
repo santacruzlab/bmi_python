@@ -1,0 +1,24 @@
+init:
+Secondary init function after the object has been created and all the super __init__ functions have run.
+
+Parameters
+----------
+None
+
+Returns
+-------
+None
+
+
+init:
+Secondary init function. See riglib.experiment.Experiment.init()
+Prior to starting the task, this 'init' 
+
+run:
+Code to execute immediately prior to the beginning of the task FSM executing, or after the FSM has finished running. 
+See riglib.experiment.Experiment.run(). This 'run' method
+
+
+cleanup:
+Function to run at 'cleanup' time, after the FSM has finished executing. See riglib.experiment.Experiment.cleanup
+This 'cleanup' method
