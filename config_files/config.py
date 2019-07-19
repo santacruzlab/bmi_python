@@ -1,7 +1,7 @@
 '''
 Module to read the 'config' text file for rig-specific configuration
 '''
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 import os
 import sys
 

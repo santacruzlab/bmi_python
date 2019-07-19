@@ -4,7 +4,8 @@ Example of inverse kinematics using the simple gradient descent method
 '''
 
 from riglib.bmi import robot_arms
-reload(robot_arms)
+import imp
+imp.reload(robot_arms)
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -30,8 +31,8 @@ x_target_pos = (np.random.randn() - 0.5)*25
 z_target_pos = (np.random.randn() - 0.5)*14
 target_pos = np.array([x_target_pos, 0, z_target_pos]) - shoulder_anchor
 target_pos = np.array([-14.37130744,   0.        ,  22.97472612])
-print "target position"
-print target_pos
+print("target position")
+print(target_pos)
 # target_pos = np.array([3., 0, 20])
 q = q_sub[:]
 
@@ -39,7 +40,7 @@ q_star, path = planar_chain.inverse_kinematics(q_sub.copy(), target_pos, verbose
 
 # plt.close('all')
 # planar_chain.plot(q_star)
-print planar_chain.endpoint_pos(q_star)
+print(planar_chain.endpoint_pos(q_star))
 
 # plt.figure()
 # plt.plot(endpoint_traj[:k,0], endpoint_traj[:k,2])	

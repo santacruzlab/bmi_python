@@ -9,11 +9,12 @@ from riglib.bmi import kfdecoder, ppfdecoder
 from riglib.bmi import train
 from riglib.bmi import extractor, state_space_models
 import unittest
+import imp
 
-reload(train)
-reload(kfdecoder)
-reload(ppfdecoder)
-reload(extractor)
+imp.reload(train)
+imp.reload(kfdecoder)
+imp.reload(ppfdecoder)
+imp.reload(extractor)
 
 class TestDecoderTrain(unittest.TestCase):
     def test_kalman_vf(self):
@@ -23,7 +24,7 @@ class TestDecoderTrain(unittest.TestCase):
       
         training_block = dbfn.TaskEntry(dec_record.entry_id, dbname='testing')
         files = training_block.datafiles
-        print files
+        print(files)
       
         from riglib.bmi import extractor
         extractor_cls = extractor.BinnedSpikeCountsExtractor

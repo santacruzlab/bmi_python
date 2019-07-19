@@ -11,13 +11,14 @@ import cProfile
 from riglib.bmi import train, clda, bmi, ppfdecoder, extractor
 from tasks import bmimultitasks, generatorfunctions as genfns
 from riglib.bmi.train import unit_conv
-from itertools import izip
+import imp
+
 from tasks import bmi_recon_tasks
 
-reload(clda)
-reload(train)
-reload(bmi)
-reload(ppfdecoder)
+imp.reload(clda)
+imp.reload(train)
+imp.reload(bmi)
+imp.reload(ppfdecoder)
 
 
 idx = 2306
@@ -28,7 +29,7 @@ parser.add_option("-b", "--block", dest="block", help="Database ID number of blo
 (options, args) = parser.parse_args()
 idx = options.block
 te = performance._get_te(idx)
-print te
+print(te)
 T = len(te.hdf.root.task)
 n_iter = 100 #T
 #n_iter = 15782
@@ -105,13 +106,13 @@ state_transitions = task_msgs[~(task_msgs['msg'] == 'update_bmi')]
 #         self.idx += 1
 
 
-reload(bmi_recon_tasks)
+imp.reload(bmi_recon_tasks)
 gen = genfns.sim_target_seq_generator_multi(8, 1000)
 self = task = bmi_recon_tasks.ContCLDARecon(te, n_iter, gen)
 task.init()
 error = task.calc_recon_error()
 
-print "Max recon error", np.max(np.abs(error))
+print("Max recon error", np.max(np.abs(error)))
 
 # task = CLDAPPFReconstruction(gen)
 # task.init()

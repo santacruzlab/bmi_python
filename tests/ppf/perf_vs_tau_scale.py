@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 import plotutil
 import numpy as np
 from db.tracker import models
-from itertools import izip
+import imp
 
-reload(performance)
-reload(plotutil)
-reload(dbfn)
+
+imp.reload(performance)
+imp.reload(plotutil)
+imp.reload(dbfn)
 
 ppf_fixed_blocks_nov10 = dbfn.TaskEntrySet.construct_from_queryset(name='BMI perf Nov 10', filter_fns=[dbfn._assist_level_0], subj='C', date=(11,10), task__name__startswith='bmi')
 ppf_fixed_blocks_nov11 = dbfn.TaskEntrySet.construct_from_queryset(name='BMI perf Nov 11', filter_fns=[dbfn._assist_level_0], subj='C', date=(11,11), task__name__startswith='bmi')

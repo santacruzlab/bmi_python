@@ -12,11 +12,11 @@ import imp
 try:
     imp.find_module("featurelist")
 except ImportError:
-    print "Error importing featurelist!"
-    import traceback
-    traceback.print_exc()
-    raise Exception("Error importing featurelist!\n\n")
-    #features = dict()
+    print ("Error importing featurelist!")
+    # import traceback
+    # traceback.print_exc()
+    # raise Exception("Error importing featurelist!\n\n")
+    features = dict()
 else:
     from featurelist import features
 
@@ -24,10 +24,10 @@ else:
 try:
     from tasklist import tasks
 except ImportError:
-    print 'Import Error in db.namelist: from tasklist import tasks -- likely error in a single task preventing import'
+    print ('Import Error in db.namelist: from tasklist import tasks -- likely error in a single task preventing import')
     tasks = dict()
 
-from itertools import izip
+
 
 # Derive generator functions from the tasklist (all generatorfunctions should be staticmethods of a task)
 generator_names = []
@@ -37,7 +37,7 @@ for task in tasks:
     if hasattr(task_cls, 'sequence_generators'):
         generator_function_names = task_cls.sequence_generators
         gen_fns = [getattr(task_cls, x) for x in generator_function_names]
-        for fn_name, fn in izip(generator_function_names, gen_fns):
+        for fn_name, fn in zip(generator_function_names, gen_fns):
             if fn in generator_functions:
                 pass
             else:
@@ -45,7 +45,7 @@ for task in tasks:
                 generator_functions.append(fn)
 
 generators = dict()
-for fn_name, fn in izip(generator_names, generator_functions):
+for fn_name, fn in zip(generator_names, generator_functions):
     generators[fn_name] = fn
 
 
@@ -61,7 +61,7 @@ class SubclassDict(dict):
         try:
             return super(self.__class__, self).__getitem__(name)
         except KeyError:
-            for inst, model in self.items():
+            for inst, model in list(self.items()):
                 if issubclass(name, inst):
                     return model
         raise KeyError
@@ -91,6 +91,6 @@ class SubclassDict(dict):
 try:
     from bmilist import *
 except:
-    print "error importing BMI configuration variables"
+    print ("error importing BMI configuration variables")
     import traceback
     traceback.print_exc()

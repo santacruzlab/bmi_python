@@ -9,8 +9,9 @@ from scipy.io import loadmat, savemat
 from riglib.bmi.sim_neurons import PointProcessEnsemble
 import matplotlib.pyplot as plt
 from riglib.bmi import state_space_models
+import imp
 
-reload(ppfdecoder)
+imp.reload(ppfdecoder)
 
 data = loadmat('sample_spikes_and_kinematics_10000.mat')
 hand_vel = data['hand_vel']
@@ -81,7 +82,7 @@ plt.plot(decoded_output[0,:], label='pyth')
 plt.legend()
 plt.show()
 
-print np.max(np.abs(x_est[0,:n_iter] - decoded_output[0,:]))
+print(np.max(np.abs(x_est[0,:n_iter] - decoded_output[0,:])))
 
 
 # TODO expand A, W, C to same dimensions as for KF
@@ -116,6 +117,6 @@ plt.legend()
 plt.show()
 
 
-print np.max(np.abs(x_est[0,:n_iter] - decoded_output_new[3,:]))
+print(np.max(np.abs(x_est[0,:n_iter] - decoded_output_new[3,:])))
 
 

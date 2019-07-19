@@ -6,9 +6,9 @@ import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'db.settings'
 
 import re
-import cPickle
+#import cPickle
 import tempfile
-import xmlrpclib
+#import xmlrpclib
 import pickle
 import os
 
@@ -79,9 +79,9 @@ def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslic
     pos_key : string
         TODO
     """
-    print "make bmi"
+    print("make bmi")
     extractor_cls = namelist.extractors[extractorname]
-    print 'Training with extractor class:', extractor_cls
+    print(('Training with extractor class:', extractor_cls))
 
     if 'spike' in extractor_cls.feature_type:  # e.g., 'spike_counts'
         # look at "cells" argument (ignore "channels")
@@ -164,18 +164,18 @@ def cache_and_train(*args, **kwargs):
 
     # import config
     if config.recording_sys['make'] == 'plexon':
-        print "cache and train"
+        print ("cache and train")
         entry = kwargs['entry']
-        print entry
+        print (entry)
         plxfile = models.DataFile.objects.get(system__name='plexon', entry=entry)
-        print plxfile
+        print (plxfile)
 
         if not plxfile.has_cache():
             cache = cache_plx.si(plxfile.get_path())
             train = make_bmi.si(*args, **kwargs)
             chain(cache, train)()
         else:
-            print "calling"
+            print ("calling")
             make_bmi.delay(*args, **kwargs)
     
     elif config.recording_sys['make'] == 'blackrock':
@@ -209,7 +209,7 @@ def save_new_decoder_from_existing(obj, orig_decoder_record, suffix='_'):
     new_decoder_fname = obj.save()
     new_decoder_name = orig_decoder_record.name + suffix
     training_block_id = orig_decoder_record.entry_id
-    print "Saving new decoder:", new_decoder_name
+    print(("Saving new decoder:", new_decoder_name))
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 
 ## Functions to manipulate existing (KF)Decoders. These belong elsewhere
@@ -219,7 +219,7 @@ def conv_mm_dec_to_cm(decoder_record):
     Convert a mm unit decoder to cm
     '''
     decoder_fname = os.path.join('/storage/decoders/', decoder_record.path)
-    print decoder_fname
+    print (decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
     from riglib.bmi import train
@@ -231,7 +231,7 @@ def conv_mm_dec_to_cm(decoder_record):
 
     new_decoder_name = decoder_name + '_cm'
     training_block_id = decoder_record.entry_id
-    print new_decoder_name
+    print (new_decoder_name)
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 
 def zero_out_SSKF_bias(decoder_record):
@@ -248,7 +248,7 @@ def conv_kfdecoder_binlen(decoder_record, new_binlen):
 def conv_kfdecoder_to_ppfdecoder(decoder_record):
     # Load the decoder
     decoder_fname = os.path.join('/storage/decoders/', decoder_record.path)
-    print decoder_fname
+    print (decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
 
@@ -261,7 +261,7 @@ def conv_kfdecoder_to_ppfdecoder(decoder_record):
 
     new_decoder_name = decoder_name + '_ppf'
     training_block_id = decoder_record.entry_id
-    print new_decoder_name
+    print (new_decoder_name)
     from tracker import dbq
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 
@@ -278,7 +278,7 @@ def conv_kfdecoder_to_sskfdecoder(decoder_record):
 def make_kfdecoder_interpolate(decoder_record):
     # Load the decoder
     decoder_fname = os.path.join('/storage/decoders/', decoder_record.path)
-    print decoder_fname
+    print (decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
 
@@ -291,7 +291,7 @@ def make_kfdecoder_interpolate(decoder_record):
 
     new_decoder_name = decoder_name + '_60hz'
     training_block_id = decoder_record.entry_id
-    print new_decoder_name
+    print (new_decoder_name)
     from tracker import dbq
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 

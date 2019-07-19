@@ -6,7 +6,7 @@ for more complete documentation
 
 
 #from django.conf.urls.defaults import *
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -14,7 +14,7 @@ admin.autodiscover()
 
 import trainbmi
 
-urlpatterns = patterns('',
+urlpatterns = ['',
 	(r'^$', 'tracker.views.list'),
     (r'^all/$', 'tracker.views.listall'),
     (r'^listdb/(?P<dbname>.+?)/.*?/ajax/exp_info/(?P<idx>\d+)/', 'tracker.ajax.exp_info'),    
@@ -52,5 +52,5 @@ urlpatterns = patterns('',
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
-)
+]
 

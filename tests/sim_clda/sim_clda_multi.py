@@ -3,7 +3,7 @@
 Simulation of CLDA control task
 """
 ## Imports
-from __future__ import division
+
 from db import dbfunctions
 from db.tracker import dbq
 from db.tracker import models
@@ -26,16 +26,17 @@ from tasks import cursor_clda_tasks
 from riglib.bmi.feedback_controllers import LQRController
 
 import pickle
+import imp
 
 
 # reload(kfdecoder)
 # reload(ppfdecoder)
-reload(clda)
+imp.reload(clda)
 # reload(riglib.bmi)
 # reload(riglib.bmi.train)
 from tasks import tentaclebmitasks
-reload(cursor_clda_tasks)
-reload(tentaclebmitasks)
+imp.reload(cursor_clda_tasks)
+imp.reload(tentaclebmitasks)
 
 import argparse
 parser = argparse.ArgumentParser(description='Analyze neural control of a redundant kinematic chain')
@@ -149,7 +150,7 @@ else:
 
 self = task
 task.init()
-print 'task init called'
+print('task init called')
 task.run()
 
 if args.save:

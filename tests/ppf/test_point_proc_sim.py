@@ -6,8 +6,9 @@ import numpy as np
 from scipy.io import loadmat, savemat
 import utils
 from riglib.bmi import sim_neurons
+import imp
 
-reload(sim_neurons)
+imp.reload(sim_neurons)
 
 kin_data = loadmat('paco_hand_kin.mat')
 hand_kin = kin_data['hand_kin']
@@ -58,4 +59,4 @@ spikes_ensemble = np.zeros([N, C])
 for n in range(1, N):
     spikes_ensemble[n-1, :] = ensemble(X[n,:])
 
-print np.array_equal(spikes_ensemble, spike_counts)
+print(np.array_equal(spikes_ensemble, spike_counts))

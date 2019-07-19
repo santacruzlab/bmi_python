@@ -21,7 +21,8 @@ else:
     c = celery.Celery()
     c.conf.update(CELERY_ACCEPT_CONTENT = ['json', 'pickle'])
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "db.settings")
+    #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "db.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
     from django.core.management import execute_from_command_line
 

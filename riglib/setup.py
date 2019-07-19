@@ -41,5 +41,5 @@ setup(  name        = "Plexfile utilities",
         author      = "James Gao",
         version     = "0.1.0",
         packages = ['plexon'],
-        ext_modules = cythonize([psth, plexfile], include_dirs=['.', 'plexon/cython/'])
-        )
+        ext_modules = cythonize([psth, plexfile] #include_dirs=['.', 'plexon/cython/'])
+        ))

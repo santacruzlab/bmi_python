@@ -11,7 +11,7 @@ from riglib import experiment
 
 from json_param import Parameters
 from tasktrack import Track
-from models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
+from .models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
 
 import trainbmi
 import logging
@@ -58,7 +58,7 @@ def train_decoder_ajax_handler(request, idx):
         cells=request.POST['cells'],
         channels=request.POST['channels'],
         binlen=1./update_rate,
-        tslice=map(float, request.POST.getlist('tslice[]')),
+        tslice=list(map(float, request.POST.getlist('tslice[]'))),
         ssm=request.POST['ssm'],
         pos_key=request.POST['pos_key'],
         kin_extractor=request.POST['kin_extractor'],
@@ -113,7 +113,7 @@ def task_info(request, idx, dbname='default'):
     '''
     task = Task.objects.using(dbname).get(pk=idx)
     feats = []
-    for name, isset in request.GET.items():
+    for name, isset in list(request.GET.items()):
         if isset == "true": # box for the feature checked
             feat = Feature.objects.using(dbname).get(name=name)
             feats.append(feat)
@@ -146,12 +146,12 @@ def exp_info(request, idx, dbname='default'):
     try:
         entry_data = entry.to_json()
     except:
-        print "##### Error trying to access task entry data: id=%s, dbname=%s" % (idx, dbname)
+        print("##### Error trying to access task entry data: id=%s, dbname=%s" % (idx, dbname))
         import traceback
         exception = traceback.format_exc()
         exception.replace('\n', '\n    ')
-        print exception.rstrip()
-        print "#####"
+        print(exception.rstrip())
+        print("#####")
     else:
         return _respond(entry_data)
 
@@ -159,7 +159,7 @@ def hide_entry(request, idx):
     '''
     See documentation for exp_info
     '''
-    print "hide_entry"
+    print("hide_entry")
     entry = TaskEntry.objects.get(pk=idx)
     entry.visible = False
     entry.save()
@@ -169,7 +169,7 @@ def show_entry(request, idx):
     '''
     See documentation for exp_info
     '''
-    print "hide_entry"
+    print("hide_entry")
     entry = TaskEntry.objects.get(pk=idx)
     entry.visible = True
     entry.save()
@@ -222,19 +222,19 @@ def start_experiment(request, save=True):
         data = json.loads(request.POST['data'])
 
         task =  Task.objects.get(pk=data['task'])
-        Exp = task.get(feats=data['feats'].keys())
+        Exp = task.get(feats=list(data['feats'].keys()))
 
         entry = TaskEntry(subject_id=data['subject'], task=task)
         params = Parameters.from_html(data['params'])
         entry.params = params.to_json()
-        kwargs = dict(subj=entry.subject, task_rec=task, feats=Feature.getall(data['feats'].keys()),
+        kwargs = dict(subj=entry.subject, task_rec=task, feats=Feature.getall(list(data['feats'].keys())),
                       params=params)
 
         # Save the target sequence to the database and link to the task entry, if the task type uses target sequences
         if issubclass(Exp, experiment.Sequence):
-            print "creating seq"
-            print "data['sequence'] POST data"
-            print data['sequence']
+            print("creating seq")
+            print("data['sequence'] POST data")
+            print(data['sequence'])
             seq = Sequence.from_json(data['sequence'])
             seq.task = task
             if save:
@@ -252,7 +252,7 @@ def start_experiment(request, save=True):
             entry.save()
 
             # Link the features used to the task entry
-            for feat in data['feats'].keys():
+            for feat in list(data['feats'].keys()):
                 f = Feature.objects.get(pk=feat)
                 entry.feats.add(f.pk)
 
@@ -271,9 +271,9 @@ def start_experiment(request, save=True):
 
     except Exception as e:
         # Generate an HTML response with the traceback of any exceptions thrown
-        import cStringIO
+        import io
         import traceback
-        err = cStringIO.StringIO()
+        err = io.StringIO()
         traceback.print_exc(None, err)
         err.seek(0)
         return _respond(dict(status="error", msg=err.read()))
@@ -318,9 +318,9 @@ def _respond_err(e):
     JSON-encoded dictionary
         Sets status to "error" and provides the specific error message
     '''
-    import cStringIO
+    import io
     import traceback
-    err = cStringIO.StringIO()
+    err = io.StringIO()
     traceback.print_exc(None, err)
     err.seek(0)
     return _respond(dict(status="error", msg=err.read()))        
@@ -352,8 +352,8 @@ def reward_drain(request, onoff):
     '''
     if onoff == 'on':
         r.drain(600)
-        print 'drain on'
+        print('drain on')
     else:
-        print 'drain off'
+        print('drain off')
         r.drain_off()
     return HttpResponse('Turning reward %s' % onoff)

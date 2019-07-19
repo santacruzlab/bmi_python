@@ -8,10 +8,10 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
 
-from models import TaskEntry, Task, Subject, Feature, Generator
+from .models import TaskEntry, Task, Subject, Feature, Generator
 
 import namelist
-from ajax import exp_tracker
+from .ajax import exp_tracker
 
 import datetime
 
@@ -28,7 +28,7 @@ def list(request):
     -------
     Django HTTPResponse instance
     '''
-    print "views.list: new root request received"
+    print("views.list: new root request received")
     td = datetime.timedelta(days=60)
     start_date = datetime.date.today() - td
     # entries = TaskEntry.objects.filter(visible=True).order_by('-date') # date__gt=start_date, 
@@ -56,7 +56,7 @@ def list(request):
         from tasklist import tasks
     except ImportError:
         tasks = dict()
-    tasks = filter(lambda t: t.name in tasks.keys(), task_records)
+    tasks = [t for t in task_records if t.name in list(tasks.keys())]
 
     epoch = datetime.datetime.utcfromtimestamp(0)
     for entry in entries:
@@ -98,7 +98,7 @@ def list(request):
 
     resp = render_to_response('list.html', fields, RequestContext(request))
 
-    print "views.list: resp done!"
+    print("views.list: resp done!")
     return resp
 
 def listall(request):
@@ -159,12 +159,12 @@ def listdb(request, dbname='default', subject=None, task=None):
     Django HTTPResponse instance
     '''
     filter_kwargs = dict(visible=True)
-    if not (subject is None) and isinstance(subject, (str, unicode)):
+    if not (subject is None) and isinstance(subject, str):
         filter_kwargs['subject__name'] = subject
-    if not (task is None) and isinstance(task, (str, unicode)):
+    if not (task is None) and isinstance(task, str):
         filter_kwargs['task__name'] = task
 
-    print filter_kwargs
+    print(filter_kwargs)
 
     entries = TaskEntry.objects.using(dbname).filter(**filter_kwargs).order_by("-date")
     _color_entries(entries)
@@ -208,13 +208,13 @@ def get_sequence(request, idx):
     Pointing browser to WEBROOT/sequence_for/(?P<idx>\d+)/ returns a pickled
     file with the 'sequence' used in the specified id
     '''
-    import cPickle
+    import pickle
     entry = TaskEntry.objects.get(pk=idx)
-    seq = cPickle.loads(str(entry.sequence.sequence))
+    seq = pickle.loads(str(entry.sequence.sequence))
     log = json.loads(entry.report)
     num = len([l[2] for l in log if l[0] == "wait"])
 
-    response = HttpResponse(cPickle.dumps(seq[:num]), content_type='application/x-pickle')
+    response = HttpResponse(pickle.dumps(seq[:num]), content_type='application/x-pickle')
     response['Content-Disposition'] = 'attachment; filename={subj}{time}_{idx}.pkl'.format(
         subj=entry.subject.name[:4].lower(), 
         time="%04d%02d%02d"%(entry.date.year, entry.date.month, entry.date.day),

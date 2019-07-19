@@ -2,7 +2,7 @@
 This module contains functions which convert parameter sets stored
 as JSON blobs into python dictionaries or vice versa.
 '''
-import __builtin__
+import builtins
 import ast
 import json
 import numpy as np
@@ -37,7 +37,7 @@ def param_objhook(obj):
         return func(*obj['args'])
     elif '__class__' in obj:
         # look up the module
-        mod = __builtin__.__import__(obj['__module__'], fromlist=[obj['__class__']])
+        mod = builtins.__import__(obj['__module__'], fromlist=[obj['__class__']])
 
         # get the class with the 'getattr' and then run the class constructor on the class data
         return getattr(mod, obj['__class__'])(obj['__dict__'])
@@ -142,11 +142,11 @@ class Parameters(object):
     @classmethod
     def from_html(cls, params):
         processed = dict()
-        for name, value in params.items():
-            if isinstance(value, (str, unicode)):
+        for name, value in list(params.items()):
+            if isinstance(value, str):
                 processed[name] = _parse_str(value)
             elif isinstance(value, list):
-                processed[name] = map(_parse_str, value)
+                processed[name] = list(map(_parse_str, value))
             else:
                 processed[name] = value
 
@@ -167,7 +167,7 @@ class Parameters(object):
                 return obj.tolist()    
             elif isinstance(obj, dict):
                 # if the object is a dictionary, just run the encoder on each of the 'values' of the dictionary
-                return dict((k, encode(v)) for k, v in obj.items())
+                return dict((k, encode(v)) for k, v in list(obj.items()))
             elif isinstance(obj, object) and hasattr(obj, '__dict__'):
                 # if the object is a new-style class (inherits from 'object'), save the module, class name and object data
                 # (python object data (attributes) are stored in the parameter __dict__)
@@ -199,7 +199,7 @@ class Parameters(object):
         '''
         params = self.params
         self.params = dict()
-        for name, value in params.items():
+        for name, value in list(params.items()):
             if name in traits:
                 self.params[name] = norm_trait(traits[name], value)
             else:
