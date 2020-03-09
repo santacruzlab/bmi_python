@@ -6,7 +6,11 @@ Blackrock Neural Signal Processor (NSP) (or nPlay).
 import sys
 import time
 from collections import namedtuple
-from cerebus import cbpy
+try:
+    from cerebus import cbpy
+except ImportError:
+    import warnings
+    warnings.warn("Unable to import cerebus library. Check if is installed if using the Blackrock NeuroPort system")
 
 SpikeEventData = namedtuple("SpikeEventData",
                             ["chan", "unit", "ts", "arrival_ts"])
@@ -66,7 +70,6 @@ class Connection(object):
         
     def select_channels(self, channels):
         '''Sets the channels on which to receive event/continuous data.
-
         Parameters
         ----------
         channels : array_like
@@ -177,4 +180,3 @@ class Connection(object):
                                      arrival_ts=arrival_ts)
 
             time.sleep(sleep_time)
-
