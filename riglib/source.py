@@ -13,53 +13,9 @@ from multiprocessing import sharedctypes as shm
 import ctypes
 
 import numpy as np
+from .mp_proxy import FuncProxy
 
-
-class FuncProxy(object):
-    '''
-    Interface for calling functions in remote processes. Similar to tasktrack.FuncProxy.
-    '''
-    def __init__(self, name, pipe, event):
-        '''
-        Constructor for FuncProxy
-
-        Parameters
-        ----------
-        name : string
-            Name of remote function to call
-        pipe : mp.Pipe instance
-            multiprocessing pipe through which to send data (function name, arguments) and receive the result
-        event : mp.Event instance
-            A flag to set which is multiprocessing-compatible (visible to both the current and the remote processes)
-
-        Returns
-        -------
-        FuncProxy instance
-        '''
-        self.pipe = pipe
-        self.name = name
-        self.event = event
-
-    def __call__(self, *args, **kwargs):
-        '''
-        Return the result of the remote function call
-
-        Parameters
-        ----------
-        *args, **kwargs : positional arguments, keyword arguments
-            To be passed to the remote function associated when the object was created
-
-        Returns
-        -------
-        function result
-        '''
-        self.pipe.send((self.name, args, kwargs))
-        self.event.set()
-        return self.pipe.recv()
-
-
-# NOTE: this import MUST be after the defintion of FuncProxy
-from . import sink
+from . import sink # this circular import is not ideal..
 
 class DataSourceSystem(object):
     '''
@@ -112,7 +68,6 @@ class DataSource(mp.Process):
             Flag to indicate whether data should be saved to a sink (e.g., HDF file)
         kwargs: optional keyword arguments
             Passed to the source during object construction if any are specified
-
         Returns
         -------
         DataSource instance
@@ -138,7 +93,9 @@ class DataSource(mp.Process):
         self.stream = mp.Event()
         self.last_idx = 0
 
-        self.methods = set(n for n in dir(source) if inspect.ismethod(getattr(source, n)))
+        # self.methods = set(n for n in dir(source) if inspect.ismethod(getattr(source, n)))
+        self.methods = set(filter(lambda n: inspect.isfunction(getattr(source, n)), dir(source)))
+
 
         # in DataSource.run, there is a call to "self.sinks.send(...)",
         # but if the DataSource was never registered with the sink manager,
@@ -151,11 +108,9 @@ class DataSource(mp.Process):
         From Python's docs on the multiprocessing module:
             Start the process's activity.
             This must be called at most once per process object. It arranges for the object's run() method to be invoked in a separate process.
-
         Parameters
         ----------
         None
-
         Returns
         -------
         None
@@ -171,6 +126,7 @@ class DataSource(mp.Process):
             system = self.source(**self.source_kwargs)
             system.start()
         except Exception as e:
+            print("source.DataSource.run: unable to start source!")
             print(e)
             self.status.value = -1
 
@@ -186,6 +142,7 @@ class DataSource(mp.Process):
                     else:
                         ret = getattr(system, cmd)(*args, **kwargs)
                 except Exception as e:
+                    print("source.DataSource.run: unable to process RPC call")
                     traceback.print_exc()
                     ret = e
                 self.lock.release()
@@ -206,6 +163,10 @@ class DataSource(mp.Process):
                 if self.send_data_to_sink_manager:
                     self.sinks.send(self.name, data)
                 if data is not None:
+                    # if not isinstance(data, np.ndarray):
+                    #     raise ValueError("source.DataSource.run: Data returned from \
+                    #         source system must be an array to ensure type consistency!")
+
                     try:
                         self.lock.acquire()
                         i = self.idx.value % self.max_len
@@ -213,6 +174,7 @@ class DataSource(mp.Process):
                         self.idx.value += 1
                         self.lock.release()
                     except Exception as e:
+                        print("source.DataSource.run, exception saving data to ring buffer")
                         print(e)
             else:
                 time.sleep(.001)
@@ -223,7 +185,6 @@ class DataSource(mp.Process):
     def get(self, all=False, **kwargs):
         '''
         Retreive data from the remote process
-
         Parameters
         ----------
         all : boolean, optional, default=False
@@ -231,7 +192,6 @@ class DataSource(mp.Process):
             this is NOT the same as all the data observed. (see 'bufferlen' in __init__ for buffer size)
         kwargs : optional kwargs 
             To be passed to self.filter, if it is listed
-
         Returns
         -------
         np.recarray 
@@ -316,27 +276,24 @@ class DataSource(mp.Process):
     def __getattr__(self, attr):
         '''
         Try to retreive attributes from the remote DataSourceSystem if the are not found in the proximal Source object
-
         Parameters
         ----------
         attr : string 
             Name of attribute to retreive
-
         Returns
         -------
         object
             The arbitrary value associated with the named attribute, if it exists.
         '''
-        if attr in self.methods:
+        methods = object.__getattribute__(self, "methods") # this is done instead of "self.methods" to avoid infinite recursion in Windows
+        if attr in methods:
             # if the attribute requested is an instance method of the 'source', return a proxy to the remote source's method
             return FuncProxy(attr, self.pipe, self.cmd_event)
-        elif not attr.beginsWith("__"):
+        elif not attr.startswith("__"):
             # try to look up the attribute remotely
-            print("getting attribute %s" % attr)
             self.pipe.send(("getattr", (attr,), {}))
             self.cmd_event.set()
             return self.pipe.recv()
-        # TODO stylistically, this last statement should be what happens if an "else:" is hit
         raise AttributeError(attr)
 
 
@@ -434,11 +391,9 @@ class MultiChanDataSource(mp.Process):
         From Python's docs on the multiprocessing module:
             Start the process's activity.
             This must be called at most once per process object. It arranges for the object's run() method to be invoked in a separate process.
-
         Parameters
         ----------
         None
-
         Returns
         -------
         None
@@ -450,9 +405,9 @@ class MultiChanDataSource(mp.Process):
         '''
         Main function executed by the mp.Process object. This function runs in the *remote* process, not in the main process
         '''
-        print("Starting datasource %r" % self.source)
+        print(("Starting datasource %r" % self.source))
         if self.send_data_to_sink_manager:
-            print("Registering Supplementary HDF file for datasource %r" % self.source)
+            print(("Registering Supplementary HDF file for datasource %r" % self.source))
             self.register_supp_hdf()
 
         try:
@@ -586,25 +541,24 @@ class MultiChanDataSource(mp.Process):
             else:
                 time.sleep(.001)
         
-        self.supp_hdf.close_data()
-        print('end of supp hdf')
+        if hasattr(self, "supp_hdf"):
+            self.supp_hdf.close_data()
+            print('end of supp hdf')
 
         system.stop()
-        print("ended datasource %r" % self.source)
+        print(("ended datasource %r" % self.source))
 
 
 
     def get(self, n_pts, channels, **kwargs):
         '''
         Return the most recent n_pts of data from the specified channels.
-
         Parameters
         ----------
         n_pts : int
             Number of data points to read
         channels : iterable
             Channels from which to read
-
         Returns
         -------
         list of np.recarray objects
@@ -626,7 +580,7 @@ class MultiChanDataSource(mp.Process):
             try:
                 row = self.chan_to_row[chan]
             except KeyError:
-                print('data source was not configured to get data on channel', chan)
+                print(('data source was not configured to get data on channel', chan))
             else:  # executed if try clause does not raise a KeyError
                 idx = self.idxs[row]
                 if idx >= n_pts:  # no wrap-around required
@@ -646,14 +600,12 @@ class MultiChanDataSource(mp.Process):
     def get_new(self, channels, **kwargs):
         '''
         Return the new (unread) data from the specified channels.
-
         Parameters
         ----------
         channels : iterable
             Channels from which to read        
         kwargs : optional kwargs 
             To be passed to self.filter, if it is listed
-
         Returns
         -------
         list of np.recarray objects
@@ -672,7 +624,7 @@ class MultiChanDataSource(mp.Process):
             try:
                 row = self.chan_to_row[chan]
             except KeyError:
-                print('data source was not configured to get data on channel', chan)
+                print(('data source was not configured to get data on channel', chan))
                 data.append(None)
             else:  # executed if try clause does not raise a KeyError
                 idx = self.idxs[row]
@@ -717,12 +669,10 @@ class MultiChanDataSource(mp.Process):
     def __getattr__(self, attr):
         '''
         Try to retreive attributes from the remote DataSourceSystem if the are not found in the proximal Source object
-
         Parameters
         ----------
         attr : string 
             Name of attribute to retreive
-
         Returns
         -------
         object
@@ -731,7 +681,7 @@ class MultiChanDataSource(mp.Process):
         if attr in self.methods:
             return FuncProxy(attr, self.pipe, self.cmd_event)
         elif not attr.beginsWith("__"):
-            print("getting attribute %s" % attr)
+            print(("getting attribute %s" % attr))
             self.pipe.send(("getattr", (attr,), {}))
             self.cmd_event.set()
             return self.pipe.recv()
