@@ -99,7 +99,10 @@ class StateSpace(object):
             self.states = kwargs['statelist']
         else:
             self.states = list(states)
-
+    
+    def __len__(self):
+        return len(self.states)
+        
     def __repr__(self):
         return 'State space: ' + str(self.state_names)
 
