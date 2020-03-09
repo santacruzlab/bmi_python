@@ -1,4 +1,4 @@
-from tracker import models
+from .tracker import models
 
 def hide_empty_task_entries(hide=False):
 	tes_empty_report = models.TaskEntry.objects.filter(report='')
