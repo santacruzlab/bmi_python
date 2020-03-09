@@ -15,14 +15,14 @@ if [ -z "$BMI3D" ]
 fi
 
 #Check /storage (exist )
-storage=$(python3 $BMI3D/config_files/check_storage.py 2>&1)
+storage=$(python $BMI3D/config_files/check_storage.py 2>&1)
 if [ $storage == 'False' ]; then
     echo "/storage does not exist --> if on Ismore, must mount"
     exit 1
 fi
 
 # Make sure that the server is not already running in a different program
-if [ `ps aux | grep "manage.py runserver" | grep python3 | wc -l` -gt 0 ]; then 
+if [ `ps aux | grep "manage.py runserver" | grep python | wc -l` -gt 0 ]; then 
     echo "ERROR: runserver seems to have already been executed by a different program!"
     exit 1
 fi
@@ -34,8 +34,8 @@ if [ ! -e $BMI3D/config_files/config ]; then
 fi
     
 # Mount the neural recording system, if a mount point is specified in the config file
-if [ `cat $BMI3D/config_files/config | grep mount_point | wc -l` -gt 0 ]; then
-    MOUNT_POINT=`cat $BMI3D/config_files/config | grep mount_point | tr -d '[:blank:]' | cut -d '=' -f 2`
+if [ `cat $BMI3D/config | grep mount_point | wc -l` -gt 0 ]; then
+    MOUNT_POINT=`cat $BMI3D/config | grep mount_point | tr -d '[:blank:]' | cut -d '=' -f 2`
     if [[ -z `mount | grep $MOUNT_POINT` ]]; then
         echo "Mounting neural recording system computer at $MOUNT_POINT"
         sudo mount $MOUNT_POINT
@@ -79,20 +79,19 @@ MANAGER=$BMI3D/db/manage.py
 
 # Start python processes and save their PIDs (stored in the bash '!' variable 
 # immediately after the command is executed)
-# 
-# changed python to python3 so that python 3.6 is used for DJANGO and CELERY
-python3 $MANAGER runserver 0.0.0.0:8000 --noreload &
+python $MANAGER runserver 0.0.0.0:8000 --noreload &
 DJANGO=$!
-python3 $MANAGER celery worker &
+python $MANAGER celery worker &
 CELERY=$!
 #python $MANAGER celery flower --address=0.0.0.0 &
 #FLOWER=$!
+
 # Define what happens when you hit control-C
 function ctrl_c() {
 	kill -9 $DJANGO
 	kill $CELERY
 	#kill $FLOWER
-    kill -9 `ps aux | grep python3 | grep manage.py | tr -s " " | cut -d " " -f 2`
+    kill -9 `ps aux | grep python | grep manage.py | tr -s " " | cut -d " " -f 2`
 	# kill -9 `ps -C 'python manage.py' -o pid --no-headers`
 }
 
