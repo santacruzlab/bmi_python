@@ -2,7 +2,6 @@
 ####### Declare environment variables
 CODE=$HOME/code
 BMI3D=$CODE/bmi3d ### Directory in which to install the bmi3d software
-mkdir $BMI3D/log
 
 
 ####### Set up directories
@@ -47,8 +46,7 @@ sudo apt-get -y install python-pip libhdf5-serial-dev
 sudo apt-get -y install python-numpy
 sudo apt-get -y install python-scipy
 # setup the CIFS 
-#sudo apt-get -y install smbclient cifs-utils smbfs
-sudo apt-get -y install samba-client samba-common cifs-utils
+sudo apt-get -y install smbclient cifs-utils smbfs
 # matplotlib
 sudo apt-get -y install python-matplotlib
 # pygame
@@ -77,36 +75,30 @@ sudo apt-get install arduino arduino-core
 sudo apt-get install setserial
 
 ####### Install Python dependencies
-sudo pip3 install numexpr 
-sudo pip3 install cython 
-sudo pip3 install django-celery 
-sudo pip3 install traits 
-sudo pip3 install pandas 
-sudo pip3 install patsy 
-sudo pip3 install statsmodels 
-sudo pip3 install PyOpenGL PyOpenGL_accelerate
-# Django 1.6 is not compatible with Python3
-#sudo pip3 install Django==1.6 
-sudo pip3 install Django==2.2.3
-sudo pip3 install pylibftdi
-sudo pip3 install nitime
-sudo pip3 install sphinx
-sudo pip3 install numpydoc
-sudo pip3 install tornado
-# tables 2.4.0 not compatible with python3
-#sudo pip3 install tables==2.4.0
-sudo pip3 install tables
-sudo pip3 install sklearn
+sudo pip install numexpr 
+sudo pip install cython 
+sudo pip install django-celery 
+sudo pip install traits 
+sudo pip install pandas 
+sudo pip install patsy 
+sudo pip install statsmodels 
+sudo pip install PyOpenGL PyOpenGL_accelerate
+sudo pip install Django==1.6 
+sudo pip install pylibftdi
+sudo pip install nitime
+sudo pip install sphinx
+sudo pip install numpydoc
+sudo pip install tornado
+sudo pip install tables==2.4.0
+sudo pip install sklearn
 
 
 ####### Download any src code
-# Skip cloning Suraj's github code
 git clone https://github.com/sgowda/plot $HOME/code/plotutil
 git clone https://github.com/sgowda/robotics_toolbox $HOME/code/robotics
 # pygame
 hg clone https://bitbucket.org/pygame/pygame $HOME/code/pygame
 # Phidgets code
-cd $CODE/src
 wget http://www.phidgets.com/downloads/libraries/libphidget.tar.gz
 wget http://www.phidgets.com/downloads/libraries/PhidgetsPython.zip
 
@@ -116,11 +108,11 @@ wget http://www.phidgets.com/downloads/libraries/PhidgetsPython.zip
 ####### Install source code, configure software
 # plexread module
 cd $BMI3D/riglib
-sudo python3 setup.py install
+sudo python setup.py install
 
 # pygame
 cd $HOME/code/pygame
-sudo python3 setup.py install
+sudo python setup.py install
 
 # symlink for iPython
 sudo ln -s /usr/bin/ipython /usr/bin/ipy
@@ -138,8 +130,8 @@ sudo make install
 
 cd $CODE/src/
 unzip PhidgetsPython.zip  
-cd Phidgets22Python
-sudo python3 setup.py install
+cd PhidgetsPython
+sudo python setup.py install
 
 
 
@@ -158,13 +150,12 @@ sudo usermod -a -G dialout $USER # Serial ports belong to 'dialout' group
 
 ####### Reconfigure .bashrc
 sed -i '$a export PYTHONPATH=$PYTHONPATH:$HOME/code/robotics' $HOME/.bashrc
-sed -i '$a export BMI3D=/home/santacruzlab/code/bmi3d' $HOME/.bashrc
+sed -i '$a export BMI3D=/home/lab/code/bmi3d' $HOME/.bashrc
 sed -i '$a source $HOME/code/bmi3d/pathconfig.sh' $HOME/.bashrc
 source $HOME/.bashrc
 
-# Error with this - "cannot access - no such file or directory"
 sudo chown -R $USER ~/.matplotlib
 
 cd $HOME/code/bmi3d/db
-python3 manage.py syncdb
+python manage.py syncdb
 # Add superuser 'lab' with password 'lab'
