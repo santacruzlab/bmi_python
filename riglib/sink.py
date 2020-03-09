@@ -8,7 +8,7 @@ import traceback
 import multiprocessing as mp
 
 from . import source
-from .source import FuncProxy
+from .mp_proxy import FuncProxy
 
 class DataSink(mp.Process):
     '''
@@ -36,16 +36,17 @@ class DataSink(mp.Process):
         self.cmd_pipe, self._cmd_pipe = mp.Pipe()
         self.pipe, self._pipe = mp.Pipe()
         self.status = mp.Value('b', 1) # mp boolean used for terminating the remote process
-        self.methods = set(n for n in dir(output) if inspect.ismethod(getattr(output, n)))
+
+        self.methods = set(filter(lambda n: inspect.isfunction(getattr(output, n)), dir(output)))
+        # python 2 version: inspect.ismethod doesn't work because the object is not instantiated
+        # self.methods = set(n for n in dir(output) if inspect.ismethod(getattr(output, n)))
     
     def run(self):
         '''
         Run the sink system in a remote process
-
         Parameters
         ----------
         None
-
         Returns
         -------
         None
@@ -90,10 +91,11 @@ class DataSink(mp.Process):
         object:
             Value of specified named attribute
         '''
-        if attr in self.methods:
+        methods = object.__getattribute__(self, "methods")
+        if attr in methods:
             return FuncProxy(attr, self.cmd_pipe, self.cmd_event)
         else:
-            super(DataSink, self).__getattr__(self, attr)
+            raise AttributeError("Can't get attribute: %s. Remote methods available: %s" % (attr, str(self.methods)))
 
     def send(self, system, data):
         '''
@@ -116,11 +118,9 @@ class DataSink(mp.Process):
     def stop(self):
         '''
         Instruct the sink to stop gracefully by setting the 'status' boolean
-
         Parameters
         ----------
         None
-
         Returns
         -------
         None
@@ -139,11 +139,9 @@ class SinkManager(object):
     def __init__(self):
         '''
         Constructor for SinkManager
-
         Parameters
         ----------
         None
-
         Returns
         -------
         None
@@ -155,18 +153,16 @@ class SinkManager(object):
     def start(self, output, **kwargs):
         '''
         Docstring
-
         Parameters
         ----------
         output : DATA_TYPE
             ARG_DESCR
         kwargs : optional kwargs
             ARG_DESCR
-
         Returns
         -------
         '''
-        print("sinkmanager start %s"%output)
+        print(("sinkmanager start %s"%output))
         sink = DataSink(output, **kwargs)
         sink.start()
         self.registrations[sink] = set()
@@ -180,14 +176,12 @@ class SinkManager(object):
     def register(self, system, dtype=None):
         '''
         Register a system with all the known sinks
-
         Parameters
         ----------
         system : source.DataSource, source.MultiChanDataSource, or string 
             System to register with all the sinks 
         dtype : None (deprecated)
             Even if specified, this is overwritten in the 'else:' condition below
-
         Returns
         -------
         None
@@ -215,14 +209,12 @@ class SinkManager(object):
     def send(self, system, data):
         '''
         Send data from the specified 'system' to all sinks which have been registered
-
         Parameters
         ----------
         system: string 
             Name of the system sending the data
         data: np.array
             Generic data to be handled by each sink. Can be a record array, e.g., for task data.
-
         Returns
         -------
         None
@@ -255,13 +247,13 @@ class PrintSink(object):
         print("Starting print sink")
     
     def register(self, name, dtype):
-        print("Registered name %s with dtype %r"%(name, dtype))
+        print(("Registered name %s with dtype %r"%(name, dtype)))
     
     def send(self, system, data):
-        print("Received %s data: \n%r"%(system, data))
+        print(("Received %s data: \n%r"%(system, data)))
     
     def sendMsg(self, msg):
-        print("### MESSAGE: %s"%msg)
+        print(("### MESSAGE: %s"%msg))
     
     def close(self):
         print("Ended print sink")
