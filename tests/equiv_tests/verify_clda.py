@@ -1,7 +1,6 @@
 #!/usr/bin/python
 from db import dbfunctions as dbfn
-import imp
-imp.reload(dbfn)
+reload(dbfn)
 
 from tasks import bmimultitasks, performance
 import numpy as np
