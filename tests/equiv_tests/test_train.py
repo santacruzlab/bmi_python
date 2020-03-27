@@ -9,12 +9,11 @@ from riglib.bmi import kfdecoder, ppfdecoder
 from riglib.bmi import train
 from riglib.bmi import extractor, state_space_models
 import unittest
-import imp
 
-imp.reload(train)
-imp.reload(kfdecoder)
-imp.reload(ppfdecoder)
-imp.reload(extractor)
+reload(train)
+reload(kfdecoder)
+reload(ppfdecoder)
+reload(extractor)
 
 class TestDecoderTrain(unittest.TestCase):
     def test_kalman_vf(self):
