@@ -19,7 +19,7 @@ Visual C++ Build tools (for the 'traits' package)
 
 # Installation
 ```bash
-git clone https://github.com/DerekYJC/bmi_python.git
+git clone https://github.com/santacruzlab/bmi_python.git
 cd bmi_python
 pip3 install -r requirements.txt
 pip3 install -e .
