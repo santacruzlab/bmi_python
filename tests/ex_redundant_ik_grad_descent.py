@@ -4,8 +4,7 @@ Example of inverse kinematics using the simple gradient descent method
 '''
 
 from riglib.bmi import robot_arms
-import imp
-imp.reload(robot_arms)
+reload(robot_arms)
 import numpy as np
 import matplotlib.pyplot as plt
 import time

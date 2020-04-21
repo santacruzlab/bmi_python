@@ -4,7 +4,6 @@ High-level classes for BMI used to tie all th BMI subcomponent systems together
 import numpy as np
 import traceback
 import re
-from riglib.plexon import Spikes
 import multiprocessing as mp
 import queue
 
@@ -33,8 +32,13 @@ class GaussianState(object):
         if isinstance(mean, np.matrix):
             assert mean.shape[1] == 1 # column vector
             self.mean = mean
-        elif isinstance(mean, float):
-            self.mean = mean
+        elif isinstance(mean, (float, int)):
+            mean = float(mean)
+            if isinstance(cov, float):
+                self.mean = mean
+            else:
+                self.mean = mean * np.mat(np.ones([cov.shape[0], 1]))
+
         elif isinstance(mean, np.ndarray):
             if np.ndim(mean) == 1:
                 mean = mean.reshape(-1,1)
@@ -60,12 +64,13 @@ class GaussianState(object):
             mu = other*self.mean
             cov = other**2 * self.cov
         elif isinstance(other, np.ndarray):
+            # This never actually happens for an array because of how numpy implements array multiplication..
+            # (but if it did the following would be logical)
             other = np.mat(other)
             mu = other*self.mean
             cov = other*self.cov*other.T
         else:
-            print((type(other)))
-            raise
+            raise ValueError("Unrecognized type: ", type(other))
         return GaussianState(mu, cov)
 
     def __mul__(self, other):
@@ -77,8 +82,7 @@ class GaussianState(object):
         if isinstance(other, int) or isinstance(other, np.float64) or isinstance(other, float):
             cov = other**2 * self.cov
         else:
-            print((type(other)))
-            raise
+            raise ValueError("Unrecognized type: ", type(other))
         return GaussianState(mean, cov)
 
     def __add__(self, other):
@@ -98,6 +102,51 @@ class GaussianState(object):
             # print other
             raise ValueError("Gaussian state: cannot add type :%s" % type(other))
 
+    def probability(self, x, calc_log_pr=False):
+        """ Evaluate multivariate Gaussian probability density of input vector, given the 
+        mean and covariance of this object """
+        assert x.shape == self.mean.shape
+        k = self.mean.shape[0]
+
+        log_det_sign, log_det_cov = np.linalg.slogdet(self.cov)
+        if log_det_sign != 1.0:
+            raise ValueError("Covariance matrix is not positive definite!")
+
+        log_pr = -0.5*(k*np.log(2*np.pi) + log_det_cov + \
+            (x - self.mean).T * self.cov.I * (x - self.mean))
+
+        if calc_log_pr:
+            return log_pr 
+        else:
+            return np.exp(log_pr)
+
+    def volume(self, boundary):
+        """ Calculate volume of ellipsoid x^T * cov^-1 * x """
+        from scipy.special import gamma
+        
+        cov_det = np.linalg.det(self.cov)
+        n = self.mean.shape[0]
+        if cov_det == 0:
+            cov_eigenvals, _ = np.linalg.eig(self.cov)
+            n = np.sum(cov_eigenvals > 1e-5)
+            cov_det = np.product(cov_eigenvals[cov_eigenvals > 1e-5])
+
+        n_sphere_vol = np.pi**(float(n)/2)/gamma(float(n)/2 + 1)
+        return n_sphere_vol * boundary**(float(n)/2) * np.sqrt(cov_det)
+
+    def distance(self, x, sqrt=False):
+        """ Calculate Mahalanobis distance """
+        if not hasattr(self, "cov_inv"):
+            self.cov_inv = np.linalg.inv(self.cov)
+
+        dist_sq = (x - self.mean).T * self.cov_inv * (x - self.mean)
+        dist_sq = dist_sq[0,0]
+        if sqrt:
+            return np.sqrt(dist_sq)
+        else:
+            return dist_sq
+
+
 
 class GaussianStateHMM(object):
     '''
@@ -110,9 +159,7 @@ class GaussianStateHMM(object):
     def __init__(self, A, W):
         '''
         Constructor for GaussianStateHMM
-
         x_{t+1} = A*x_t + w_t; w_t ~ N(0, W)
-
         Parameters
         ----------
         A: np.mat of shape (N, N)
@@ -132,7 +179,6 @@ class GaussianStateHMM(object):
     def _init_state(self, init_state=None, init_cov=None):
         """
         Initialize the state of the filter with a mean and covariance (uncertainty)
-
         Parameters
         ----------
         init_state : np.matrix, optional
@@ -147,14 +193,17 @@ class GaussianStateHMM(object):
         None
         """
         ## Initialize the BMI state, assuming 
-        nS = self.A.shape[0] # number of state variables
+        nS = self.n_states() # number of state variables
         if init_state is None:
             init_state = np.mat( np.zeros([nS, 1]) )
             if self.include_offset: init_state[-1,0] = 1
         if init_cov is None:
             init_cov = np.mat( np.zeros([nS, nS]) )
-        self.state = GaussianState(init_state, init_cov) 
+        self.state = GaussianState(init_state, init_cov)
         self.init_noise_models()
+
+    def n_states(self):
+        return self.A.shape[0]
 
     def init_noise_models(self):
         '''
@@ -172,7 +221,6 @@ class GaussianStateHMM(object):
             x_t = previous state
             c_t = control input (the "directed" part of the model)
             w_t = process noise (the "random walk" part of the model)
-
         Parameters
         ----------
         state : GaussianState instance
@@ -186,7 +234,6 @@ class GaussianStateHMM(object):
         F : np.mat of shape (B.shape[1], N)
             Feedback control gains. Used to compute u_t = BF(x^* - x_t)
         
-
         Returns
         -------
         GaussianState instance
@@ -229,7 +276,6 @@ class GaussianStateHMM(object):
     def obj_eq(self, other, attrs=[]):
         '''
         Determine if two objects have mattching array attributes
-
         Parameters
         ----------
         other : object
@@ -237,7 +283,6 @@ class GaussianStateHMM(object):
         attrs : list, optional
             List of attributes to compare for equality. Only attributes that are common to both objects are used.
             The attributes should be np.array or similar as np.array_equal is used to determine equality
-
         Returns
         -------
         bool 
@@ -254,7 +299,6 @@ class GaussianStateHMM(object):
     def obj_diff(self, other, attrs=[]):
         '''
         Calculate the difference of the two objects w.r.t the specified attributes
-
         Parameters
         ----------
         other : object
@@ -262,7 +306,6 @@ class GaussianStateHMM(object):
         attrs : list, optional
             List of attributes to compare for equality. Only attributes that are common to both objects are used.
             The attributes should be np.array or similar as np.array_equal is used to determine equality
-
         Returns
         -------
         np.array
@@ -289,12 +332,10 @@ class GaussianStateHMM(object):
     def __setstate__(self, state):
         """
         Unpickle decoders by loading all the saved parameters and then running _pickle_init
-
         Parameters
         ----------
         state : dict
             Provided by the unpickling system
-
         Returns
         -------
         None
@@ -310,6 +351,32 @@ class GaussianStateHMM(object):
             except:
                 print(("GaussianStateHMM: could not pickle attribute %s" % attr))
         return data_to_pickle
+
+    def predict(self, observations, *args, **kwargs):
+        if isinstance(observations, list):
+            N = len(observations)
+        elif isinstance(observations, np.ndarray):
+            time_dim = kwargs.pop("time_dim", 1)
+            if time_dim not in [0, 1]:
+                raise ValueError("Can't interpret observation matrix")
+            N = observations.shape[time_dim]
+            if time_dim == 1:
+                observations = observations.T
+        state_seq = []
+        data = []
+        for k in range(N):
+            ret = self._forward_infer(self.state, observations[k], *args, **kwargs)
+            if np.iterable(ret):
+                state_k, data_k = ret
+            else:
+                state_k = ret
+                data_k = None
+
+            self.state = state_k
+
+            state_seq.append(state_k)
+            data.append(data_k)
+        return state_seq, data            
 
 
 class MachineOnlyFilter(GaussianStateHMM):
@@ -333,6 +400,26 @@ class MachineOnlyFilter(GaussianStateHMM):
             return self.A * st + Bu
         else:
             return self.A * st
+
+
+class RectangularBounder(object):
+    """ Hard limit on state values """
+    def __init__(self, bounding_box, states_to_bound):
+        self.bounding_box = bounding_box
+        self.states_to_bound = states_to_bound
+
+    def __call__(self, state_mean, state_names):
+        """
+        Apply bounds on state vector, if bounding box is specified
+        """
+        state_mean = state_mean.copy()
+        min_bounds, max_bounds = self.bounding_box
+
+        repl_with_min = np.array(state_mean[:,0]).ravel() < min_bounds
+        repl_with_max = np.array(state_mean[:,0]).ravel() > max_bounds
+        state_mean[repl_with_min, :] = min_bounds[repl_with_min].reshape(-1, 1)
+        state_mean[repl_with_max, :] = min_bounds[repl_with_max].reshape(-1, 1)
+        return state_mean
 
 
 class Decoder(object):
@@ -364,7 +451,8 @@ class Decoder(object):
         """
 
         self.filt = filt
-        self.filt._init_state()
+        if not filt is None:
+            self.filt._init_state()
         self.ssm = ssm
 
         self.units = np.array(units, dtype=np.int32)
@@ -414,7 +502,6 @@ class Decoder(object):
     def plot_pds(self, C, ax=None, plot_states=['hand_vx', 'hand_vz'], invert=False, **kwargs):
         '''
         Plot 2D "preferred directions" of features in the Decoder
-
         Parameters
         ----------
         C: np.array of shape (n_features, n_states)
@@ -463,7 +550,6 @@ class Decoder(object):
     def update_params(self, new_params, **kwargs):
         '''
         Method for updating the parameters of the decoder
-
         Parameters
         ----------
         new_params: dict 
@@ -486,7 +572,7 @@ class Decoder(object):
         """
         Apply bounds on state vector, if bounding box is specified
         """
-        if not self.bounding_box == None:
+        if not self.bounding_box is None:
             min_bounds, max_bounds = self.bounding_box
             state = self[self.states_to_bound]
             repl_with_min = state < min_bounds
@@ -499,19 +585,17 @@ class Decoder(object):
     def __getitem__(self, idx):
         """
         Get element(s) of the BMI state, indexed by name or number
-
         Warning: The variable 'q' is a reserved keyword, referring to all of
         the position states. This strange letter choice was made to be consistent
         with the robotics literature, where 'q' refers to the vector of 
         generalized joint coordinates.
-
         Parameters
         ----------
         idx: int or string
             Name of the state, index of the state, or list of indices/names 
             of the Decoder state(s) to return
         """
-        if isinstance(idx, int):
+        if isinstance(idx, int) or isinstance(idx, np.int64) or isinstance(idx, np.int32):
             return self.filt.state.mean[idx, 0]
         elif idx == 'q':
             pos_states, = np.nonzero(self.ssm.state_order == 0)
@@ -525,19 +609,21 @@ class Decoder(object):
         elif np.iterable(idx):
             return np.array([self.__getitem__(k) for k in idx])
         else:
-            raise ValueError("Decoder: Improper index type: %s" % type(idx))
+            try:
+                return self.filt.state.mean[idx, 0]
+            except:
+                raise ValueError("Decoder: Improper index type: %s" % type(idx))
 
     def __setitem__(self, idx, value):
         """
         Set element(s) of the BMI state, indexed by name or number
-
         Parameters
         ----------
         idx: int or string
             Name of the state, index of the state, or list of indices/names 
             of the Decoder state(s) to return
         """
-        if isinstance(idx, int):
+        if isinstance(idx, int) or isinstance(idx, np.int64) or isinstance(idx, np.int32):
             self.filt.state.mean[idx, 0] = value
         elif idx == 'q':
             pos_states, = np.nonzero(self.ssm.state_order == 0)
@@ -551,7 +637,10 @@ class Decoder(object):
         elif np.iterable(idx):
             [self.__setitem__(k, val) for k, val in zip(idx, value)]
         else:
-            raise ValueError("Decoder: Improper index type: %" % type(idx))
+            try:
+                self.filt.state.mean[idx, 0] = value
+            except:
+                raise ValueError("Decoder: Improper index type: %" % type(idx))
 
     def __setstate__(self, state):
         """
@@ -580,12 +669,10 @@ class Decoder(object):
     def set_call_rate(self, call_rate):
         '''
         Function for the higher-level task to set the frequency of function calls to __call__
-
         Parameters
         ----------
         call_rate : float 
             1./call_rate should be an integer multiple or divisor of the Decoder's 'binlen'
-
         Returns
         -------
         None
@@ -605,7 +692,6 @@ class Decoder(object):
     def predict(self, neural_obs, assist_level=0.0, weighted_avg_lfc=False, **kwargs):
         """
         Decode the spikes
-
         Parameters
         ----------
         neural_obs: np.array of shape (N,) or (N, 1)
@@ -618,6 +704,9 @@ class Decoder(object):
         kwargs: dict
             Mostly for kwargs function call compatibility
         """
+        if np.any(neural_obs > 1000):
+            print('observations have counts >> 1000 ')
+        
         if np.any(assist_level) > 0 and 'x_assist' not in kwargs:
             raise ValueError("Assist cannot be used if the forcing term is not specified!")
 
@@ -678,7 +767,6 @@ class Decoder(object):
     def decode(self, neural_obs, **kwargs):
         '''
         Decode multiple observations sequentially.
-
         Parameters
         ----------
         neural_obs: np.array of shape (# features, # observations)
@@ -720,7 +808,6 @@ class Decoder(object):
     def __call__(self, obs_t, **kwargs):
         '''
         Wrapper for the 'predict' method
-
         Parameters
         ----------
         obs_t: np.array of shape (# features, # subbins)
@@ -736,12 +823,10 @@ class Decoder(object):
     def save(self, filename=''):
         '''
         Pickle the Decoder object to a file
-
         Parameters
         ----------
         filename: string, optional
             Filename to pickle the decoder to. If unspecified, a temporary file will be created.
-
         Returns
         -------
         filename: string
@@ -762,7 +847,6 @@ class Decoder(object):
     def save_attrs(self, hdf_filename, table_name='task'):
         '''
         Save the attributes of the Decoder to the attributes of the specified HDF table
-
         Parameters
         ----------
         hdf_filename: string
@@ -804,7 +888,6 @@ class BMISystem(object):
         feature_accumulator : accumulator.FeatureAccumulator instance
             Combines features across time if necesary to perform rate matching 
             between the task rate and the decoder rate.
-
         Returns
         -------
         BMISystem instance
@@ -823,7 +906,6 @@ class BMISystem(object):
         '''
         Main function for all BMI functions, including running the decoder, adapting the decoder 
         and incorporating assistive control inputs
-
         Parameters
         ----------
         neural_obs : np.ndarray, 
@@ -841,7 +923,6 @@ class BMISystem(object):
         **kwargs : dict
             Instance-specific arguments, e.g. RML/SmoothBatch require a 'half_life' parameter 
             that is not required of other CLDA methods. 
-
         Returns
         -------
         decoded_states : np.ndarray
@@ -885,7 +966,7 @@ class BMISystem(object):
                 elif self.learner.input_state_index == -1:
                     learner_state = prev_state
                 else:
-                    print(( "Not implemented yet: %d" % self.learner.input_state_index))
+                    print(("Not implemented yet: %d" % self.learner.input_state_index))
                     learner_state = prev_state
 
                 if learn_flag:
@@ -938,10 +1019,10 @@ class BMILoop(object):
         self.load_decoder()
         self.init_decoder_state()
         if hasattr(self.decoder, 'adapting_state_inds'):
-            print ('Decoder has adapting state inds')
+            print('Decoder has adapting state inds')
 
         if hasattr(self.decoder, 'adapting_neural_inds'):
-            print ('Decoder has adapting neural inds')
+            print('Decoder has adapting neural inds')
 
         # Declare data attributes to be stored in the sinks every iteration of the FSM
         self.add_dtype('loop_time', 'f8', (1,))
@@ -1065,7 +1146,6 @@ class BMILoop(object):
     def call_decoder(self, neural_obs, target_state, **kwargs):
         '''
         Run the decoder computations
-
         Parameters
         ----------
         neural_obs : object, typically np.array of shape (n_features, n_subbins)
@@ -1094,12 +1174,10 @@ class BMILoop(object):
     def move_plant(self, **kwargs):
         '''
         The main functions to retrieve raw observations from the neural data source and convert them to movement of the plant
-
         Parameters
         ----------
         **kwargs : optional keyword arguments
             optional arguments for the decoder, assist, CLDA, etc. fed to the BMISystem
-
         Returns
         -------
         decoder_state : np.mat
@@ -1176,7 +1254,7 @@ class BMILoop(object):
         super(BMILoop, self)._cycle()
 
     def enable_clda(self):
-        print ("CLDA enabled")
+        print("CLDA enabled")
         self.learn_flag = True
 
     def disable_clda(self):
@@ -1209,14 +1287,12 @@ class BMILoop(object):
     def write_clda_data_to_hdf_table(hdf_fname, data, ignore_none=False):
         '''
         Save CLDA data generated during the experiment to the specified HDF file
-
         Parameters
         ----------
         hdf_fname : string
             filename of HDF file
         data : list
             list of dictionaries with the same keys and same dtypes for values
-
         Returns
         -------
         None
@@ -1233,7 +1309,7 @@ class BMILoop(object):
                 first_update = data[k]
         
             table_col_names = list(first_update.keys())
-            print (table_col_names)
+            print(table_col_names)
             dtype = []
             shapes = []
             for col_name in table_col_names:
@@ -1288,7 +1364,8 @@ class BMILoop(object):
 
         # Open a log file in case of error b/c errors not visible to console
         # at this point
-        f = open(os.path.join(os.getenv('HOME'), 'code/bmi3d/log/clda_cleanup_log'), 'w')
+        from config import config
+        f = open(os.path.join(config.log_path, 'clda_cleanup_log'), 'w')
         f.write('Opening log file\n')
 
         f.write('# of paramter updates: %d\n' % len(self.bmi_system.param_hist))
@@ -1320,4 +1397,3 @@ class BMI(object):
     Legacy class, used only for unpickling super old Decoder objects. Ignore completely.
     '''
     pass
-

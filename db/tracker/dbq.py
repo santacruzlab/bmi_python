@@ -146,10 +146,6 @@ dispatcher.register_function(hide_task_entry, 'hide_task_entry')
 
 @csrf_exempt
 def rpc_handler(request):
-    if StrictVersion('%d.%d.%d' % django.VERSION[0:3]) < StrictVersion('1.6.0'):
-        response = HttpResponse(mimetype="application/xml") 
-        response.write(dispatcher._marshaled_dispatch(request.raw_post_data))
-    else:
-        response = HttpResponse(mimetype="application/xml") 
-        response.write(dispatcher._marshaled_dispatch(request.body))
+    response = HttpResponse(content_type="application/xml") 
+    response.write(dispatcher._marshaled_dispatch(request.body))
     return response

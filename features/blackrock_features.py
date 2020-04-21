@@ -7,7 +7,8 @@ import fnmatch
 import os
 from riglib import bmi
 from riglib.bmi import extractor
-from riglib.experiment import traits
+from .neural_sys_features import CorticalData, CorticalBMI
+from riglib import blackrock
 
 
 class RelayBlackrock(object):
@@ -27,10 +28,8 @@ class RelayBlackrock(object):
     def ni_out(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -101,10 +100,8 @@ class RelayBlackrock(object):
     def set_state(self, condition, **kwargs):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -114,10 +111,8 @@ class RelayBlackrock(object):
     def cleanup(self, database, saveid, **kwargs):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -170,10 +165,8 @@ class RelayBlackrockByte(RelayBlackrock):
     def ni_out(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -223,8 +216,7 @@ class BlackrockData(object):
         finally:
             self.neurondata.stop()
 
-from .neural_sys_features import CorticalData, CorticalBMI
-from riglib import blackrock
+
 class BlackrockData(CorticalData):
     @property 
     def sys_module(self):

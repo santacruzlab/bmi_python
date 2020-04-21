@@ -26,17 +26,16 @@ from tasks import cursor_clda_tasks
 from riglib.bmi.feedback_controllers import LQRController
 
 import pickle
-import imp
 
 
 # reload(kfdecoder)
 # reload(ppfdecoder)
-imp.reload(clda)
+reload(clda)
 # reload(riglib.bmi)
 # reload(riglib.bmi.train)
 from tasks import tentaclebmitasks
-imp.reload(cursor_clda_tasks)
-imp.reload(tentaclebmitasks)
+reload(cursor_clda_tasks)
+reload(tentaclebmitasks)
 
 import argparse
 parser = argparse.ArgumentParser(description='Analyze neural control of a redundant kinematic chain')

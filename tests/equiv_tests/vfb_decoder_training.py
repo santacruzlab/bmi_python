@@ -6,8 +6,7 @@ import numpy as np
 from db import dbfunctions as dbfn
 from db.tracker import models
 from riglib.bmi import train
-import imp
-imp.reload(train)
+reload(train)
 
 te = dbfn.get_task_entry(1844)
 dec_record = dbfn.get_decoder_entry(te)

@@ -8,10 +8,14 @@ from . import plexnet
 from collections import Counter
 import os
 import array
-from config_files.config import config
 
-PL_IP = config.plexon_ip
-PL_PORT = int(config.plexon_port)
+try:
+    from config import config
+    PL_IP = config.plexon_ip
+    PL_PORT = int(config.plexon_port)
+except:
+    PL_IP = "127.0.0.1" # default to localhost
+    PL_PORT = 6000
 PL_ADDR = (PL_IP, PL_PORT)
 
 PL_SingleWFType = 1
@@ -30,14 +34,12 @@ class Spikes(DataSourceSystem):
     def __init__(self, addr=PL_ADDR, channels=None):
         '''
         Constructor for plexon.Spikes
-
         Parameters
         ----------
         addr: tuple of length 2
             (IP address, UDP port)
         channels: optional, default = None
             list of channels (electrodes) from which to receive spike data
-
         Returns
         -------
         Spikes instance
@@ -98,7 +100,6 @@ class LFP(DataSourceSystem):
     def __init__(self, addr=PL_ADDR, channels=None, chan_offset=512):
         '''
         Constructor for plexon.LFP
-
         Parameters
         ----------
         addr : tuple of length 2
@@ -107,7 +108,6 @@ class LFP(DataSourceSystem):
             list of channels (electrodes) from which to receive spike data
         chan_offset : int, optional, default=512
             Indexing offset from the first LFP channel to the indexing system used by the OPX system
-
         Returns
         -------
         plexon.LFP instance
@@ -170,7 +170,6 @@ class Aux(DataSourceSystem):
     def __init__(self, addr=PL_ADDR, channels=None, chan_offset=768):
         '''
         Constructor for plexon.Aux
-
         Parameters
         ----------
         addr : tuple of length 2
@@ -179,7 +178,6 @@ class Aux(DataSourceSystem):
             list of channels (electrodes) from which to receive spike data
         chan_offset : int, optional, default=768
             Indexing offset from the first Aux channel to the indexing system used by the OPX system
-
         Returns
         -------
         plexon.Aux instance

@@ -11,14 +11,13 @@ import cProfile
 from riglib.bmi import train, clda, bmi, ppfdecoder, extractor
 from tasks import bmimultitasks, generatorfunctions as genfns
 from riglib.bmi.train import unit_conv
-import imp
 
 from tasks import bmi_recon_tasks
 
-imp.reload(clda)
-imp.reload(train)
-imp.reload(bmi)
-imp.reload(ppfdecoder)
+reload(clda)
+reload(train)
+reload(bmi)
+reload(ppfdecoder)
 
 
 idx = 2306
@@ -106,7 +105,7 @@ state_transitions = task_msgs[~(task_msgs['msg'] == 'update_bmi')]
 #         self.idx += 1
 
 
-imp.reload(bmi_recon_tasks)
+reload(bmi_recon_tasks)
 gen = genfns.sim_target_seq_generator_multi(8, 1000)
 self = task = bmi_recon_tasks.ContCLDARecon(te, n_iter, gen)
 task.init()
