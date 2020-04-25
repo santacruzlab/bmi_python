@@ -1,0 +1,18 @@
+<head>
+</head>
+<body>
+<input id="transition" type="submit" value="transition">
+<input id="subtarget" type="submit" value="subtarget">
+<input id="rest" type="submit" value="rest">
+<input id="accept" type="submit" value="accept">
+<input id="reject" type="submit" value="reject">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type='text/javascript'>
+$("#transition").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/transition")});
+$("#subtarget").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/subtarget")});
+$("#rest").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/rest")});
+$("#accept").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/accept")});
+$("#reject").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/reject")});
+</script>
+</body>

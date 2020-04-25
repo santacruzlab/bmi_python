@@ -1,0 +1,13 @@
+<head>
+</head>
+<body>
+<input id="accept" type="submit" value="Accept">
+<input id="reject" type="submit" value="Reject">
+
+
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type='text/javascript'>
+$("#accept").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/accept")});
+$("#reject").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_trial/reject")});
+</script>
+</body>
