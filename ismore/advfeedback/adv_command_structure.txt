@@ -1,0 +1,132 @@
+Specification of how to control the program for the advanced feedback and how to send data through the TCP connection.
+
+IMPORTANT: Add two double points ("::") after each command in order to separate the command from the others. This was done to be able to send commands very fast without pauses inbetween. This is necessary to run the application in real-time.
+Example: ADDEXO EXOSTATIC 1,0,20::TOGGLEMAT RIGHT::ROTATECAMERA 120::
+This command sequence will execute the three commands one after another.
+
+REMEMBER: All commands have to end with two double points now! This applies even if you only send one command.
+
+# ### Command table ### #
+
+ADDEXO - Add new exo
+Command structure:
+ADDEXO EXOTYPE HANDEDNESS PARAMETERS
+
+Parameters:
+Exotype - String that specifies the type of the exo to be added
+Handedness - String (either "left" or "right") that specifies the type of arm that should be added
+Parameters - Parameters needed by that exo type
+
+DELETE - Delete exo
+Command structure:
+DELETE EXOID
+
+Parameters
+Exoid - Id of the exo to be removed
+
+DATA - Send data 
+Command structure:
+DATA EXOID PARAMETERS
+
+Parameters:
+Exoid - The unique Id of the exo
+Parameters - Parameters of the degrees of freedom, like for the EXOSTATIC type: BaseXpos,BaseYpos,BaseHeading,PronoRoll,IndexHeading,GroupHeading,ThumbHeading
+
+TOGGLEMAT - Add or change the mat. If a mat already exists in the scene this mat is replaced.
+Command structure:
+TOGGLEMAT HANDEDNESS
+
+Parameters:
+Handedness - String (either "left" or "right") that specifies the type of the mat to be added.
+
+ADDBASE - Add an exo that only consists of the base and the armrest without the fingers.
+Command structure
+ADDBASE EXOTYPE PARAMETERS
+
+Parameters:
+Exotype - String that specifies the type of the exo to be added
+Parameters - Parameters needed by that exo type
+
+SETCOLOR - Set the color of an exo
+Command structure:
+SETCOLOR EXOID COLOR
+
+Parameters:
+Exoid - The unique id of the exo
+Color - An RGB color in the format red,green,blue (values from 0 to 1)
+
+TOGGLETRANSPARENCY - Toggle transparency of an exo
+Command structure:
+TOGGLETRANSPARENCY EXOID
+
+Parameters:
+Exoid - The unique id of the exo
+
+TOGGLEMAT - Add or change the orientation of the mat (for experiment with left or right hand)
+Command structure:
+TOGGLEMAT SIDE
+
+Parameters:
+Side - Specifies which hand is being trained ('LEFT' or 'RIGHT')
+
+SETBGCOLOR - Set the color of the background
+Command structure:
+SETBGCOLOR COLOR
+
+Parameters:
+Color - An RGB color in the format red,green,blue (values from 0 to 1)
+
+ROTATECAMERA - Rotate the camera by some degrees around the center of the mat
+Command structure:
+ROTATECAMERA ANGLE
+
+Parameters:
+Angle - An angle in degrees
+
+EXIT - End visualisation (close Panda3D)
+Command structure:
+EXIT
+
+
+# ### Exotypes ### #
+
+EXOSTATIC - Add new exo that stays at a static position
+Parameters:
+List of positions and parameters, separated by commas.
+X-Position of the base,
+y-Position of the base,
+heading of the base,
+roll of the pronation module,
+heading of the index finger,
+heading of the finger group,
+heading of the thumb
+
+Explanation:
+This exo stays at the specified position until it is removed from the scene or the program ends. It can be used for specifying the target position the patients have to reach.
+
+EXOKEYBOARD - Add new exo that is controlled by the keyboard
+Parameters:
+- none -
+
+Explanation:
+Focus the window that shows the 3D visualisation (e.g. move the mouse to the window that shows the feedback and click). All keyboard controlled exos are controlled by the keyboard. Arrow keys control heading and movement direction of the base. Pronation and supination are controlled by "r" and "f", index, finger group and the thumb are controlled by "q" and "a", "w" and "s" and "e" and "r", respectively.
+
+EXOREALTIME - Add new exo that listens to data coming from a tcp connection
+Parameters:
+Depending on the plant type (exo with hand or base only) there are 7 or 3 parameters to initialise the realtime exo.
+For the exo with hand these parameters are:
+X-Position of the base,
+y-Position of the base,
+heading of the base,
+roll of the pronation module,
+heading of the index finger,
+heading of the finger group,
+heading of the thumb
+
+For the exo with the base only these paramters are:
+X-Position of the base,
+y-Position of the base,
+heading of the base
+
+Explanation:
+This exo is initialised with the specified values and controlled via tcp using the DATA command.
