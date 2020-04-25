@@ -1,0 +1,34 @@
+<head>
+</head>
+<body>
+<input id="0" type="submit" value="0">
+<input id="1" type="submit" value="1">
+<input id="2" type="submit" value="2">
+<input id="3" type="submit" value="3">
+<input id="4" type="submit" value="4">
+<input id="5" type="submit" value="5">
+<input id="6" type="submit" value="6">
+<input id="7" type="submit" value="7">
+<input id="8" type="submit" value="8">
+<input id="9" type="submit" value="9">
+<input id="10" type="submit" value="10">
+<input id="accept" type="submit" value="Accept">
+<input id="reject" type="submit" value="Reject">
+
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type='text/javascript'>
+$("#0").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/0")});
+$("#1").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/1")});
+$("#2").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/2")});
+$("#3").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/3")});
+$("#4").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/4")});
+$("#5").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/5")});
+$("#6").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/6")});
+$("#7").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/7")});
+$("#8").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/8")});
+$("#9").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/9")});
+$("#10").click(function() {$.get("http://localhost:8000/ajax/setattr/rating_difficulty/10")});
+$("#accept").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_rating/accept")});
+$("#reject").click(function() {$.get("http://localhost:8000/ajax/setattr/experimenter_acceptance_of_rating/reject")});
+</script>
+</body>
