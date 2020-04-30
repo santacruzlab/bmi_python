@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Check if ./IsMore is running at 4Hz indefinitely
+
+cnt=0
+ag_anim=0
+n_beeps=2
+
+error_state=0
+
+while true;
+do 
+    if ! pgrep -x "IsMore" > /dev/null; then
+        # Check if number of beeps have already occurred
+        if (("$cnt" < "$n_beeps")); then
+            (cd '/home/tecnalia/code/ismore/tubingen/scripts/'; ./play_alarm 400 200 50 50 1 1)
+            cnt=$(($cnt+1))
+            error_state=1
+        else
+                case $ag_anim in
+                    0 ) echo -ne "ArmAssist not running: !  \\r"; ag_anim=$(($ag_anim+1));;
+                    1 ) echo -ne "ArmAssist not running:  ! \\r"; ag_anim=$(($ag_anim+1));;
+                    2 ) echo -ne "ArmAssist not running:   !\\r"; ag_anim=0;;
+                esac
+        fi
+    else
+        cnt=0
+            if (("$error_state" == 0)); then
+            case $ag_anim in
+                0 ) echo -ne "ArmAssist running: >  \\r"; ag_anim=$(($ag_anim+1));;
+                1 ) echo -ne "ArmAssist running:  > \\r"; ag_anim=$(($ag_anim+1));;
+                2 ) echo -ne "ArmAssist running:   >\\r"; ag_anim=0;;
+            esac
+            else
+                echo " "
+                echo -ne "\033[2K"
+                error_state=0
+                (cd '/home/tecnalia/code/ismore/tubingen/scripts/'; ./play_alarm 800 1000 20 20 1 1)
+            fi
+    fi
+    sleep 0.25s
+done

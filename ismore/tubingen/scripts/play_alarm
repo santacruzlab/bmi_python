@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Plays two sine waves for the specified amount of time on the main speaker
+# Args:
+#   1. frequency of sine wave 1
+#   2. frequency of sine wave 2
+#   3. duration of playtime of sinewave 1
+#   4. duration of playtime of sinewave 2
+function play_alarm() {
+    (speaker-test --frequency $1 --test sine)& 
+    sleep 0.${3}s
+    kill -15 $!
+    (speaker-test --frequency $2 --test sine)&
+    sleep 0.${4}s
+    kill -15 $!
+}
+
+# Plays two sine waves for the specified amount of time on the computer speaker
+# Args:
+#   1. frequency of sine wave 1
+#   2. frequency of sine wave 2
+#   3. duration of playtime of sinewave 1
+#   4. duration of playtime of sinewave 2
+function play_beep() {
+    (beep -f $1 -l $3)&
+    sleep 0.1
+    (beep -f $2 -l $4)&
+    sleep 0.1
+}
+
+# Plays alarm sounds as specified
+# Args:
+#   1. frequency of sine wave 1
+#   2. frequency of sine wave 2
+#   3. duration of playtime of sinewave 1
+#   4. duration of playtime of sinewave 2
+#   5. number of repetitions
+#   6. choose speaker (0=main, 1=pc)
+function main() {
+end=$5
+if [ "$6" = "0" ]; then
+    for ((i=0; i<$5; i++))
+        do
+            play_alarm $1 $2 $3 $4
+        done
+else
+    for ((i=0; i<$5; i++))
+        do
+            play_beep $1 $2 $3 $4
+        done
+fi
+}
+
+# Start main function
+main $1 $2 $3 $4 $5 $6

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Check if ReHandController_IsMore is running at 4Hz indefinitely
+echo "Waiting for rehand_app..."
+
+# Wait for armassist_app to start
+while ! pgrep -f -x "./ReHandController_IsMore" > /dev/null;
+do
+    sleep 0.25s
+done
+
+echo "Starting watchdog cycle."
+
+# Check if armassist_app is running
+while pgrep -f -x "./ReHandController_IsMore" > /dev/null;
+do 
+    sleep 0.25s
+done
+
+# Get name of second relay
+relay_2=$(/home/tecnalia/usbrelay/usbrelay/usbrelay 2>/dev/null | grep _2 | cut -d"=" -f1)
+
+# If armassist_app is not running turn off power...
+(cd '/home/tecnalia/usbrelay/usbrelay/';./usbrelay $relay_2=0 2>/dev/null)
+
+# ... and play auditory warning 
+(cd '/home/tecnalia/code/ismore/tubingen/scripts/'; ./play_alarm 400 200 50 50 1 1)
+sleep 0.05s
+(cd '/home/tecnalia/code/ismore/tubingen/scripts/'; ./play_alarm 400 200 50 50 1 1)

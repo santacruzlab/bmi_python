@@ -1,0 +1,166 @@
+#!/bin/bash
+
+# Shows main menu and gets the user's input for selecting an item of the menu
+function main_menu() {
+    echo "HYBRID SCRIPTS PROGRAM MENU"
+    echo " "
+    
+    echo "#### Exo tools ####"
+    echo "1: Deactivate ArmAssist and ReHand motors"
+    echo "2: Print process table for ArmAssist and ReHand"
+    echo " "
+    echo "#### Platform tools ####"
+    echo "3: Create target matrix"
+    echo "4: Update fixed variance from compliant session"
+    echo "5: Select EEG channel"
+    echo "6: Train EEG decoder"
+    echo "7: Train EMG decoder"
+    echo " "
+    echo "#### Backup tools ####"
+    echo "8: Initialize backup with new patient"
+    echo "9: Add files to existing backup" 
+    echo " "
+    echo "Press ENTER to confirm."
+    echo "Press any other key and ENTER to cancel."
+    echo " "
+    
+    read -p "Please select script `echo $'\n> '`" yn
+    case $yn in
+        1 ) deactivate_exo;;
+        2 ) print_process_table;;
+        3 ) create_target_matrix;; 
+        4 ) update_fixed_var;; 
+        5 ) select_eeg_channel;;
+        6 ) train_eeg_decoder;;
+        7 ) train_emg_decoder;;
+        8 ) initialize_folder_structure;; 
+        9 ) open_file_browser_windows;;
+    esac
+}
+    
+# Set home folder for python scripts
+pyscripts="/home/tecnalia/code/ismore/tubingen/scripts/"
+# Set storage folder for decoders
+decoderstore="/storage/decoders"
+
+# Runs creation of the target matrix
+function create_target_matrix() {
+    echo " "
+    echo "Create target matrix"
+    read -p "Task entry (id) `echo $'\n> '`" te_targets
+    read -p "Task type `echo $'\n> '`" task_type
+
+    scriptname="create_targets_matrix.py"
+    python "$pyscripts$scriptname" $te_targets $task_type
+}
+
+# Runs update of the fixed variance using the data of the compliant session 
+function update_fixed_var() {
+    echo " "
+    echo "Update fixed variance from compliant session"
+    read -p "Task entry compliant `echo $'\n> '`" te_compliant
+    # Get the most recently changed emg decoder from the decoder storage
+    existing_decoder=$(ls $decoderstore/emg* -t | awk '{printf("%s\n",$0);exit}')
+    echo "Would you like to use the last decoder: $existing_decoder ?"
+    # Get user input
+    read -p "Press ENTER to accept or specify other name of the EMG decoder `echo $'\n> '`" name_emg_decoder 
+    # Check if arguments were supplied or not
+    if [[ -z "$name_emg_decoder" ]]; then
+        # Strip /storage/decoder/ from string (:18) and remove file type extension (:-4)
+        decoder=${existing_decoder:18:-4}
+        echo "Using decoder $decoder" 
+    else
+        decoder=$name_emg_decoder
+        echo "Using decoder $decoder"
+    fi
+
+    scriptname="update_fixed_var_from_compliant.py"
+    python "$pyscripts$scriptname" $te_compliant $decoder
+}
+
+# Runs channel selection for the EEG decoder
+function select_eeg_channel() {
+    echo " "
+    echo "Select EEG channel"
+    echo "Not implemented yet!"
+}
+
+# Runs training of the EEG decoder
+function train_eeg_decoder() {
+    echo " "
+    echo "Train EEG decoder"
+    read -p "Config ID (patient ID) `echo $'\n> '`" config_id
+    read -p "List of task_entries (separate several by ',' e.g.: 11826,11833): `echo $'\n> '`" train_hdf_ids
+    echo "Would you like to use 'screening' as task type?"
+    read -p "Press ENTER to accept or specify other task type (e.g. compliant): `echo $'\n> '`" calibration_data
+    if [[ -z "$calibration_data" ]]; then
+        calibration_data="screening"
+    fi
+        
+    echo "Using $calibration_data as task type"
+    
+    echo "Training EEG decoder..."
+
+    scriptname="train_eeg_decoder.py"
+    python "$pyscripts$scriptname" $config_id $train_hdf_ids $calibration_data
+}
+
+# Runs training of the EMG decoder
+function train_emg_decoder() {
+    echo " "
+    echo "Train EMG decoder"
+    read -p "Config ID (patient ID) `echo $'\n> '`" config_id
+    read -p "List of task_entries (separate several by ',' e.g.: 11826,11833): `echo $'\n> '`" train_hdf_ids
+    
+    echo "Training EMG decoder..."
+
+    scriptname="train_emg_decoder.py"
+    python "$pyscripts$scriptname" $config_id $train_hdf_ids
+}
+
+# Opens file browser windows for performing manual backup
+function open_file_browser_windows() {
+    echo " "
+    echo "Opening file browser windows for performing manual backup"
+    read -p "Training? (ENTER or N + ENTER): " training_condition
+    read -p "Patient ID: " pat_id
+
+    if [ "$training_condition" = "N" ]; then
+        nautilus --browser "/mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/"
+        nautilus --browser "/storage/rawdata/hdf/"
+        nautilus --browser "/storage/supp_hdf"
+    else
+        read -p "Training day: " training_day_name
+        mkdir -p /mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name/eeg-resting-state/header_files
+        mkdir -p /mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name/eeg-resting-state/supp_hdf
+        mkdir -p /mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name/compliant/header_files
+        mkdir -p /mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name/compliant/supp_hdf
+        mkdir -p /mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name/intervention/header_files
+        mkdir -p /mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name/intervention/supp_hdf
+
+        nautilus --browser "/mnt/cinstorage/hybrid-bmi-2018/$pat_id/data/training/$training_day_name"
+        nautilus --browser "/storage/supp_hdf/"
+        nautilus --browser "/storage/rawdata/hdf/"
+    fi
+}
+
+# Initializes folder structure of backup for new subjects 
+function initialize_folder_structure() {
+    /home/tecnalia/code/ismore/tubingen/scripts/initialize_patient_backup.sh
+}
+
+# Prints process table looking for the ArmAssist and ReHand applications
+function print_process_table() {
+    ps aux | grep IsMore
+    ps aux | grep ReHand
+}
+
+# Deactivates ArmAssist and ReHand motors for manual manipulation
+function deactivate_exo() {
+    scriptname="deactivate_exo.py"
+    python "$pyscripts$scriptname"
+}
+
+
+# Start main function
+main_menu
