@@ -1,0 +1,60 @@
+# Configuration for the EEG decoder
+# Configuration for the EEG decoder
+
+# Specify paralyzed side
+trial_hand_side: 'left'
+
+# Selection of channels to be used in the training of the decoder
+# (without the channels used for the laplacian filter)
+# Order: Ascending
+# (Sequence of strings)
+channels_2train: 
+    - '22'
+
+# Configuration of the feedback electrodes and frequency bins
+# Channel names are mapped to sequences of frequency bins
+freq_bands: &freq_bands {
+    '22': [[6,9]]
+}
+
+# Configuration of the Laplacian filter
+# Channel names (center channel) are mapped to sequences of channel names
+# (channels for the Laplacian filter)
+#
+# If the channels are already filtered they have different names:
+# e.g. '22_filt'. In that case use those names here and set 
+# 'filt_training_data' to True
+
+NEIGHBOUR_CHANNELS_DICT: {
+    '22':  ['15', '17','25','26']
+}
+
+# Does the data used for training the decoder need to be filtered?
+filt_training_data: True 
+
+# Configuration of the features that will be computed in the decoder
+# (sequence of feature names)
+feature_names: 
+    - 'AR'
+# Set input to the feature function
+# (feature names are mapped to sequences of frequency bands)
+feature_fn_kwargs:
+    'AR':
+        'freq_bands': *freq_bands
+
+# Is the EOG recorded on a bipolar channel?
+bipolar_EOG: True
+# Reject artifacts of EOG, EEG and EMG?
+artifact_rejection: True
+
+# Configuration of the decoder 
+win_len: 0.5
+buffer_len: 120
+fs: 1000
+
+# General configuration
+# Name of the database
+db_name: 'default'
+# Type of plant for which a decoder is supposed to be created
+# One of 'ArmAssist', 'ReHand', 'IsMore'
+plant_type: 'IsMore'
