@@ -75,7 +75,9 @@
     }
 
     function enable_built_in_feature(feature) {
-      $("#alert_field").html("Not implemented!");
+      $.post("/setup/add/enable_features", feature, function (resp){
+        $("#alert_field").html(resp["msg"]);
+      });
     }
 
     function add_new_feature() {
