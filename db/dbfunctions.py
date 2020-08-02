@@ -3,6 +3,8 @@ Interface between the Django database methods/models and data analysis code
 '''
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'db.settings'
+
+
 import sys
 import json
 import numpy as np
@@ -24,7 +26,7 @@ try:
 except:
     pass
 
-from .tracker import models
+from tracker import models
 
 # default DB, change this variable from python session to switch to other database
 db_name = 'default'
@@ -32,7 +34,6 @@ db_name = 'default'
 def group_ids(ids, grouping_fn=lambda te: te.calendar_date):
     '''
     Automatically group together a flat list of database IDs
-
     Parameters
     ----------
     ids: iterable
@@ -347,7 +348,6 @@ def search_by_units(unitlist, decoderlist = None, exact=False):
 def get_task_entries_by_date(subj=None, date=datetime.date.today(), dbname='default', **kwargs):
     '''
     Get all the task entries for a particular date
-
     Parameters
     ----------
     subj: string, optional, default=None
@@ -393,7 +393,6 @@ class TaskEntry(object):
     def __init__(self, task_entry_id, dbname='default', **kwargs):
         '''
         Constructor for TaskEntry
-
         Parameters
         ----------
         task_entry_id : int
@@ -404,7 +403,6 @@ class TaskEntry(object):
             config_files/make_config.py
         **kwargs : dict
             For any additional parameters unused by child classes
-
         Returns
         -------
         TaskEntry instance
@@ -517,12 +515,10 @@ class TaskEntry(object):
         '''
         Retrieve decoders associated with this block. A block may have multiple decoders 
         associated with it, e.g., a single decoder seeding block may be used to generate several seed decoders
-
         Parameters
         ----------
         return_type: string
             'record' means the Django database records are returned. 'object' means the un-pickled riglib.bmi.Decoder objects are returned
-
         Returns
         -------
         list or object
@@ -542,10 +538,8 @@ class TaskEntry(object):
     def summary_stats(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -556,7 +550,6 @@ class TaskEntry(object):
     def proc(self, filt=None, proc=None, cond=None, comb=None, **kwargs):
         '''
         Generic trial-level data analysis function
-
         Parameters
         ----------
         filt: callable; call signature: trial_filter_fn(trial_msgs)
@@ -571,13 +564,11 @@ class TaskEntry(object):
             For 'legacy' compatibility, you can also specify 'trial_filter_fn' for 'filt', 'trial_proc_fn' for 'proc', 
             'trial_condition_fn' for 'cond', and 'data_comb_fn' for comb. These are ignored if any newer equivalents are specified.
             All other keyword arguments are passed to the 'proc' function. 
-
         Returns
         -------
         result: list
             The results of all the analysis. The length of the returned list equals len(self.blocks). Sub-blocks
             grouped by tuples are combined into a single result. 
-
         '''
         if filt == None:
             filt = kwargs.pop('trial_filter_fn', default_trial_filter_fn)
@@ -631,10 +622,8 @@ class TaskEntry(object):
     def supplementary_data_file(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -643,7 +632,6 @@ class TaskEntry(object):
     def get_cached_attr(self, key, fn, clean=False):
         '''
         Generic method for saving the results of a computation to the supplementary_data_file associated with this block
-
         Parameters
         ----------
         key : string
@@ -672,10 +660,8 @@ class TaskEntry(object):
     def get_matching_state_transition_seq(self, seq):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -695,10 +681,8 @@ class TaskEntry(object):
     def get_task_var_during_epochs(self, epochs, var_name, comb_fn=lambda x:x, start_offset=0):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -732,8 +716,9 @@ class TaskEntry(object):
             return ''
         elif len(q) == 1:
             q = q[0]
-            dbconfig = getattr(config, 'db_config_%s' % self.record._state.db)
-            return os.path.join(dbconfig['data_path'], 'rawdata', q.system.name, q.path)
+            # dbconfig = getattr(config, 'db_config_%s' % self.record._state.db)
+            data_path = models.KeyValueStore.get('data_path', default='/storage', dbname=self.record._state.db)
+            return os.path.join(data_path, 'rawdata', q.system.name, q.path)
 
     @property
     def hdf(self):
@@ -788,17 +773,15 @@ class TaskEntry(object):
         This function will error if there is no decoder actually associated with this TaskEntry
         '''
         if not hasattr(self, '_decoder_obj'):
-            self._decoder_obj = self.decoder_record.load()
+            self._decoder_obj = self.decoder_record.load(encoding='latin1')
         return self._decoder_obj
 
     @property
     def clda_param_hist(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -829,7 +812,6 @@ class TaskEntry(object):
     def get_datafile(self, system_name, intermediate_path='rawdata', **query_kwargs):
         '''
         Look up the file linked to this TaskEntry from a specific system
-
         Parameters
         ----------
         system_name : string
@@ -838,7 +820,6 @@ class TaskEntry(object):
             specific directory structure for this system. Some systems have inconsistent directory structures
         **query_kwargs: keyword arguments
             These are passed to the Django record 'filter' function
-
         Returns
         -------
         filename of associated file 
@@ -938,10 +919,8 @@ class TaskEntry(object):
     def task_type(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -954,10 +933,8 @@ class TaskEntry(object):
     def n_rewards(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         # of rewards given during a block. This number could be different
@@ -971,10 +948,8 @@ class TaskEntry(object):
     def total_reward_time(self):
         '''
         Docstring
-
         Parameters
         ----------
-
         Returns
         -------
         '''
@@ -1058,7 +1033,6 @@ class TaskEntryCollection(object):
     def __init__(self, blocks, name='', cls=TaskEntry, **kwargs):
         '''
         Constructor for TaskEntryCollection
-
         Parameters
         ----------
         blocks : np.iterable
@@ -1067,7 +1041,6 @@ class TaskEntryCollection(object):
             Name to give this collection 
         cls : type, optional, default=TaskEntry
             class constructor to use for all the IDs. Uses the generic TaskEntry defined above by default
-
         Returns
         -------
         '''
@@ -1082,7 +1055,6 @@ class TaskEntryCollection(object):
     def proc_trials(self, filt=None, proc=None, cond=None, comb=None, verbose=False, max_errors=10, **kwargs):
         '''
         Generic framework to perform a trial-level analysis on the entire dataset
-
         Parameters
         ----------
         filt: callable; call signature: trial_filter_fn(trial_msgs)
@@ -1097,7 +1069,6 @@ class TaskEntryCollection(object):
             Feedback print statements so that you know processing is happening
         max_errors: int, optional, default = 10
             Number of trials resulting in error before the processing quits. Below this threshold, errors are printed but the code continues on to the next trial.
-
         Returns
         -------
         result: list
@@ -1179,7 +1150,6 @@ class TaskEntryCollection(object):
         '''
         Generic framework to perform a block-level analysis on the entire dataset, 
         e.g., percent of trials correct, which require analyses across trials
-
         Parameters
         ----------
         block_filter_fn: callable; call signature: block_filter_fn(task_entry)
@@ -1188,7 +1158,6 @@ class TaskEntryCollection(object):
             The main workhorse function 
         data_comb_fn: callable; call signature: data_comb_fn(list)
             Combine the list into the desired output structure
-
         Returns
         -------
         result: list
