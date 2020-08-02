@@ -1,4 +1,4 @@
-brain-python-interface (a.k.a. bmi3d)
+bmi_python (a.k.a. bmi3d)
 ====================================
 **This the unstable python 3 branch. It may not yet do what you want it to do. Use the master branch for the heavily-tested (but out of date) python 2 version**
 
@@ -10,6 +10,7 @@ in that it is primarily intended for intracortical BMI experiments.
 This package has been used with the following recording systems:
 - Omniplex neural recording system (Plexon, Inc.). 
 - Blackrock NeuroPort
+- Ripple Neuro (under development)
 
 Code documentation can be found at http://carmenalab.github.io/bmi3d_docs/
 
@@ -27,8 +28,8 @@ Visual C++ Build tools (for the 'traits' package)
 
 # Installation
 ```bash
-git clone -b develop https://github.com/carmenalab/brain-python-interface.git
-cd brain-python-interface
+git clone -b develop https://github.com/santacruzlab/bmi_python.git
+cd bmi_python
 pip3 install -r requirements.txt
 pip3 install -e .
 ```
