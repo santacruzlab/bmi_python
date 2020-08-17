@@ -15,6 +15,9 @@ from .bmi_task_features import NormFiringRates
 from .arduino_features import PlexonSerialDIORowByte
 from .blackrock_features import BlackrockBMI
 from .blackrock_features import RelayBlackrockByte
+from .ripple_features import RippleBMI
+from .ripple_features import RelayRippleByte
+############IMPORT RIPPLE FEATURES###########################
 
 
 built_in_features = dict(
@@ -45,6 +48,8 @@ built_in_features = dict(
     relay_arduino=PlexonSerialDIORowByte,
     blackrockbmi        = BlackrockBMI,
     relay_blackrockbyte = RelayBlackrockByte,
+    ripplebmi = RippleBMI,
+    relay_ripplebyte = RelayRippleByte,
 )
 
 # >>> features.built_in_features['autostart'].__module__

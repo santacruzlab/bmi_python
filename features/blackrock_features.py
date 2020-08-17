@@ -28,8 +28,10 @@ class RelayBlackrock(object):
     def ni_out(self):
         '''
         Docstring
+
         Parameters
         ----------
+
         Returns
         -------
         '''
@@ -100,8 +102,10 @@ class RelayBlackrock(object):
     def set_state(self, condition, **kwargs):
         '''
         Docstring
+
         Parameters
         ----------
+
         Returns
         -------
         '''
@@ -111,8 +115,10 @@ class RelayBlackrock(object):
     def cleanup(self, database, saveid, **kwargs):
         '''
         Docstring
+
         Parameters
         ----------
+
         Returns
         -------
         '''
@@ -165,8 +171,10 @@ class RelayBlackrockByte(RelayBlackrock):
     def ni_out(self):
         '''
         Docstring
+
         Parameters
         ----------
+
         Returns
         -------
         '''

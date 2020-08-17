@@ -24,7 +24,7 @@ import time
 from riglib import serial_dio
 
 sec_per_min = 60
-baudrate = 115200 #9600
+baudrate = 9600 #9600
 
 class SerialDIORowByte(object):
     '''

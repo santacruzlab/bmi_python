@@ -22,7 +22,9 @@ class RewardSystem(traits.HasTraits):
     Feature for the Crist solenoid reward system
     '''
     trials_per_reward = traits.Float(1, desc='Number of successful trials before solenoid is opened')
+
     def __init__(self, *args, **kwargs):
+        print("RRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEWWWWWWWWWWWAAAAAAAAAAAARRRRRRRRRRRRRRRDDDDDDDDDD")
         from riglib import reward
         super(RewardSystem, self).__init__(*args, **kwargs)
         self.reward = reward.open()

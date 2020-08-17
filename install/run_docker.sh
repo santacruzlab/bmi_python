@@ -1,18 +1,21 @@
 #!/bin/bash
 SOURCE_PATH=`realpath ..`
-WORK_VOLUME=bmi3d_vol
+WORK_VOLUME=/media/samantha/Storage1/storage/
 DOCKER_IMG=bmi3d:latest
 
 # for graphics
-export DISPLAY=:0
-xhost +
+export DISPLAY=:0.0
+xhost +local:docker
 
 docker volume create $WORK_VOLUME     # this will be persistent every time the image is invoked
 
 docker run --rm -ti \
-    -v $WORK_VOLUME:/work \
+	--device /dev/snd \
+	--device /dev/dri:/dev/dri \
+	--device /dev/arduino_joystick \
+    -v $WORK_VOLUME:/storage \
     -v $SOURCE_PATH:/src \
     -w /work \
-    -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e DISPLAY=:0.0 -v /tmp/.X11-unix:/tmp/.X11-unix \
     -p 8000:8000 \
     $DOCKER_IMG bash

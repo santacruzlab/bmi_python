@@ -37,8 +37,6 @@ cd $HOME
 wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 sudo apt-key add rabbitmq-signing-key-public.asc
 sudo add-apt-repository ppa:webupd8team/sublime-text-2
-
-### STOPPED HERE
 '''
 sudo wget http://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
 sudo dpkg -i erlang-solutions_1.0_all.deb

@@ -63,6 +63,7 @@ class ArduinoJoystick(Joystick):
         '''
         Same as above, w/o Phidgets import
         '''
+        print('ASDFASDFSADF')
         from riglib import source, sink
         self.sinks = sink.sinks
         self.register_num_channels()
@@ -70,6 +71,7 @@ class ArduinoJoystick(Joystick):
         self.sinks.register(self.joystick)
 
     def register_num_channels(self):
+  
         from riglib import arduino_joystick, source, sink
         System = arduino_joystick.make(2, 1)
         self.joystick = source.DataSource(System)

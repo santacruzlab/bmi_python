@@ -60,10 +60,12 @@ class SaveHDF(object):
     def set_state(self, condition, **kwargs):
         '''
         Save task state transitions to HDF
+
         Parameters
         ----------
         condition: string
             Name of new state to transition into. The state name must be a key in the 'status' dictionary attribute of the task
+
         Returns
         -------
         None
