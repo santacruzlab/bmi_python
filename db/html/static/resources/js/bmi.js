@@ -317,3 +317,4 @@ BMI.prototype.train = function() {
             alert(resp.msg);
     }.bind(this), "json");
 }
+
