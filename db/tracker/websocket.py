@@ -30,14 +30,17 @@ class ClientSocket(websocket.WebSocketHandler):
         Returns a boolean indicating whether the requesting URL is one that the 
         handler will respond to. For this websocket, everyone with access gets a response since 
         we're running the server locally (or over ssh tunnels) and not over the regular internet.
+
         Parameters
         ----------
         origin : string?
             The URL from which the request originated
+
         Returns
         -------
         boolean
             Returns True if the request originates from a valid URL
+
         See websocket.WebSocketHandler.check_origin for additional documentation
         '''
         return True
@@ -63,7 +66,6 @@ class Server(mp.Process):
         application = tornado.web.Application([
             (r"/connect", ClientSocket),
         ])
-
         application.listen(8001)
         self.ioloop = tornado.ioloop.IOLoop.current()
         self.ioloop.add_handler(self._pipe, self._send, self.ioloop.READ)

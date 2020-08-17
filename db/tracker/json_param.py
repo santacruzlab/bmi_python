@@ -15,15 +15,18 @@ def param_objhook(obj):
     '''
     A custom JSON "decoder" which can recognize certain types of serialized python objects 
     (django models, function calls, object constructors) and re-create the objects
+
     Parameters
     ----------
     obj : dict
         The deserialized JSON data in python dictionary form (after calling json.loads)
+
     Returns
     -------
     object
         If possible, a python object based on the JSON data is created. If not, the original dictionary
         is simply returned.
+
     '''
     from tracker import models
     if '__django_model__' in obj:
@@ -46,12 +49,14 @@ def norm_trait(trait, value):
     Take user input and convert to the type of the trait. 
     For example, a user might select a decoder's name/id but the ID needs to be mapped 
     to an object for type checking when the experiment is constructed)
+
     Parameters
     ----------
     trait : trait object
         trait object declared for the runtime-configurable field.
     value : object
         Value of trait set from user input, to be type-checked
+
     Returns
     -------
     typecast value of trait
@@ -183,10 +188,12 @@ class Parameters(object):
     def trait_norm(self, traits):
         '''
         Apply typecasting to parameters which correspond to experiment traits 
+
         Parameters
         ----------
         traits : dict
             keys are the names of each trait for the Experiment class, values are the trait objects
+
         Returns
         -------
         None

@@ -8,7 +8,7 @@ import traceback
 import os
 
 from django.template import RequestContext
-from django.shortcuts import render
+from django.shortcuts import render_to_response, render
 from django.http import HttpResponse
 
 from . import exp_tracker
@@ -90,10 +90,12 @@ def _list_exp_history(dbname='default', subject=None, task=None, max_entries=Non
 def list_exp_history(request, **kwargs):
     '''
     Top-level view called when browser pointed at webroot
+
     Parameters
     ----------
     request: HTTPRequest instance
         No data needs to be extracted from this request
+
     Returns 
     -------
     Django HTTPResponse instance
@@ -102,6 +104,8 @@ def list_exp_history(request, **kwargs):
 
     fields = _list_exp_history(**kwargs)
     fields['hostname'] = request.get_host()
+    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
+    print(fields['hostname'])
 
     # this line is important--this is needed so the Track object knows if the task has ended in an error
     # TODO there's probably some better way of doing this within the multiprocessing lib (some code to run after the process has terminated)
@@ -111,7 +115,7 @@ def list_exp_history(request, **kwargs):
     if tracker.task_proxy is not None and "saveid" in tracker.task_kwargs:
         fields['running'] = tracker.task_kwargs["saveid"]
 
-    resp = render(request, 'list.html', fields)
+    resp = render_to_response('list.html', fields, RequestContext(request))
     return resp
 
 def setup(request):
@@ -244,3 +248,9 @@ def link_data_files_response_handler(request, task_entry_id):
             return HttpResponse("Error creating data file, see terminal for error message")
     else:
         return HttpResponse("File does not exist {}!".format(file_path))
+
+
+
+
+
+

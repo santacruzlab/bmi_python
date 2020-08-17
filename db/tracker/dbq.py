@@ -41,10 +41,13 @@ def save_data(curfile, system, entry, move=True, local=True, custom_suffix=None,
             suff = custom_suffix
         else:
             raise Exception('Must provide a custom suffix for system: ' + system)
-
-    sys = System.objects.using(dbname).get(name=system)
+    try:
+        sys = System.objects.using(dbname).get(name=system) 
+    except:
+        sys = System.make_new_sys(name=system)
+    
     entry = TaskEntry.objects.using(dbname).get(pk=entry)
-
+    
     now = entry.date
     today = datetime.date(now.year, now.month, now.day)
     tomorrow = today + datetime.timedelta(days=1)
@@ -54,14 +57,17 @@ def save_data(curfile, system, entry, move=True, local=True, custom_suffix=None,
     num = enums[entry]
 
     if move:
+
         dataname = "{subj}{time}_{num:02}_te{id}.{suff}".format(
             subj=entry.subject.name[:4].lower(),
             time=time.strftime('%Y%m%d'), num=num+1,
             id=entry.id, suff=suff
         )
+
         if system != 'blackrock2':
             fullname = os.path.join(sys.path, dataname)
             sys_path = sys.path
+
         else:
             fullname = os.path.join('/storage/rawdata/blackrock', dataname)
             sys_path = '/storage/rawdata/blackrock'

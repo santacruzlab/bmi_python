@@ -227,6 +227,7 @@ def remote_runtask(tracker_end_of_pipe, task_end_of_pipe, websock, **kwargs):
 
     # Redirect printing from the websocket back to the shell
     if use_websock:
+
         websock.write("Running task cleanup functions....\n")
     sys.stdout = sys.__stdout__
     print("Running task cleanup functions....\n")
@@ -243,18 +244,22 @@ def remote_runtask(tracker_end_of_pipe, task_end_of_pipe, websock, **kwargs):
         
         cleanup_successful = False
     else:
+
         log_str("Starting cleanup...")
         cleanup_successful = task_wrapper.cleanup()
+        print("Ending cleanup.. wwwwwwwwwwwwwwwwwwwwwwwwwwwww")
 
 
     # inform the user in the browser that the task is done!
+
     if cleanup_successful == True or cleanup_successful is None:
+
         if use_websock: websock.write("\n\n...done!\n")
+        
     else:
         if use_websock: websock.write("\n\nError! Check for errors in the terminal!\n")
 
     print("*************************** EXITING TASK *****************************")
-
 
 class TaskWrapper(object):
     '''
@@ -276,6 +281,7 @@ class TaskWrapper(object):
             Database record of Sequence parameters/static target sequence
             If passed in as a tuple, then it's the result of calling 'seq.get' on the models.Sequence instance
         seq_params: params from seq (see above)
+
         saveid : int, optional
             ID number of db.tracker.models.TaskEntry associated with this task
             if None specified, then the data saved will not be linked to the
@@ -362,9 +368,10 @@ class TaskWrapper(object):
             # returns the result of tracker.dbq.rpc_handler
             database = xmlrpc.client.ServerProxy("http://localhost:8000/RPC2/", allow_none=True)
             # from tracker import dbq as database
-
+            print(self.saveid)
             cleanup_successful = self.task.cleanup(database, self.saveid, subject=self.subj)
-            
+            print("second one wwwwwwwwwwwwwwwwwwwwwwwwwwwww")
+
             # if not self.task._task_init_complete:
             #     from tracker import dbq
             #     dbq.hide_task_entry(self.saveid)

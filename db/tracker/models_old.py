@@ -1,5 +1,6 @@
 '''
 Classes here which inherit from django.db.models.Model define the structure of the database
+
 Django database modules. See https://docs.djangoproject.com/en/dev/intro/tutorial01/
 for a basic introduction
 '''
@@ -107,12 +108,14 @@ class Task(models.Model):
     def params(self, feats=(), values=None):
         '''
         Get user-editable parameters for the frontend
+
         Parameters
         ----------
         feats : iterable of Feature instances
             Features selected on the task interface
         values : dict
             Values for the task parameters
+
         '''
         Exp = self.get(feats=feats)
         params = Exp.get_params()

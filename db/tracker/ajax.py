@@ -26,12 +26,14 @@ http_request_queue = []
 def train_decoder_ajax_handler(request, idx):
     '''
     AJAX handler for creating a new decoder.
+
     Parameters
     ----------
     request : Django HttpRequest
         POST data containing details for how to train the decoder (type, units, update rate, etc.)
     idx : int
         ID number of the models.TaskEntry record with the data used to train the Decoder.
+
     Returns
     -------
     Django HttpResponse
@@ -76,10 +78,12 @@ class encoder(json.JSONEncoder):
 def _respond(data):
     '''
     Generic HTTPResponse to return JSON-formatted dictionary values
+
     Parameters
     ----------
     data : dict
         Keys and values can be just about anything
+
     Returns
     -------
     HttpResponse
@@ -90,11 +94,14 @@ def _respond(data):
 def task_info(request, idx, dbname='default'):
     '''
     Get information about the task
+
     Parameters
     ----------
     request : Django HttpRequest
+
     idx : int
         Primary key used to look up the task from the database
+
     Returns
     -------
     JSON-encoded dictionary
@@ -122,12 +129,14 @@ def task_info(request, idx, dbname='default'):
 def exp_info(request, idx, dbname='default'):
     '''
     Get information about the task
+
     Parameters
     ----------
     request : Django HttpRequest
         POST request triggered by clicking on a task entry from the left side pane
     idx : int
         Primary key used to look up the TaskEntry from the database
+
     Returns
     -------
     JSON-encoded dictionary 
@@ -298,11 +307,13 @@ def start_experiment(request, save=True, execute=True):
 def rpc(fn):
     '''
     Generic remote procedure call function
+
     Parameters
     ----------
     fn : callable
         Function which takes a single argument, the tracker object. 
         Return values from this function are ignored.
+
     Returns
     -------
     JSON-encoded dictionary 
@@ -329,10 +340,12 @@ def rpc(fn):
 def _respond_err(e):
     '''
     Default error response from server to webclient
+
     Parameters
     ----------
     e : Exception
         Error & traceback to convert to string format. 
+
     Returns
     -------
     JSON-encoded dictionary
@@ -592,3 +605,4 @@ def setup_handler(request):
         return save_recording_sys(request)
     else:
         return _respond(dict(status="error", msg="Unrecognized data type: %s" % data_type))
+

@@ -1,5 +1,6 @@
 '''
 Classes here which inherit from django.db.models.Model define the structure of the database
+
 Django database modules. See https://docs.djangoproject.com/en/dev/intro/tutorial01/
 for a basic introduction
 '''
@@ -107,12 +108,14 @@ class Task(models.Model):
     def params(self, feats=(), values=None):
         '''
         Get user-editable parameters for the frontend
+
         Parameters
         ----------
         feats : iterable of Feature instances
             Features selected on the task interface
         values : dict
             Values for the task parameters
+
         '''
         Exp = self.get(feats=feats)
         params = Exp.get_params()
@@ -309,8 +312,10 @@ class System(models.Model):
     def populate():
         for name in ["eyetracker", "hdf", "plexon", "bmi", "bmi_params", "juice_log", "blackrock"]:
             try:
+                print("mns WWWWWWWw................")
                 System.objects.get(name=name)
             except ObjectDoesNotExist:
+                print('HELLO WTF')
                 System(name=name, path="/storage/rawdata/%s"%name).save()
 
     def get_post_processor(self):
@@ -478,7 +483,10 @@ class Sequence(models.Model):
 
         if hasattr(self, 'generator') and self.generator.static: # If the generator is static, (NOTE: the generator being static is different from the *sequence* being static)
             if len(self.sequence) > 0:
-                return generate.runseq, dict(seq=pickle.loads(str(self.sequence)))
+                #return generate.runseq, dict(seq=pickle.loads(str(self.sequence)))
+                import codecs
+                pickled = codecs.encode(pickle.dumps(self.sequence), "base64").decode()
+                return generate.runseq, dict(seq=np.core.multiarray.scalar(np.dtype('U3'), pickle.loads(codecs.decode(pickled.encode(), "base64"))))
             else:
                 return generate.runseq, dict(seq=self.generator.get()(**Parameters(self.params).params))            
         else:
@@ -730,6 +738,9 @@ class TaskEntry(models.Model):
                 print("No plexon file found")
                 js['bmi'] = dict(_neuralinfo=None)
         
+        ###############INSERT RIPPLE##########################
+        elif recording_sys_make == 'ripple':
+            pass
         elif recording_sys_make == 'blackrock':
             try:
                 print('skipping .nev conversion')
@@ -886,6 +897,7 @@ class TaskEntry(models.Model):
         else:
             report_data = None
         try:
+            print('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWww')
             return Exp.get_desc(params.get_data(), report_data)
         except:
             import traceback
@@ -1482,3 +1494,4 @@ class KeyValueStore(models.Model):
             obj.save()
         else:
             raise ValueError("Duplicate keys: %s" % key)
+
