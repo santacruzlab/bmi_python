@@ -1,0 +1,24 @@
+[reward_sys]
+version = 0
+
+[recording_sys]
+make = ripple
+mount_point = /media/samantha/Storage/storage/
+
+[graphics]
+window_start_x = 0
+window_start_y = 0
+
+[backup_root]
+root = /backup
+
+[plexon IP address]
+addr = 10.0.0.13
+port = 6000
+
+[update_rates]
+hdf_hz = 60
+
+[db_config_default]
+data_path = /media/samantha/Storage/storage
+

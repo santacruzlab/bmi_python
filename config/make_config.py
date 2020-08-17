@@ -8,7 +8,7 @@ from collections import OrderedDict
 stuff = OrderedDict()
 
 stuff['reward_sys'] = dict(version=0)
-stuff['recording_sys'] = dict(make='plexon', mount_point='/storage/plexon')
+stuff['recording_sys'] = dict(make='plexon', mount_point='/storage/')
 stuff['graphics'] = dict(window_start_x=0, window_start_y=0)
 stuff['backup_root'] = dict(root='/backup')
 stuff['plexon IP address'] = dict(addr='10.0.0.13', port=6000)
@@ -20,7 +20,7 @@ databases = list(settings.DATABASES.keys())
 for dbname in databases:
     stuff['db_config_%s' % dbname] = dict(data_path='/storage')
 
-config_filename = '$BMI3D/config_files/config'
+config_filename = '$HOME/brain-python-interface/config/config'
 config_fh = open(os.path.expandvars(config_filename), 'w')
 
 for system_name, system_opts in list(stuff.items()):

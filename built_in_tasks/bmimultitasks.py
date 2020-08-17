@@ -60,10 +60,12 @@ class OFCEndpointAssister(FeedbackControllerAssist):
     def __init__(self, decoding_rate=180):
         '''
         Constructor for OFCEndpointAssister
+
         Parameters
         ----------
         decoding_rate : int
             Rate that the decoder should operate, in Hz. Should be a multiple or divisor of 60 Hz
+
         Returns
         -------
         OFCEndpointAssister instance
@@ -77,10 +79,12 @@ class OFCEndpointAssister(FeedbackControllerAssist):
     def get_F(self, assist_level):
         '''
         Look up the feedback gain matrix based on the assist_level
+
         Parameters
         ----------
         assist_level : float
             Float between 0 and 1 to indicate the level of the assist (1 being the highest)
+
         Returns
         -------
         np.mat
@@ -122,6 +126,7 @@ class SimpleEndpointAssister(Assister):
     def endpoint_assist_simple(cursor_pos, target_pos, decoder_binlen=0.1, speed=0.5, target_radius=2., assist_level=0.):
         '''
         Estimate the next state using a constant velocity estimate moving toward the specified target
+
         Parameters
         ----------
         cursor_pos: np.ndarray of shape (3,)
@@ -136,6 +141,7 @@ class SimpleEndpointAssister(Assister):
             Radius of the target. When the cursor is inside the target, the machine assisted cursor speed decreases.
         assist_level: float
             Scalar between (0, 1) where 1 indicates full machine control and 0 indicates full neural control.
+
         Returns
         -------
         x_assist : np.ndarray of shape (7, 1)
@@ -162,8 +168,10 @@ class SimpleEndpointAssisterLFC(feedback_controllers.MultiModalLFC):
     def __init__(self, *args, **kwargs):
         '''
         Docstring
+
         Parameters
         ----------
+
         Returns
         -------
         '''
@@ -503,4 +511,4 @@ class SimBMIControlMulti(SimCosineTunedEnc, SimKFDecoderSup, BMIControlMulti):
         for k in range(n_trials):
             targ = targets[target_inds[k], :]
             yield np.array([[center[0], 0, center[1]],
-                            [targ[0], 0, targ[1]]])
+                            [targ[0], 0, targ[1]]])        

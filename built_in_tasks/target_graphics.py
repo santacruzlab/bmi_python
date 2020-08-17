@@ -35,6 +35,8 @@ class CircularTarget(object):
 
     def move_to_position(self, new_pos):
         self.int_position = new_pos
+        print('OHOHOHOHOHOOHO')
+        print(self.int_position)
         self.drive_to_new_pos()
 
     def drive_to_new_pos(self):
