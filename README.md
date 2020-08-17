@@ -1,4 +1,5 @@
-bmi_python (a.k.a. bmi3d)
+
+brain-python-interface (a.k.a. bmi3d)
 ====================================
 **This the unstable python 3 branch. It may not yet do what you want it to do. Use the master branch for the heavily-tested (but out of date) python 2 version**
 
@@ -10,7 +11,6 @@ in that it is primarily intended for intracortical BMI experiments.
 This package has been used with the following recording systems:
 - Omniplex neural recording system (Plexon, Inc.). 
 - Blackrock NeuroPort
-- Ripple Neuro (under development)
 
 Code documentation can be found at http://carmenalab.github.io/bmi3d_docs/
 
@@ -28,8 +28,8 @@ Visual C++ Build tools (for the 'traits' package)
 
 # Installation
 ```bash
-git clone -b develop https://github.com/santacruzlab/bmi_python.git
-cd bmi_python
+git clone -b develop https://github.com/carmenalab/brain-python-interface.git
+cd brain-python-interface
 pip3 install -r requirements.txt
 pip3 install -e .
 ```
@@ -80,3 +80,11 @@ This package has a lot of dependencies which makes installation somewhat brittle
 - Installation in a virtual environment (see `venv` in python3) or in a Docker container is recommended to try to isolate the package from version conflict issues. 
 - Run scripts in `tests/unit_tests/` to try to isolate which components may not be working correctly. Issues in `riglib` will be easier to fix than issues in the database. 
 
+
+Papers which have used this package
+-----------------------------------
+- Ramos Murguialday et al., A Novel Implantable Hybrid Brain-Machine-Interface (BMI) for Motor Rehabilitation in Stroke Patients. IEEE NER 2019
+- Khanna P. and Carmena J.M. (2017) Beta band oscillations in motor cortex reflect neural population signals that delay movement onset. eLife 6:e24573. doi:10.7554/eLife.24573.
+- Moorman H.G.*, Gowda S.* and Carmena J.M. (2017) Control of redundant kinematic degrees of freedom in a closed-loop brain-machine interface. IEEE Transactions on Neural Systems and Rehabilitation Engineering 25(6), pp. 750-760. doi:10.1109/TNSRE.2016.2593696.
+- Shanechi M.M.*, Orsborn A.L.*, Moorman H.G.*, Gowda S.*, Dangi S., and Carmena J.M. (2017) Rapid control and feedback rates in the sensorimotor pathway enhance neuroprosthetic control. Nature Communications 8:13825. doi:10.1038/ncomms13825.
+- Dangi S., Gowda S., Moorman H.G., Orsborn A.L., So K., Shanechi M. and Carmena J.M. (2014) Continuous closed-loop decoder adaptation with a recursive maximum likelihood algorithm allows for rapid performance acquisition in brain-machine interfaces. Neural Computation 12, pp. 1-29.
