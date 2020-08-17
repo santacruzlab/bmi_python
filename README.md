@@ -35,7 +35,7 @@ pip3 install -e .
 ```
 
 ## Installation in Docker
-- Set up docker on Ubuntu following these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
+- Set up docker on Ubuntu following these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04
 - In the `install` folder, execute `build_docker.sh` to build the image
 - Also in the `install` folder, execute `run_docker.sh` to load the image. Annoyingly at this time, because the source directory is mounted in a way that is volatile, the bash shell will 'reinstall' the bmi3d package every time you load the image
 
