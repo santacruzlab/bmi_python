@@ -1,5 +1,6 @@
 """
 Robot kinematic operations.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -17,16 +18,20 @@ def fkine(robot, q):
     """
     Computes the forward kinematics for each joint space point defined by C{q}.
     ROBOT is a robot object.
+
     For an n-axis manipulator C{q} is an n element vector or an m x n matrix of
     robot joint coordinates.
+
     If C{q} is a vector it is interpretted as the generalized joint coordinates, and
     C{fkine} returns a 4x4 homogeneous transformation for the tool of
     the manipulator.
+
     If C{q} is a matrix, the rows are interpretted as the generalized 
     joint coordinates for a sequence of points along a trajectory.  q[i,j] is
     the j'th joint parameter for the i'th trajectory point.  In this case
     C{fkine} returns a list of matrices for each point
     along the path.
+
     The robot's base or tool transform, if present, are incorporated into the
     result.
     
@@ -63,27 +68,34 @@ def ikine(robot, tr, q=None, m=None):
     Inverse manipulator kinematics.
     Computes the joint coordinates corresponding to the end-effector transform C{tr}.
     Typically invoked as
+
         - Q = IKINE(ROBOT, T)
         - Q = IKINE(ROBOT, T, Q)
         - Q = IKINE(ROBOT, T, Q, M)
+
     Uniqueness
     ==========
     Note that the inverse kinematic solution is generally not unique, and 
     depends on the initial guess C{q} (which defaults to 0).
+
     Iterative solution
     ==================
     Solution is computed iteratively using the pseudo-inverse of the
     manipulator Jacobian.
+
     Such a solution is completely general, though much less efficient 
     than specific inverse kinematic solutions derived symbolically.
+
     This approach allows a solution to obtained at a singularity, but 
     the joint angles within the null space are arbitrarily assigned.
+
     Operation on a trajectory
     =========================
     If C{tr} is a list of transforms (a trajectory) then the solution is calculated
     for each transform in turn.  The return values is a matrix with one row for each
     input transform.  The initial estimate for the iterative solution at 
     each time step is taken as the solution from the previous time step.
+
     Fewer than 6DOF
     ===============
     If the manipulator has fewer than 6 DOF then this method of solution
@@ -95,8 +107,11 @@ def ikine(robot, tr, q=None, m=None):
     correspond to translation in X, Y and Z, and rotation about X, Y and
     Z respectively.  The value should be 0 (for ignore) or 1.  The number
     of non-zero elements should equal the number of manipulator DOF.
+
     For instance with a typical 5 DOF manipulator one would ignore
     rotation about the wrist axis, that is, M = [1 1 1 1 1 0].
+
+
     @type robot: Robot instance
     @param robot: The robot
     @type tr: homgeneous transformation
@@ -170,19 +185,24 @@ def ikine(robot, tr, q=None, m=None):
 def ikine560(robot, T, configuration=''):
     """
     Inverse kinematics for Puma 560-like robot, ie. 6-axis with a spherical wrist.
+
     The optional C{configuration} argument specifies the configuration of the arm in
     the form of a string containing one or more of the configuration codes
        - 'l' or 'r'    lefty/righty
        - 'u' or 'd'    elbow
        - 'n' or 'f'    wrist flip or noflip.
+
     The default configuration is 'lun'.
     
     Reference
     =========
+
     Inverse kinematics for a PUMA 560 based on the equations by Paul and Zhang
     From The International Journal of Robotics Research
     Vol. 5, No. 2, Summer 1986, p. 32-44.
+
     @author: Robert Biro (gt2231a@prism.gatech.edu) with Gary Von McMurray, GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95.
+
     @type robot: Robot instance
     @param robot: The robot
     @type T: homgeneous transformation

@@ -51,3 +51,4 @@ L[1].G = 1
 qz = [0,0]
 
 tl = SerialLink(L,name='Simple two link')
+

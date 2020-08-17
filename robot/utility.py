@@ -1,5 +1,7 @@
 """
 Python toolbox utility and helper functions.
+
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -161,3 +163,5 @@ if __name__ == "__main__":
     print(arg2array( array([1,2,3]) ));
     print(arg2array( array([1,2,3]).T ));
     print(arg2array( [1,2,3]));
+
+    

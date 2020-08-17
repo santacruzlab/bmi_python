@@ -1,5 +1,6 @@
 """
 Jacobian matrix operations.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -14,9 +15,12 @@ import numpy as np
 def jacob0(robot, q):
     """
     Compute manipulator Jacobian in world coordinates for joint coordinates C{q}.
+
     The manipulator Jacobian matrix maps differential changes in joint space
     to differential Cartesian motion (world coord frame) of the end-effector
+
     M{dX = J dQ}
+
     @type robot: Robot
     @type q: vector M{n x 1}
     @param q: joint coordinate
@@ -38,8 +42,10 @@ def jacob0(robot, q):
 def jacobn(robot, q):
     """
     Compute manipulator Jacobian in tool coordinates for joint coordinates C{q}.
+
     The manipulator Jacobian matrix maps differential changes in joint space
     to differential Cartesian motion (tool coord frame) of the end-effector.
+
     M{dX = J dQ}
 		
     Reference
@@ -49,6 +55,7 @@ def jacobn(robot, q):
     Differential Kinematic Control Equations for Simple Manipulators
     IEEE SMC 11(6) 1981
     pp. 456-460
+
     @type robot: Robot
     @type q: vector M{n x 1}
     @param q: joint coordinate
@@ -87,6 +94,7 @@ def tr2jac(t):
     Compute a Jacobian to map differentials motion between frames.
     The M{6x6} Jacobian matrix to map differentials (joint velocity) between 
     frames related by the homogeneous transform C{t}.
+
     @rtype: matrix M{6 x 6}
     @return: Jacobian matrix
     @see: L{tr2diff}, L{diff2tr}

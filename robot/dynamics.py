@@ -1,5 +1,6 @@
 """
 Robot dynamics operations.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -14,8 +15,10 @@ def accel(robot, *args):
     """
     Compute manipulator forward dynamics, the joint accelerations that result
     from applying the actuator torque to the manipulator robot in state q and qd.
+
        - qdd = accel(robot, q, qd, torque)
        - qdd = accel(robot, [q qd torque])
+
     Uses the method 1 of Walker and Orin to compute the forward dynamics.
     This form is useful for simulation of manipulator dynamics, in
     conjunction with a numerical integration function.
@@ -56,13 +59,17 @@ def accel(robot, *args):
 def coriolis(robot, q, qd):
     """
     Compute the manipulator Coriolis matrix
+
     c = coriolis(robot, q, qd)
+
     Returns the n-element Coriolis/centripetal torque vector at the specified 
     pose and velocity.
+
     If C{q} and C{qd} are row vectors, the result is a row vector 
     of joint torques.
     If C{q} and C{qd} are matrices, each row is interpretted as a joint state 
     vector, and the result is a matrix each row being the corresponding joint torques.
+
     @type q: M{m x n} matrix
     @type q: Joint coordinate
     @type qd: M{m x n} matrix
@@ -78,12 +85,15 @@ def coriolis(robot, q, qd):
 def inertia(robot, q):
     """
     Compute the manipulator inertia matrix
+
     inertia(robot, q)
+
     Returns the M{n x n} symmetric inertia matrix which relates joint torque 
     to joint acceleration for the robot in pose C{q}.
     
     If C{q} is a matrix then return a list of inertia matrices, corresponding
     to the joint coordinates from rows of C{q}.
+
     @type q: M{m x n} matrix
     @type q: Joint coordinate
     @type robot: Robot object, n-axes
@@ -106,9 +116,12 @@ def inertia(robot, q):
 def cinertia(robot, q):
     """
     Compute the Cartesian (operational space) manipulator inertia matrix
+
     m = cinertia(robot, q)
+
     Return the M{6 x 6} inertia matrix which relates Cartesian force/torque to 
     Cartesian acceleration.
+
     @type q: n-vector
     @type q: Joint coordinate
     @type robot: Robot object, n-axes
@@ -127,15 +140,20 @@ def cinertia(robot, q):
 def gravload(robot, q, gravity=None):
     """
     Compute the gravity loading on manipulator joints
+
     taug = gravload(robot, q)
     taug = gravload(robot, q, grav)
+
     Compute the joint gravity loading for the manipulator C{robot} in the
     configuration C{q}.
+
     If C{q} is a row vector, the result is a row vector of joint torques.
     If C{q} is a matrix, each row is interpretted as a joint state vector, and
     the result is a matrix each row being the corresponding joint torques.
+
     Gravity vector can be given explicitly using the named gravity keyword, otherwise
     it defaults to the value of the C{robot} object.
+
     @type q: M{m x n} matrix
     @type q: Joint coordinate
     @type grav: 3-vector
@@ -159,10 +177,13 @@ def gravload(robot, q, gravity=None):
 def rne(robot, *args, **options):
     """
     Compute inverse dynamics via recursive Newton-Euler formulation.
+
     tau = rne(robot, q, qd, qdd)
     tau = rne(robot, [q qd qdd])
+
     Returns the joint torque required to achieve the specified joint position,
     velocity and acceleration state.
+
     Options
     =======
     
@@ -173,23 +194,30 @@ def rne(robot, *args, **options):
         Gravity vector is an attribute of the robot object but this may be 
         overriden by providing a gravity acceleration vector [gx gy gz] using the
         named argument gravity
+
         tau = rne(robot, ..., gravity=[gx, gy, gz])
+
+
         External force/moment
         ---------------------
         An external force/moment acting on the end of the manipulator may also be
         specified by a 6-element vector [Fx Fy Fz Mx My Mz].
+
         tau = rne(robot, ..., fext=[fx,fy,fz, mx,my,mz])
+
         where Q, QD and QDD are row vectors of the manipulator state; pos, vel, 
         and accel.
         
         Debug
         -----
+
         tau = rne(robot, ..., debug=n)
         
         Use the debug named argument to enable
             - 0 no messages
             - 1 display results of forward and backward recursions
             - 2 display print R and p*
+
     @see: L{robot}, L{accel}, L{inertia}, L{coriolis}, L{gravload}
     @note: verified against Matlab toolbox
     """
@@ -487,3 +515,4 @@ def _rne_mdh(robot, Q, Qd, Qdd, grav, fext, debug=0):
                 # prismatic
                 tau[p,j] = f.T*z0 + link.G**2*link.Jm*qdd[j,0] + link.G*link.friction(qd[j,0])
     return tau
+

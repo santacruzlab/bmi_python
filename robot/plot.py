@@ -218,6 +218,7 @@ class struct(object):
 def plot_options(robot, workspace, delay, cylinder, mag, perspective, Raise, render, loop, base, wrist, shadow, name, xyz, jaxes, joints):
     '''
     # process a cell array of options and return a struct
+
     # define all possible options and their default values
     '''
     o = struct()
@@ -552,3 +553,4 @@ def animate(robot, q, opt):
         set(h.xt, 'Position', xv[1:3])
         set(h.yt, 'Position', yv[1:3])
         set(h.zt, 'Position', zv[1:3])
+    

@@ -60,3 +60,4 @@ function [t, q, qd] = fdyn(robot, t0, t1, torqfun, q0, qd0, varargin)
 	[t,y] = ode45('fdyn2', [t0 t1], x0, [], robot, torqfun, varargin{:});
 	q = y(:,1:n);
 	qd = y(:,n+1:2*n);
+

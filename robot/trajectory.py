@@ -1,5 +1,7 @@
+
 """
 Trajectory primitives.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -22,6 +24,7 @@ def jtraj(q0, q1, tv, qd0=None, qd1=None):
     M{qd(t)} and M{qdd(t)} are also computed.  All three are returned as a tuple.
     Each of these is an M{m x n} matrix, with one row per time step, and
     one column per joint parameter.
+
     @type q0: m-vector
     @param q0: initial state
     @type q1: m-vector
@@ -35,6 +38,7 @@ def jtraj(q0, q1, tv, qd0=None, qd1=None):
     @rtype: tuple
     @return: (q, qd, qdd), a tuple of M{m x n} matrices
     @see: L{ctraj}
+
     """
 
     if isinstance(tv,(int,int32,float,float64)):
@@ -89,8 +93,10 @@ def ctraj(t0, t1, r):
     The number of points is the length of the path distance vector C{r}.
     Each element of C{r} gives the distance along the path, and the 
     must be in the range [0 1].
+
     If {r} is a scalar it is taken as the number of points, and the points 
     are equally spaced between C{t0} and C{t1}.
+
     The trajectory is a list of transform matrices.
     
     @type t0: homogeneous transform
@@ -112,3 +118,5 @@ def ctraj(t0, t1, r):
     for s in r.T:
         traj.append( T.trinterp(t0, t1, float(s)) )
     return traj
+    
+

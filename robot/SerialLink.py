@@ -1,5 +1,6 @@
 """
 SerialLink object.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -290,3 +291,4 @@ class SerialLink(object):
             
         else:
             raise AttributeError;
+

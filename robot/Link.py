@@ -1,5 +1,6 @@
 """
 Link object.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -16,6 +17,7 @@ import time
 class Link:
     """
     LINK create a new LINK object
+
     A LINK object holds all information related to a robot link such as
     kinematics of the joint
         - alpha; the link twist angle
@@ -28,18 +30,22 @@ class Link:
         - I; 3x3 inertia matrix about link COG
         - m; link mass
         - r; link COG wrt link coordinate frame 3x1
+
     motor and transmission parameters
         - B; link viscous friction (motor referred)
         - Tc; link Coulomb friction 1 element if symmetric, else 2
         - G; gear ratio
         - Jm; inertia (motor referred)
+
     and miscellaneous
         - qlim; joint limit matrix [lower upper] 2 x 1
         - offset; joint coordinate offset
     Handling the different kinematic conventions is now hidden within the LINK
     object.
+
     Conceivably all sorts of stuff could live in the LINK object such as
     graphical models of links and so on.
+
     @see: L{Robot}
     """
     
@@ -54,10 +60,12 @@ class Link:
         L = LINK([theta d a alpha], CONVENTION)
         L = LINK([theta d a alpha sigma], CONVENTION)
         L = LINK([theta d a alpha sigma offset], CONVENTION)
+
         If sigma or offset are not provided they default to zero.  Offset is a
         constant amount added to the joint angle variable before forward kinematics
         and is useful if you want the robot to adopt a 'sensible' pose for zero
         joint angle configuration.
+
         The optional CONVENTION argument is 'standard' for standard D&H parameters 
         or 'modified' for modified D&H parameters.  If not specified the default
         'standard'.

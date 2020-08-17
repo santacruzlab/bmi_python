@@ -1,5 +1,6 @@
 """
 Quaternion class.
+
 @author: Peter Corke
 @copyright: Peter Corke 1999-2008
 """
@@ -14,14 +15,20 @@ import copy
 class Quaternion:
     """A quaternion is a compact method of representing a 3D rotation that has
     computational advantages including speed and numerical robustness.
+
     A quaternion has 2 parts, a scalar s, and a vector v and is typically written::
+
         q = s <vx vy vz>
+
     A unit quaternion is one for which M{s^2+vx^2+vy^2+vz^2 = 1}.
+
     A quaternion can be considered as a rotation about a vector in space where
     q = cos (theta/2) sin(theta/2) <vx vy vz>
     where <vx vy vz> is a unit vector.
+
     Various functions such as INV, NORM, UNIT and PLOT are overloaded for
     quaternion objects.
+
     Arithmetic operators are also overloaded to allow quaternion multiplication,
     division, exponentiaton, and quaternion-vector multiplication (rotation).
     """
@@ -29,6 +36,7 @@ class Quaternion:
     def __init__(self, *args):
         '''
 Constructor for quaternion objects:
+
     - q = Quaternion(v, theta)    from vector plus angle
     - q = Quaternion(R)       from a 3x3 or 4x4 matrix
     - q = Quaternion(q)       from another quaternion
@@ -457,3 +465,4 @@ Constructor for quaternion objects:
                     qq = Quaternion( (sin((1-R)*theta) * q1 + sin(R*theta) * q2) / sin(theta) )
                 q.append(qq)
         return q
+

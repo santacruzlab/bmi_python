@@ -1,5 +1,6 @@
 """
 Primitive operations for 3x3 orthonormal and 4x4 homogeneous matrices.
+
 @author: Peter Corke
 @copyright: Peter Corke
 """
@@ -18,6 +19,7 @@ def rotx(theta):
     @param theta: the rotation angle
     @rtype: 3x3 orthonormal matrix
     @return: rotation about X-axis
+
     @see: L{roty}, L{rotz}, L{rotvec}
     """
     
@@ -35,6 +37,7 @@ def roty(theta):
     @param theta: the rotation angle
     @rtype: 3x3 orthonormal matrix
     @return: rotation about Y-axis
+
     @see: L{rotx}, L{rotz}, L{rotvec}
     """
     
@@ -53,6 +56,7 @@ def rotz(theta):
     @param theta: the rotation angle
     @rtype: 3x3 orthonormal matrix
     @return: rotation about Z-axis
+
     @see: L{rotx}, L{roty}, L{rotvec}
     """
     
@@ -71,6 +75,7 @@ def trotx(theta):
     @param theta: the rotation angle
     @rtype: 4x4 homogeneous matrix
     @return: rotation about X-axis
+
     @see: L{troty}, L{trotz}, L{rotx}
     """
     return r2t(rotx(theta))
@@ -83,6 +88,7 @@ def troty(theta):
     @param theta: the rotation angle
     @rtype: 4x4 homogeneous matrix
     @return: rotation about Y-axis
+
     @see: L{troty}, L{trotz}, L{roty}
     """
     return r2t(roty(theta))
@@ -95,6 +101,7 @@ def trotz(theta):
     @param theta: the rotation angle
     @rtype: 4x4 homogeneous matrix
     @return: rotation about Z-axis
+
     @see: L{trotx}, L{troty}, L{rotz}
     """
     return r2t(rotz(theta))
@@ -152,6 +159,7 @@ def eul2r(phi, theta=None, psi=None):
         - R = eul2r(S{theta}, S{phi}, S{psi})
         - R = eul2r([S{theta}, S{phi}, S{psi}])
     These correspond to rotations about the Z, Y, Z axes respectively.
+
     @type phi: number or list/array/matrix of angles
     @param phi: the first Euler angle, or a list/array/matrix of angles
     @type theta: number
@@ -160,7 +168,9 @@ def eul2r(phi, theta=None, psi=None):
     @param psi: the third Euler angle
     @rtype: 3x3 orthonormal matrix
     @return: R([S{theta} S{phi} S{psi}])
+
     @see:  L{tr2eul}, L{eul2tr}, L{tr2rpy}
+
     """
 
     n = 1
@@ -204,6 +214,7 @@ def eul2tr(phi,theta=None,psi=None):
         - R = eul2tr(S{theta}, S{phi}, S{psi})
         - R = eul2tr([S{theta}, S{phi}, S{psi}])
     These correspond to rotations about the Z, Y, Z axes respectively.
+
     @type phi: number or list/array/matrix of angles
     @param phi: the first Euler angle, or a list/array/matrix of angles
     @type theta: number
@@ -212,7 +223,9 @@ def eul2tr(phi,theta=None,psi=None):
     @param psi: the third Euler angle
     @rtype: 4x4 homogenous matrix
     @return: R([S{theta} S{phi} S{psi}])
+
     @see:  L{tr2eul}, L{eul2r}, L{tr2rpy}
+
     """
     return r2t( eul2r(phi, theta, psi) )
 
@@ -285,6 +298,7 @@ def rpy2r(roll, pitch=None,yaw=None,zyx=False,deg=False):
         - R = rpy2r(S{theta}, S{phi}, S{psi})
         - R = rpy2r([S{theta}, S{phi}, S{psi}])
     These correspond to rotations about the Z, Y, X axes respectively.
+
     @type roll: number or list/array/matrix of angles
     @param roll: roll angle, or a list/array/matrix of angles
     @type pitch: number
@@ -293,7 +307,9 @@ def rpy2r(roll, pitch=None,yaw=None,zyx=False,deg=False):
     @param yaw: yaw angle
     @rtype: 4x4 homogenous matrix
     @return: R([S{theta} S{phi} S{psi}])
+
     @see:  L{tr2rpy}, L{rpy2r}, L{tr2eul}
+
     """
     n=1
     if pitch==None and yaw==None:
@@ -350,6 +366,7 @@ def rpy2tr(roll, pitch=None, yaw=None, zyx=False, deg=False):
         - R = rpy2tr(r, p, y)
         - R = rpy2tr([r, p, y])
     These correspond to rotations about the Z, Y, X axes respectively.
+
     @type roll: number or list/array/matrix of angles
     @param roll: roll angle, or a list/array/matrix of angles
     @type pitch: number
@@ -358,7 +375,9 @@ def rpy2tr(roll, pitch=None, yaw=None, zyx=False, deg=False):
     @param yaw: yaw angle
     @rtype: 4x4 homogenous matrix
     @return: R([S{theta} S{phi} S{psi}])
+
     @see:  L{tr2rpy}, L{rpy2r}, L{tr2eul}
+
     """
     return r2t( rpy2r(roll, pitch, yaw, zxy, deg) )
 
@@ -369,6 +388,7 @@ def oa2r(o,a):
     """Rotation from 2 vectors.
     The matrix is formed from 3 vectors such that::
         R = [N O A] and N = O x A.  
+
     In robotics A is the approach vector, along the direction of the robot's 
     gripper, and O is the orientation vector in the direction between the 
     fingertips.
@@ -396,7 +416,9 @@ def oa2r(o,a):
 def oa2tr(o,a):
     """otation from 2 vectors.
     The rotation submatrix is formed from 3 vectors such that::
+
         R = [N O A] and N = O x A.  
+
     In robotics A is the approach vector, along the direction of the robot's 
     gripper, and O is the orientation vector in the direction between the 
     fingertips.
@@ -430,6 +452,7 @@ def rotvec2r(theta, v):
     @param theta: the rotation angle
     @rtype: 3x3 orthonormal matrix
     @return: rotation
+
     @see: L{rotx}, L{roty}, L{rotz}
     """
     v = arg2array(v);
@@ -452,6 +475,7 @@ def rotvec2tr(theta, v):
     @param theta: the rotation angle
     @rtype: 4x4 homogeneous matrix
     @return: rotation
+
     @see: L{trotx}, L{troty}, L{trotz}
     """
     return r2t(rotvec2r(theta, v))
@@ -477,6 +501,7 @@ def transl(x, y=None, z=None):
     Decompose a homogeneous transformation
     ======================================
     
+
         - v = transl(T)   
     
         Return the translation vector
@@ -594,6 +619,7 @@ def trinterp(T0, T1, r):
         trinterp(T0, T1, 1) = T1
         
     Rotation is interpolated using quaternion spherical linear interpolation.
+
     @type T0: 4x4 homogeneous transform
     @param T0: Initial value
     @type T1: 4x4 homogeneous transform
@@ -628,6 +654,7 @@ def trnorm(t):
     
         N = O x A
         O = A x N
+
     @type t: 4x4 homogeneous transformation
     @param t: the transform matrix to convert
     @rtype: 3x3 orthonormal rotation matrix

@@ -1,0 +1,32 @@
+Running new task: 
+Spawning process...
+{'subj': 1, 'base_class': <class 'built_in_tasks.manualcontrolmultitasks.JoystickMulti'>, 'feats': [<class 'features.generator_features.Autostart'>, <class 'features.peripheral_device_features.ArduinoJoystick'>, <class 'features.hdf_features.SaveHDF'>], 'params': <tracker.json_param.Parameters object at 0x7fe6ff3dafa0>, 'seq': (<function runseq at 0x7fe703d8bdc0>, {'seq': array([[[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+        [-7.07106781e+00,  0.00000000e+00,  7.07106781e+00]],
+
+       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+        [-1.83697020e-15,  0.00000000e+00, -1.00000000e+01]],
+
+       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+        [ 7.07106781e+00,  0.00000000e+00,  7.07106781e+00]],
+
+       ...,
+
+       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+        [ 7.07106781e+00,  0.00000000e+00,  7.07106781e+00]],
+
+       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+        [ 7.07106781e+00,  0.00000000e+00, -7.07106781e+00]],
+
+       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+        [-7.07106781e+00,  0.00000000e+00, -7.07106781e+00]]])}), 'saveid': 174, 'seq_params': '{"nblocks": 100, "ntargets": 8, "boundaries": {"__builtin__": "tuple", "args": [[-18, 18, -18, 18]]}, "distance": 10}'}
+remote_runtask
+TaskWrapper constructor
+instantiating task with a generator
+Initial command: ('end_task', (), {})
+remote command received: end_task, (), {}
+return value: None
+task state = target, stop status=True, waiting for next command...
+Done with command: end_task
+
+End of task while loop
+Starting cleanup...
