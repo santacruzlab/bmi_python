@@ -36,7 +36,7 @@ class MirrorDisplay(Renderer):
         super(MirrorDisplay, self).__init__((w/2,h), fov, near, far, **kwargs)
         flip = kwargs.pop('flip', True)
         self.projections = offaxis_frusta((w/2, h), fov, near, far, focal_dist, iod, flip=flip)
-    
+
     def draw(self, root, **kwargs):
         '''
         Draw the 'root' model.
@@ -51,11 +51,13 @@ class MirrorDisplay(Renderer):
         w, h = self.size
 
         # draw the portion of the screen with lower-left corner (0, 0), width 'w' and height 'h'
-        glViewport(0, 0, w, h)
+        # glViewport(0,0,1920,1080)
+        glViewport(0, 0, int(w), int(h))
         super(MirrorDisplay, self).draw(root, p_matrix=self.projections[0], **kwargs)
 
         # draw the portion of the screen with lower-left corner (w, 0), width 'w' and height 'h'
-        glViewport(w, 0, w, h)
+        # glViewport(1920, 0, 1920, 1080)
+        glViewport(int(w), 0, int(w), int(h))
         super(MirrorDisplay, self).draw(root, p_matrix=self.projections[1], **kwargs)
 
 class DualMultisizeDisplay(Renderer):

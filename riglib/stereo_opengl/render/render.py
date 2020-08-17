@@ -18,10 +18,10 @@ class Renderer(object):
     def __init__(self, window_size, fov, near, far, shaders=None, programs=None):
         self.render_queue = None
         self.size = window_size
+
         self.drawpos = 0,0
         w, h = window_size
         self.projection = perspective(fov, w / h, near, far)
-
         #Add the default shaders
         if shaders is None:
             shaders = dict()
