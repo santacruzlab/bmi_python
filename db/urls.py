@@ -67,3 +67,4 @@ urlpatterns = [
     # Uncomment the next line to enable the admin:
     path(r'admin/', admin.site.urls),
 ]
+

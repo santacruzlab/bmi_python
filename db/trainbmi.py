@@ -52,6 +52,7 @@ def cache_plx(plxfile):
 def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslice, ssm, pos_key, kin_extractor, zscore):
     """
     Create a new Decoder object from training data and save a record to the database
+
     Parameters
     ----------
     name : string
@@ -205,6 +206,7 @@ def cache_and_train(*args, **kwargs):
 def save_new_decoder_from_existing(obj, orig_decoder_record, suffix='_'):
     '''
     Save a decoder that is created by manipulating the parameters of an older decoder
+
     Parameters
     ----------
     obj: riglib.bmi.Decoder instance
@@ -213,6 +215,7 @@ def save_new_decoder_from_existing(obj, orig_decoder_record, suffix='_'):
         Database record of the original decoder
     suffix: string, default='_'
         The name of the new decoder is created by taking the name of the old decoder and adding the specified suffix
+
     Returns
     -------
     None

@@ -1,4 +1,3 @@
-
 '''
 Django config file mostly auto-generated when a django project is created.
 See https://docs.djangoproject.com/en/dev/intro/tutorial01/ for an introduction
@@ -8,14 +7,12 @@ on how to customize this file test
 import os, glob, re
 cwd = os.path.split(os.path.abspath(__file__))[0]
 
-import djcelery
-djcelery.setup_loader()
 # Django settings for db project.
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
+    ('admin', 'derek706586@utexas.edu'),
     # ('Your Name', 'your_email@domain.com'),
 )
 
@@ -52,14 +49,14 @@ def get_sqlite3_databases():
 
 #DATABASES = get_sqlite3_databases()
 DATABASES = dict()
-DATABASES['default'] = {
+DATABASES["default"] = {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': os.path.join(db_dir, 'db.sqlite3'),   # Or path to database file if using sqlite3.
+            'NAME': os.path.join(db_dir, 'db.sqlite3'),                      # Or path to database file if using sqlite3.
             'USER': '',                      # Not used with sqlite3.
             'PASSWORD': '',                  # Not used with sqlite3.
             'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.   
-        }
+            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.            
+}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -68,7 +65,7 @@ DATABASES['default'] = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'America/Los_Angeles'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -141,14 +138,13 @@ STATICFILES_DIRS = (
 )
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 INSTALLED_APPS = (
+    'tracker',
     'django.contrib.auth',
     'django.contrib.admin',    
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djcelery',
-    'tracker.apps.TrackerConfig',
     'trainbmi'
 )
 
