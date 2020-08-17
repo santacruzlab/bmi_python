@@ -121,12 +121,14 @@ class FSM(object):
         '''
         Generic method to run the finite state machine of the task. Code that needs to execute 
         imediately before the task starts running in child classes should be of the form:
+
         def run(self):
             do stuff
             try:
                 super(class_name, self).run()
             finally:
                 clean up stuff
+
         The try block may or may not be necessary. For example, if you're opening a UDP port, you may want to always
         close the socket whether or not the main loop executes properly so that you don't loose the 
         reference to the socket. 
@@ -218,10 +220,12 @@ class FSM(object):
     def trigger_event(self, event):
         '''
         Transition the task state to a new state, where the next state depends on the current state as well as the trigger event
+
         Parameters
         ----------
         event: string
             Based on the current state, a particular event will trigger a particular state transition (Mealy machine)
+
         Returns
         -------
         None
@@ -237,10 +241,12 @@ class FSM(object):
     def set_state(self, condition, log=True):
         '''
         Change the state of the task
+
         Parameters
         ----------
         condition: string
             Name of new state. The state name must be a key in the 'status' dictionary attribute of the task
+
         Returns
         -------
         None
@@ -258,6 +264,7 @@ class FSM(object):
         '''
         Abstraction to get the current time. By default, state transitions are based on wall clock time, not on iteration count.
         To get simulations to run faster than real time, this function must be overwritten.
+
         Returns
         -------
         float: The current time in seconds
@@ -339,8 +346,10 @@ class ThreadedFSM(FSM, threading.Thread):
             Once a thread object is created, its activity must be started by 
             calling the thread's start() method. This invokes the run() method in a 
             separate thread of control.
+
         Prior to the thread's start method being called, the secondary init function (self.init) is executed.
         After the threading.Thread.start is executed, the 'run' method is executed automatically in a separate thread.
+
         Returns
         -------
         None

@@ -70,6 +70,7 @@ class Connection(object):
         
     def select_channels(self, channels):
         '''Sets the channels on which to receive event/continuous data.
+
         Parameters
         ----------
         channels : array_like
@@ -180,3 +181,4 @@ class Connection(object):
                                      arrival_ts=arrival_ts)
 
             time.sleep(sleep_time)
+

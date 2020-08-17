@@ -44,9 +44,11 @@ class DataSink(mp.Process):
     def run(self):
         '''
         Run the sink system in a remote process
+
         Parameters
         ----------
         None
+
         Returns
         -------
         None
@@ -118,9 +120,11 @@ class DataSink(mp.Process):
     def stop(self):
         '''
         Instruct the sink to stop gracefully by setting the 'status' boolean
+
         Parameters
         ----------
         None
+
         Returns
         -------
         None
@@ -139,9 +143,11 @@ class SinkManager(object):
     def __init__(self):
         '''
         Constructor for SinkManager
+
         Parameters
         ----------
         None
+
         Returns
         -------
         SinkManager instance
@@ -153,12 +159,14 @@ class SinkManager(object):
     def start(self, output, **kwargs):
         '''
         Docstring
+
         Parameters
         ----------
         output : DATA_TYPE
             ARG_DESCR
         kwargs : optional kwargs
             ARG_DESCR
+
         Returns
         -------
         '''
@@ -176,12 +184,14 @@ class SinkManager(object):
     def register(self, system, dtype=None, **kwargs):
         '''
         Register a system with all the known sinks
+
         Parameters
         ----------
         system : source.DataSource, source.MultiChanDataSource, or string 
             System to register with all the sinks 
         dtype : None (deprecated)
             Even if specified, this is overwritten in the 'else:' condition below
+
         Returns
         -------
         None
@@ -215,12 +225,14 @@ class SinkManager(object):
     def send(self, system, data):
         '''
         Send data from the specified 'system' to all sinks which have been registered
+
         Parameters
         ----------
         system: string 
             Name of the system sending the data
         data: np.array
             Generic data to be handled by each sink. Can be a record array, e.g., for task data.
+
         Returns
         -------
         None

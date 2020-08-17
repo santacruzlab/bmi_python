@@ -114,7 +114,7 @@ def _get_tmask_plexon(plx, tslice, sys_name='task'):
                 break
 
         if syskey is None:
-            print(list(reg.items()))
+            print((list(reg.items())))
             raise Exception('riglib.bmi.train._get_tmask: Training data source not found in neural data file!')        
     elif len(list(reg.keys())) == 0:
         # try to find how many systems' rowbytes were in the HDF file
@@ -355,7 +355,7 @@ def null_kin_extractor(files, binlen, tmask, update_rate_hz=60., pos_key='cursor
         inds = inds[::step]
         kin = kin[inds]
 
-    print("kin.shape", kin.shape)
+    print(("kin.shape", kin.shape))
     return kin
 
 
@@ -651,7 +651,7 @@ def conv_KF_to_splitFA_dec(decoder_training_te, dec_ix, fa_te, search_suffix = '
     # if search_flag:
     #     raise Exception('No decoder from ', str(decoder_training_te), ' and matching index: ', str(dec_ix), ' with FA training from: ',str(fa_te))
     # else:
-    print('Using old decoder: ', decoder_old.path)
+    print(('Using old decoder: ', decoder_old.path))
 
     decoder = pickle.load(open(decoder_old.filename))
     if hasattr(decoder, 'trained_fa_dict'):
@@ -920,7 +920,7 @@ def train_KFDecoder_abstract(ssm, kin, neural_features, units, update_rate, tsli
         else:
             raise Exception
 
-    print('zscore value: ', zscore, type(zscore))
+    print(('zscore value: ', zscore, type(zscore)))
 
     if zscore:
         if 'mFR' in kwargs and 'sdFR' in kwargs:
@@ -943,7 +943,7 @@ def train_KFDecoder_abstract(ssm, kin, neural_features, units, update_rate, tsli
         if kwargs['noise_rej']:
             sum_pop = np.sum(neural_features, axis = 0)
             bins_noisy = np.nonzero(sum_pop > kwargs['noise_rej_cutoff'])[0]
-            print('replacing %d noisy bins of total %d bins w/ mFR for decoder training!' % (len(bins_noisy), len(sum_pop)))
+            print(('replacing %d noisy bins of total %d bins w/ mFR for decoder training!' % (len(bins_noisy), len(sum_pop))))
             neural_features[:, bins_noisy] = mFR[:, np.newaxis]
     else:
         kwargs['noise_rej'] = False
@@ -962,7 +962,7 @@ def train_KFDecoder_abstract(ssm, kin, neural_features, units, update_rate, tsli
     # instantiate KFdecoder
     driftKF = kwargs.pop('driftKF', False)
     if driftKF:
-        print('Training Drift Decoder. Noise Rejection? ', kwargs['noise_rej'])
+        print(('Training Drift Decoder. Noise Rejection? ', kwargs['noise_rej']))
         kf = kfdecoder.KalmanFilterDriftCorrection(A, W, C, Q, is_stochastic=ssm.is_stochastic)
     else:
         kf = kfdecoder.KalmanFilter(A, W, C, Q, is_stochastic=ssm.is_stochastic)

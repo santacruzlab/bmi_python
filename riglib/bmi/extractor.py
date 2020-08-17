@@ -4,18 +4,10 @@ Examples include spike rate estimation, LFP power, and EMG amplitude.
 '''
 import numpy as np
 import time
-from . import sim_neurons
 from scipy.signal import butter, lfilter
 import math
 import os
-
-# try:
-#     import h5py
-# except:
-#     print 'cannot import h5py, blackrock .nev files will be opened w/ pytables'
-    
 import nitime.algorithms as tsa
-
 
 class FeatureExtractor(object):
     '''
@@ -244,7 +236,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             else:
                 step = int(binlen/(1./strobe_rate)) # Downsample kinematic data according to decoder bin length (assumes non-overlapping bins)
                 interp_rows = neurows[::step]
-            print('step: ', step)
+            print(('step: ', step))
             from plexon import psth
             spike_bin_fn = psth.SpikeBin(units, binlen)
             spike_counts = np.array(list(plx.spikes.bin(interp_rows, spike_bin_fn)))
@@ -320,7 +312,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
                         ts = grp[:]['TimeStamp']
                         units_ts = grp[:]['Unit']
                     except:
-                        print('no spikes recorded on channel: ', chan_str, ': adding zeros')
+                        print(('no spikes recorded on channel: ', chan_str, ': adding zeros'))
                         ts = []
                         units_ts = []
 
@@ -546,7 +538,7 @@ class LFPMTMPowerExtractor(object):
             bands    = f_extractor.bands
             channels = f_extractor.channels
             fs       = f_extractor.fs
-            print('bands:', bands)
+            print(('bands:', bands))
 
             n_itrs = len(interp_rows)
             n_chan = len(channels)
@@ -564,7 +556,7 @@ class LFPMTMPowerExtractor(object):
                     lfp_power[i, :] = f_extractor.extract_features(cont_samples.T).T
                 except:
                     print("Error with LFP decoder training")
-                    print(i, t)
+                    print((i, t))
                     pass
 
 
@@ -621,6 +613,8 @@ class ReplaySpikeCountsExtractor(BinnedSpikeCountsExtractor):
         '''
         Make up fake timestamps to go with the spike counts extracted from the HDF file
         '''
+        from . import sim_neurons
+
         # Get counts from HDF file
         counts = self.hdf_table[self.idx][self.source]
         n_subbins = counts.shape[1]
@@ -653,7 +647,7 @@ class ReplaySpikeCountsExtractor(BinnedSpikeCountsExtractor):
         '''
         output = super(ReplaySpikeCountsExtractor, self).__call__(*args, **kwargs)
         if not np.array_equal(output['spike_counts'], self.hdf_table[self.idx][self.source]):
-            print("spike binning error: ", self.idx)
+            print(("spike binning error: ", self.idx))
         self.idx += 1 
         return output
 
@@ -896,9 +890,9 @@ class LFPButterBPFPowerExtractor(object):
         #     print feats
         #     lfp_power[i, :] = f_extractor.extract_features(cont_samples).T
         
-        print('*' * 40)
+        print(('*' * 40))
         print('WARNING: replacing LFP values from .ns3 file with random values!!')
-        print('*' * 40)
+        print(('*' * 40))
 
         lfp_power = abs(np.random.randn(n_itrs, n_chan * len(bands)))
 
@@ -1013,7 +1007,7 @@ class AIMTMPowerExtractor(LFPMTMPowerExtractor):
             bands    = f_extractor.bands
             channels = f_extractor.channels
             fs       = f_extractor.fs
-            print('bands:', bands)
+            print(('bands:', bands))
 
             n_itrs = len(interp_rows)
             n_chan = len(channels)
@@ -1031,7 +1025,7 @@ class AIMTMPowerExtractor(LFPMTMPowerExtractor):
                     lfp_power[i, :] = f_extractor.extract_features(cont_samples.T).T
                 except:
                     print("Error with LFP decoder training")
-                    print(i, t)
+                    print((i, t))
                     pass
 
 
@@ -1299,7 +1293,7 @@ def get_mtm_lfp_power(plx, neurows, binlen, units, extractor_kwargs, strobe_rate
     bands    = f_extractor.bands
     channels = f_extractor.channels
     fs       = f_extractor.fs
-    print('bands:', bands)
+    print(('bands:', bands))
 
     n_itrs = len(interp_rows)
     n_chan = len(channels)

@@ -102,10 +102,12 @@ class Experiment(ThreadedFSM, traits.HasTraits):
     def __init__(self, verbose=True, **kwargs):
         '''
         Constructor for Experiment. This is the standard python object constructor
+
         Parameters
         ----------
         kwargs: optional keyword-arguments
             Any user-specified parameters for experiment traits, to be passed to the traits.HasTraits parent. 
+
         Returns
         -------
         Experiment instance
@@ -207,9 +209,11 @@ class Experiment(ThreadedFSM, traits.HasTraits):
         Class method to retrieve the list of editable traits for the given experiment. 
         The default behavior for an experiment class is to make all traits editable except for those
         listed in the attribute 'exclude_parent_traits'. 
+
         Parameters
         ----------
         None
+
         Returns
         -------
         editable_traits: list of strings
@@ -293,10 +297,12 @@ class Experiment(ThreadedFSM, traits.HasTraits):
     def is_hidden(cls, trait):
         '''
         Return true if the given trait is not meant to be shown on the GUI by default, i.e. hidden 
+
         Parameters
         ----------
         trait: string
             Name of trait to check
+
         Returns
         -------
         bool
@@ -312,12 +318,14 @@ class Experiment(ThreadedFSM, traits.HasTraits):
         '''
         Method to run the finite state machine of the task. Code that needs to execute 
         imediately before the task starts running in child classes should be of the form:
+
         def run(self):
             do stuff
             try:
                 super(class_name, self).run()
             finally:
                 clean up stuff
+
         The try block may or may not be necessary. For example, if you're opening a UDP port, you may want to always
         close the socket whether or not the main loop executes properly so that you don't loose the 
         reference to the socket. 
@@ -420,6 +428,7 @@ class Experiment(ThreadedFSM, traits.HasTraits):
     def cleanup(self, database, saveid, **kwargs):
         '''
         Commands to execute at the end of a task.
+
         Parameters
         ----------
         database : object
@@ -428,6 +437,7 @@ class Experiment(ThreadedFSM, traits.HasTraits):
             TaskEntry database record id to link files/data to
         kwargs : optional dict arguments
             Optional arguments to dbq methods. NOTE: kwargs cannot be used when 'database' is an RPC object.
+
         Returns
         -------
         None
@@ -452,7 +462,12 @@ class Experiment(ThreadedFSM, traits.HasTraits):
                 if (trait not in self.object_trait_names): # don't save traits which are complicated python objects to the HDF file    # and (trait not in ['bmi', 'decoder', 'ref_trajectories']):
                     h5file.root.task.attrs[trait] = getattr(self, trait)
             h5file.close()
-
+    # def end_task(self):
+    #     '''
+    #     End the FSM gracefully on the next iteration by setting the task's "stop" flag.
+    #     '''
+    #     self.stop = True
+        
     def terminate(self):
         '''
         Cleanup commands for tasks executed using the "test" button
@@ -470,6 +485,7 @@ class LogExperiment(Experiment):
         '''
         Commands to execute at the end of a task. 
         Save the task event log to the database
+
         see riglib.Experiment.cleanup for argument descriptions
         '''
         if self.verbose: print("experiment.LogExperiment.cleanup")
@@ -486,10 +502,12 @@ class LogExperiment(Experiment):
     def calc_state_occurrences(self, state_name):
         '''
         Calculate the number of times the task enters a particular state
+
         Parameters
         ----------
         state_name: string
             Name of state to track
+
         Returns
         -------
         Counts of state occurrences 
@@ -507,12 +525,14 @@ class LogExperiment(Experiment):
     def calc_events_per_min(self, event_name, window):
         '''
         Calculates the rate of event_name, per minute
+
         Parameters
         ----------
         event_name: string
             Name of state representing "event"
         window: float
             Number of seconds into the past to look to calculate the current event rate estimate.
+
         Returns
         -------
         rate : float
@@ -545,12 +565,14 @@ class Sequence(LogExperiment):
     def __init__(self, gen=None, *args, **kwargs):
         '''
         Constructor for Sequence
+
         Parameters
         ----------
         gen : Python generator
             Object with a 'next' attribute used in the special "wait" state to get the target sequence for the next trial.
         kwargs: optonal keyword-arguments
             Passed to the super constructor
+
         Returns
         -------
         Sequence instance
@@ -587,6 +609,7 @@ class Sequence(LogExperiment):
         '''
         Interpret the data coming from the generator. If the generator yields a dictionary, 
         then the keys of the dictionary automatically get set as attributes.
+
         Over-ride or add additional code in child classes if different behavior is desired.
         '''
         if isinstance(self.next_trial, dict):

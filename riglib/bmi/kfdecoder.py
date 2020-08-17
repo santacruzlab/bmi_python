@@ -6,7 +6,6 @@ import numpy as np
 from scipy.io import loadmat
 
 from . import bmi
-from . import train
 import pickle
 import re
 
@@ -141,10 +140,6 @@ class KalmanFilter(bmi.GaussianStateHMM):
 
         post_state = pred_state
 
-        #print obs_t.shape, C.shape, Q.shape
-        if np.any(obs_t > 1000):
-            print('observations have counts >> 1000 ')
-
         if obs_is_control_independent and using_control_input:
             post_state.mean += -KC*self.A*st.mean + K*obs_t
         else:
@@ -227,7 +222,8 @@ class KalmanFilter(bmi.GaussianStateHMM):
             last_P = P
             P -= KC*P;
             iter_idx += 1
-        if verbose: print("Converged in %d iterations--error: %g" % (iter_idx, np.linalg.norm(K-last_K))) 
+        if verbose: 
+            print(("Converged in %d iterations--error: %g" % (iter_idx, np.linalg.norm(K-last_K)))) 
     
         n_state_vars, n_state_vars = A.shape
         F = (np.mat(np.eye(n_state_vars, n_state_vars)) - KC) * A
@@ -274,7 +270,8 @@ class KalmanFilter(bmi.GaussianStateHMM):
                 P -= K[n]*H*P;
                 if n > 0 and np.linalg.norm(K[n] - K[n-1]) < tol: 
                     ss_idx = n
-                    if verbose: print("breaking after %d iterations" % n)
+                    if verbose: 
+                        print(("breaking after %d iterations" % n))
 
         return K, ss_idx
 
@@ -357,6 +354,10 @@ class KalmanFilter(bmi.GaussianStateHMM):
             C = np.linalg.solve(XtX_lamb, XtY).T
         Q = np.cov(Y - C*X, bias=1)
 
+        if np.ndim(Q) == 0:
+            # if "obs" only has 1 feature, Q might get collapsed to a scalar
+            Q = np.mat(Q.reshape(1,1))
+
         if not drives_obs is None:
             n_obs = C.shape[0]
             C_tmp = np.zeros([n_obs, n_states])
@@ -371,9 +372,16 @@ class KalmanFilter(bmi.GaussianStateHMM):
 
         Parameters
         ----------
+        hidden_state : np.ndarray of shape (N, T)
+            N = dimensionality of state vector, T = number of observations
+        include_offset : boolean, optional, default=False
+            if True, append a "1" to each state vector to add an offset term into the 
+            regression
 
         Returns
         -------        
+        A : np.ndarray of shape (N, N)
+        W : np.ndarray of shape (N, N)
         '''
         X = hidden_state
         T = hidden_state.shape[1]
@@ -435,14 +443,14 @@ class KalmanFilterDriftCorrection(KalmanFilter):
     def _init_state(self):
         if hasattr(self, 'prev_drift_corr'):
             self.drift_corr = self.prev_drift_corr.copy()
-            print('prev drift corr', np.mean(self.prev_drift_corr))
+            print(('prev drift corr', np.mean(self.prev_drift_corr)))
         else:
             self.drift_corr = np.mat(np.zeros(( self.A.shape[0], 1)))
             self.prev_drift_corr = np.mat(np.zeros(( self.A.shape[0], 1)))
 
         if hasattr(self, 'noise_rej'):
             if self.noise_rej:
-                print('noise rej thresh: ', self.noise_rej_cutoff)
+                print(('noise rej thresh: ', self.noise_rej_cutoff))
         else:
             self.noise_rej = False
         self.noise_cnt = 0

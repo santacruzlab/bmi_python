@@ -15,6 +15,7 @@ try:
 except ImportError:
     import enthought.traits.api as traits
 
+
 class InstanceFromDB(traits.Instance):
     def __init__(self, *args, **kwargs):
         if 'bmi3d_db_model' in kwargs:
@@ -44,7 +45,6 @@ class OptionsList(traits.Enum):
             kwargs['bmi3d_input_options'] = args[0]
 
         super(OptionsList, self).__init__(*args, **kwargs)
-        #setattr(self, 'bmi3d_input_options', bmi3d_input_options)
 
 
 traits.InstanceFromDB = InstanceFromDB

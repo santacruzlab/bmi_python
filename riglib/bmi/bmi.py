@@ -159,7 +159,9 @@ class GaussianStateHMM(object):
     def __init__(self, A, W):
         '''
         Constructor for GaussianStateHMM
+
         x_{t+1} = A*x_t + w_t; w_t ~ N(0, W)
+
         Parameters
         ----------
         A: np.mat of shape (N, N)
@@ -179,6 +181,7 @@ class GaussianStateHMM(object):
     def _init_state(self, init_state=None, init_cov=None):
         """
         Initialize the state of the filter with a mean and covariance (uncertainty)
+
         Parameters
         ----------
         init_state : np.matrix, optional
@@ -221,6 +224,7 @@ class GaussianStateHMM(object):
             x_t = previous state
             c_t = control input (the "directed" part of the model)
             w_t = process noise (the "random walk" part of the model)
+
         Parameters
         ----------
         state : GaussianState instance
@@ -234,6 +238,7 @@ class GaussianStateHMM(object):
         F : np.mat of shape (B.shape[1], N)
             Feedback control gains. Used to compute u_t = BF(x^* - x_t)
         
+
         Returns
         -------
         GaussianState instance
@@ -276,6 +281,7 @@ class GaussianStateHMM(object):
     def obj_eq(self, other, attrs=[]):
         '''
         Determine if two objects have mattching array attributes
+
         Parameters
         ----------
         other : object
@@ -283,6 +289,7 @@ class GaussianStateHMM(object):
         attrs : list, optional
             List of attributes to compare for equality. Only attributes that are common to both objects are used.
             The attributes should be np.array or similar as np.array_equal is used to determine equality
+
         Returns
         -------
         bool 
@@ -299,6 +306,7 @@ class GaussianStateHMM(object):
     def obj_diff(self, other, attrs=[]):
         '''
         Calculate the difference of the two objects w.r.t the specified attributes
+
         Parameters
         ----------
         other : object
@@ -306,6 +314,7 @@ class GaussianStateHMM(object):
         attrs : list, optional
             List of attributes to compare for equality. Only attributes that are common to both objects are used.
             The attributes should be np.array or similar as np.array_equal is used to determine equality
+
         Returns
         -------
         np.array
@@ -332,10 +341,12 @@ class GaussianStateHMM(object):
     def __setstate__(self, state):
         """
         Unpickle decoders by loading all the saved parameters and then running _pickle_init
+
         Parameters
         ----------
         state : dict
             Provided by the unpickling system
+
         Returns
         -------
         None
@@ -502,6 +513,7 @@ class Decoder(object):
     def plot_pds(self, C, ax=None, plot_states=['hand_vx', 'hand_vz'], invert=False, **kwargs):
         '''
         Plot 2D "preferred directions" of features in the Decoder
+
         Parameters
         ----------
         C: np.array of shape (n_features, n_states)
@@ -550,6 +562,7 @@ class Decoder(object):
     def update_params(self, new_params, **kwargs):
         '''
         Method for updating the parameters of the decoder
+
         Parameters
         ----------
         new_params: dict 
@@ -585,10 +598,12 @@ class Decoder(object):
     def __getitem__(self, idx):
         """
         Get element(s) of the BMI state, indexed by name or number
+
         Warning: The variable 'q' is a reserved keyword, referring to all of
         the position states. This strange letter choice was made to be consistent
         with the robotics literature, where 'q' refers to the vector of 
         generalized joint coordinates.
+
         Parameters
         ----------
         idx: int or string
@@ -617,6 +632,7 @@ class Decoder(object):
     def __setitem__(self, idx, value):
         """
         Set element(s) of the BMI state, indexed by name or number
+
         Parameters
         ----------
         idx: int or string
@@ -669,10 +685,12 @@ class Decoder(object):
     def set_call_rate(self, call_rate):
         '''
         Function for the higher-level task to set the frequency of function calls to __call__
+
         Parameters
         ----------
         call_rate : float 
             1./call_rate should be an integer multiple or divisor of the Decoder's 'binlen'
+
         Returns
         -------
         None
@@ -692,6 +710,7 @@ class Decoder(object):
     def predict(self, neural_obs, assist_level=0.0, weighted_avg_lfc=False, **kwargs):
         """
         Decode the spikes
+
         Parameters
         ----------
         neural_obs: np.array of shape (N,) or (N, 1)
@@ -767,6 +786,7 @@ class Decoder(object):
     def decode(self, neural_obs, **kwargs):
         '''
         Decode multiple observations sequentially.
+
         Parameters
         ----------
         neural_obs: np.array of shape (# features, # observations)
@@ -808,6 +828,7 @@ class Decoder(object):
     def __call__(self, obs_t, **kwargs):
         '''
         Wrapper for the 'predict' method
+
         Parameters
         ----------
         obs_t: np.array of shape (# features, # subbins)
@@ -823,10 +844,12 @@ class Decoder(object):
     def save(self, filename=''):
         '''
         Pickle the Decoder object to a file
+
         Parameters
         ----------
         filename: string, optional
             Filename to pickle the decoder to. If unspecified, a temporary file will be created.
+
         Returns
         -------
         filename: string
@@ -847,6 +870,7 @@ class Decoder(object):
     def save_attrs(self, hdf_filename, table_name='task'):
         '''
         Save the attributes of the Decoder to the attributes of the specified HDF table
+
         Parameters
         ----------
         hdf_filename: string
@@ -888,6 +912,7 @@ class BMISystem(object):
         feature_accumulator : accumulator.FeatureAccumulator instance
             Combines features across time if necesary to perform rate matching 
             between the task rate and the decoder rate.
+
         Returns
         -------
         BMISystem instance
@@ -906,6 +931,7 @@ class BMISystem(object):
         '''
         Main function for all BMI functions, including running the decoder, adapting the decoder 
         and incorporating assistive control inputs
+
         Parameters
         ----------
         neural_obs : np.ndarray, 
@@ -923,6 +949,7 @@ class BMISystem(object):
         **kwargs : dict
             Instance-specific arguments, e.g. RML/SmoothBatch require a 'half_life' parameter 
             that is not required of other CLDA methods. 
+
         Returns
         -------
         decoded_states : np.ndarray
@@ -1146,6 +1173,7 @@ class BMILoop(object):
     def call_decoder(self, neural_obs, target_state, **kwargs):
         '''
         Run the decoder computations
+
         Parameters
         ----------
         neural_obs : object, typically np.array of shape (n_features, n_subbins)
@@ -1174,10 +1202,12 @@ class BMILoop(object):
     def move_plant(self, **kwargs):
         '''
         The main functions to retrieve raw observations from the neural data source and convert them to movement of the plant
+
         Parameters
         ----------
         **kwargs : optional keyword arguments
             optional arguments for the decoder, assist, CLDA, etc. fed to the BMISystem
+
         Returns
         -------
         decoder_state : np.mat
@@ -1266,7 +1296,7 @@ class BMILoop(object):
         Re-open the HDF file and save any extra task data kept in RAM
         '''
         super(BMILoop, self).cleanup_hdf()
-        log_file = open(os.path.join(os.getenv("HOME"), 'code/bmi3d/log/clda_log'), 'w')
+        log_file = open('/src/log/clda_log', 'w')
         log_file.write(str(self.state) + '\n')
         try:
             from . import clda
@@ -1287,12 +1317,14 @@ class BMILoop(object):
     def write_clda_data_to_hdf_table(hdf_fname, data, ignore_none=False):
         '''
         Save CLDA data generated during the experiment to the specified HDF file
+
         Parameters
         ----------
         hdf_fname : string
             filename of HDF file
         data : list
             list of dictionaries with the same keys and same dtypes for values
+
         Returns
         -------
         None
@@ -1397,3 +1429,4 @@ class BMI(object):
     Legacy class, used only for unpickling super old Decoder objects. Ignore completely.
     '''
     pass
+
