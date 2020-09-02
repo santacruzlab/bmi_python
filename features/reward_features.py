@@ -138,7 +138,7 @@ class TTLReward_arduino_tdt(traits.HasTraits):
 
     def _start_reward(self):
         #port = serial.Serial('/dev/arduino_rew', baudrate=self.baudrate_rew)
-        self.port.write("j")
+        self.port.write(b'j')
         self.reportstats['Reward #'] = self.reportstats['Reward #'] + 1
         self.reward_start = self.get_time() - self.start_time
         super(TTLReward_arduino_tdt, self)._start_reward()
@@ -147,7 +147,7 @@ class TTLReward_arduino_tdt(traits.HasTraits):
         return (ts - self.reward_start) > self.reward_time
         
     def _end_reward(self):
-        self.port.write("n")
+        self.port.write(b'n')
 
 
 
