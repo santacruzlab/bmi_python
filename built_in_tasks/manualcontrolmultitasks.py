@@ -1252,6 +1252,61 @@ class JoystickMulti(ManualControlMulti):
                 reward_count += 1
         return "{} rewarded trials in {} min".format(reward_count, duration)
 
+class JoystickMulti_plusMove(JoystickMulti):
+
+    status = dict(
+        wait = dict(start_trial="target", stop=None),
+        target = dict(enter_target="hold", timeout="timeout_penalty", move="move_reward", stop=None),
+        move_reward = dict(move_reward_end="target"),
+        hold = dict(leave_early="hold_penalty", hold_complete="targ_transition"),
+        targ_transition = dict(trial_complete="reward",trial_abort="wait", trial_incomplete="target"),
+        timeout_penalty = dict(timeout_penalty_end="targ_transition"),
+        hold_penalty = dict(hold_penalty_end="targ_transition"),
+        reward = dict(reward_end="wait")
+        )
+
+    #Settable Traits
+    move_reward_time = traits.Float(1,desc="Reward Time for moving Joystick")
+    #move_dist = traits.Float(5,desc="Minimum Distance to move on screen for Reward")
+    move_dist_x = traits.Float(5,desc="Minimum Distance to move on screen for Reward")
+    move_dist_y = traits.Float(5,desc="Minimum Distance to move on screen for Reward")
+
+
+    def __init__(self, *args, **kwargs):
+        super(JoystickMulti_plusMove, self).__init__(*args, **kwargs)
+        self.last_rew_pt = np.zeros([3])
+
+    def _start_move_reward(self):
+        #if self.reward is not None:
+        #    self.reward.reward(self.move_reward_time*1000.)
+        self._start_reward()
+
+    def _end_move_reward(self):
+        self._end_reward()
+  
+    def _test_move_reward_end(self,ts):        
+        if self.move_reward_time>0:
+           self.last_rew_pt =  self.current_pt.copy()
+           if ts > self.move_reward_time: #to compensate for adding +1 to target index for moving. 
+                self.target_index += -1
+           return ts > self.move_reward_time
+        else:
+           return False
+
+    def _test_move(self,ts):
+        if self.move_reward_time>0: 
+            d_x =  ( (self.current_pt[0] - self.last_rew_pt[0]) **2)  **.5
+            d_y =  ( (self.current_pt[2] - self.last_rew_pt[2]) **2)  **.5
+
+            if d_x > self.move_dist_x or d_y > self.move_dist_y:
+                r=1
+            else:
+                r=0
+            return r
+
+        else: 
+           return False
+    
 class JoystickMulti2DWindow(JoystickMulti, WindowDispl2D):
     fps = 20.
     def __init__(self,*args, **kwargs):
