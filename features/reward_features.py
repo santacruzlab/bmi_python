@@ -149,6 +149,39 @@ class TTLReward_arduino_tdt(traits.HasTraits):
     def _end_reward(self):
         self.port.write(b'n')
 
+class TTLReward_arduino_tdt_2Systems(traits.HasTraits):
+    ''' Same idea as TTL reward arduino tdt but for two reward systems'''
+    def __init__(self, *args, **kwargs):
+        self.baudrate_rew = 9600
+        import serial
+        #self.port = serial.Serial('/dev/ttyACM0', baudrate=self.baudrate_rew)
+        self.port = serial.Serial('/dev/arduino_neurosync', baudrate=self.baudrate_rew)
+        
+        super(TTLReward_arduino_tdt, self).__init__(*args, **kwargs)
+
+    def _start_reward_1(self):
+        self.port.write(b'j')
+        self.reportstats['Reward 1 #'] = self.reportstats['Reward 1 #'] + 1
+        self.reward_start = self.get_time() - self.start_time
+        super(TTLReward_arduino_tdt_2Systems, self)._start_reward_1()
+
+    def _start_reward_2(self):
+        self.port.write(b'r')
+        self.reportstats['Reward 2 #'] = self.reportstats['Reward 2 #'] + 1
+        self.reward_start = self.get_time() - self.start_time
+        super(TTLReward_arduino_tdt_2Systems, self)._start_reward_2()
+
+    def _test_reward_1_end(self, ts):
+        return (ts - self.reward_start) > self.reward_time
+
+    def _test_reward_2_end(self, ts):
+        return (ts - self.reward_start) > self.reward_time
+        
+    def _end_reward_1(self):
+        self.port.write(b'n')
+
+    def _end_reward_2(self):
+        self.port.write(b'o')
 
 
 class JuiceLogging(traits.HasTraits):

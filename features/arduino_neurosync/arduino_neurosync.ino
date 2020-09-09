@@ -18,6 +18,8 @@ void loop() {
     }
     else if (serialListener == 'n') {
       digitalWrite(REWARD1, LOW);
+    }
+    else if (serialListener == 'o') {
       digitalWrite(REWARD2, LOW);
     }
   }
