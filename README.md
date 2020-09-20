@@ -29,7 +29,7 @@ Visual C++ Build tools (for the 'traits' package)
 # Installation
 ```bash
 git clone -b develop https://github.com/santacruzlab/bmi_python.git
-cd brain-python-interface
+cd bmi_python
 pip3 install -r requirements.txt
 pip3 install -e .
 ```
