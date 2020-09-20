@@ -149,6 +149,33 @@ class TTLReward_arduino_tdt(traits.HasTraits):
     def _end_reward(self):
         self.port.write(b'n')
 
+
+class TTLReward_arduino_tdt_2Systems_specific(traits.HasTraits):
+    ''' Same idea as TTL reward, using an arduino instead of nidaq (pin 8)'''
+    def __init__(self, *args, **kwargs):
+        self.baudrate_rew = 9600
+        import serial
+        self.port = serial.Serial('/dev/arduino_neurosync', baudrate=self.baudrate_rew)
+        
+        super(TTLReward_arduino_tdt_2Systems_specific, self).__init__(*args, **kwargs)
+
+    def _start_reward(self):
+        if self.target_selected == 'L':
+            self.port.write(b'j')
+        else:
+            self.port.write(b'r')
+        self.reportstats['Reward #'] = self.reportstats['Reward #'] + 1
+        self.reward_start = self.get_time() - self.start_time
+        super(TTLReward_arduino_tdt_2Systems_specific, self)._start_reward()
+
+    def _test_reward_end(self, ts):
+        return (ts - self.reward_start) > self.reward_time
+        
+    def _end_reward(self):
+        self.port.write(b'n')
+        self.port.write(b'o')
+
+
 class TTLReward_arduino_tdt_2Systems(traits.HasTraits):
     ''' Same idea as TTL reward arduino tdt but for two reward systems'''
     def __init__(self, *args, **kwargs):
@@ -157,7 +184,7 @@ class TTLReward_arduino_tdt_2Systems(traits.HasTraits):
         #self.port = serial.Serial('/dev/ttyACM0', baudrate=self.baudrate_rew)
         self.port = serial.Serial('/dev/arduino_neurosync', baudrate=self.baudrate_rew)
         
-        super(TTLReward_arduino_tdt, self).__init__(*args, **kwargs)
+        super(TTLReward_arduino_tdt_2Systems, self).__init__(*args, **kwargs)
 
     def _start_reward_1(self):
         self.port.write(b'j')

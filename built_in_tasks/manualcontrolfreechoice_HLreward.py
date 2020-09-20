@@ -7,7 +7,7 @@ import numpy as np
 from collections import OrderedDict
 import time
 
-from riglib import reward, stimulus_pulse
+from riglib import reward #, stimulus_pulse
 from riglib.experiment import traits, Sequence
 
 from riglib.stereo_opengl.window import Window, FPScontrol, WindowDispl2D
@@ -55,8 +55,8 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
     joystick_method = traits.Float(1,desc="1: Normal velocity, 0: Position control")
     joystick_speed = traits.Float(20, desc="Speed of cursor")
 
-    plant_type_options = plantlist.keys()
-    plant_type = traits.OptionsList(*plantlist, bmi3d_input_options=plantlist.keys())
+    plant_type_options = list(plantlist.keys()) ###############################
+    plant_type = traits.OptionsList(*plantlist, bmi3d_input_options=list(plantlist.keys())) ###
     starting_pos = (5, 0, 5)
     # window_size = (1280*2, 1024)
     window_size = traits.Tuple((1920*2, 1080), desc='window size')
@@ -642,7 +642,7 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         self.requeue()
 
     def _start_reward(self):
-        super(ManualControlFreeChoice, self)._start_reward()
+        #super(ManualControlFreeChoice, self)._start_reward()
         if self.target_selected == 'L':
             self.show_object(self.targetL, True)  
             #reward_assigned = self.targs[1,1]
