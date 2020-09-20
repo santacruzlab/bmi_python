@@ -186,28 +186,28 @@ class TTLReward_arduino_tdt_2Systems(traits.HasTraits):
         
         super(TTLReward_arduino_tdt_2Systems, self).__init__(*args, **kwargs)
 
-    def _start_reward_1(self):
+    def _start_reward_H(self):
         self.port.write(b'j')
-        self.reportstats['Reward 1 #'] = self.reportstats['Reward 1 #'] + 1
+        self.reportstats['Reward #'] = self.reportstats['Reward #'] + 1
         self.reward_start = self.get_time() - self.start_time
-        super(TTLReward_arduino_tdt_2Systems, self)._start_reward_1()
+        super(TTLReward_arduino_tdt_2Systems, self)._start_reward_H()
 
-    def _start_reward_2(self):
+    def _start_reward_L(self):
         self.port.write(b'r')
-        self.reportstats['Reward 2 #'] = self.reportstats['Reward 2 #'] + 1
+        self.reportstats['Reward #'] = self.reportstats['Reward #'] + 1
         self.reward_start = self.get_time() - self.start_time
-        super(TTLReward_arduino_tdt_2Systems, self)._start_reward_2()
+        super(TTLReward_arduino_tdt_2Systems, self)._start_reward_L()
 
-    def _test_reward_1_end(self, ts):
+    def _test_reward_H_end(self, ts):
         return (ts - self.reward_start) > self.reward_time
 
-    def _test_reward_2_end(self, ts):
+    def _test_reward_L_end(self, ts):
         return (ts - self.reward_start) > self.reward_time
         
-    def _end_reward_1(self):
+    def _end_reward_H(self):
         self.port.write(b'n')
 
-    def _end_reward_2(self):
+    def _end_reward_L(self):
         self.port.write(b'o')
 
 
