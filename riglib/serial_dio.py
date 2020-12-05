@@ -12,7 +12,7 @@ def construct_word(aux, msg_type, data, n_bits_data=8, n_bits_msg_type=3):
     word = (aux << (n_bits_data + n_bits_msg_type)) | (msg_type << n_bits_data) | data
     return word
 
-baudrate = 115200
+baudrate = 9600
 
 class SendRowByte(object):
     '''
@@ -45,7 +45,7 @@ class SendRowByte(object):
         Release access to the Arduino serial port
         '''
         # stop recording
-        self.port.write('p')
+        self.port.write(b'p')
         self.port.close()
 
     def register(self, system, dtype):
@@ -140,5 +140,5 @@ class SendRowByte(object):
         #self.port.write(word)
         if verbose:
             print(binary_repr(word, 16))
-        word_str = 'd' + struct.pack('<H', word)
+        word_str = b'd' + struct.pack('<H', word)
         self.port.write(word_str)

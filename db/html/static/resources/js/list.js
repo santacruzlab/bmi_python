@@ -309,7 +309,7 @@ Files.prototype.update_filelist = function(datafiles, task_entry_id) {
         $("#file_list").append(this.filelist);
 
         for (var sys in datafiles)
-            if ((sys == "plexon") || (sys == "blackrock") || (sys == "tdt")) {
+            if ((sys == "plexon") || (sys == "blackrock") || (sys == "tdt") || (sys == "ripple")) {
                 this.neural_data_found = true;
                 break;
             }

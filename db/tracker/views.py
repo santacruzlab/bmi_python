@@ -160,7 +160,7 @@ def setup(request):
     print(database_objs)
 
     recording_sys = models.KeyValueStore.get("recording_sys")
-    recording_sys_options = ['None', 'tdt', 'blackrock', 'plexon']
+    recording_sys_options = ['None', 'ripple', 'tdt', 'blackrock', 'plexon']
 
     return render(request, "setup.html", 
         dict(subjects=subjects, tasks=tasks, features=features, systems=systems,
