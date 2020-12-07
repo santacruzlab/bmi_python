@@ -886,19 +886,30 @@ class TaskEntry(object):
             y = [y]
         
         return x+y
+
+    @property
+    def ripple_filename(self):
+        '''
+        Return the name of the ripple file associated with this TaskEntry
+        '''
+        x = self.get_datafile('ripple', intermediate_path='')
+        if type(x) is not list:
+            x = [x]        
+        return x
+
     @property
     def nev_filename(self):
         '''
         Get any blackrock nev files associated with this TaskEntry
         '''
-        return self.get_datafile(system_name='blackrock', intermediate_path='', path__endswith='.nev')
+        return self.get_datafile(system_name='ripple', intermediate_path='', path__endswith='.nev')
 
     @property
     def nsx_filenames(self):
         '''
         Get any blackrock nsx files associated with this TaskEntry
         '''
-        return self.get_datafile(system_name='blackrock', intermediate_path='', path__endswith='.nsx')
+        return self.get_datafile(system_name='ripple', intermediate_path='', path__endswith='.nsx')
 
     @property
     def decoder_filename(self):

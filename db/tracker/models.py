@@ -310,7 +310,7 @@ class System(models.Model):
 
     @staticmethod
     def populate():
-        for name in ["eyetracker", "hdf", "plexon", "bmi", "bmi_params", "juice_log", "blackrock"]:
+        for name in ["eyetracker", "hdf", "plexon", "bmi", "bmi_params", "juice_log", "blackrock", "ripple"]:
             try:
                 print("mns WWWWWWWw................")
                 System.objects.get(name=name)
@@ -740,7 +740,8 @@ class TaskEntry(models.Model):
         
         ###############INSERT RIPPLE##########################
         elif recording_sys_make == 'ripple':
-            pass
+            print('This code does not yet know how to open Ripple files!')
+            js['bmi'] = dict(_neuralinfo=None)
         elif recording_sys_make == 'blackrock':
             try:
                 print('skipping .nev conversion')
@@ -809,14 +810,19 @@ class TaskEntry(models.Model):
         Return the name of the nev file associated with the session.
         '''
         try:
-            df = DataFile.objects.get(system__name="blackrock", path__endswith=".nev", entry=self.id)
+            df = DataFile.objects.get(system__name="ripple", path__endswith=".nev", entry=self.id)
             return df.get_path()
         except:
-            try:
-                df = DataFile.objects.get(system__name="blackrock2", path__endswith=".nev", entry=self.id)
-                return df.get_path()
-            except:
-                return None
+            return None
+        # try:
+        #     df = DataFile.objects.get(system__name="blackrock", path__endswith=".nev", entry=self.id)
+        #     return df.get_path()
+        # except:
+        #     try:
+        #         df = DataFile.objects.get(system__name="blackrock2", path__endswith=".nev", entry=self.id)
+        #         return df.get_path()
+        #     except:
+        #         return None
             #import traceback
             #traceback.print_exc()
             #return 'no_nev_file'
@@ -832,20 +838,28 @@ class TaskEntry(models.Model):
         try:
             dfs = []
             for k in range(1, 7):
-                df_k = DataFile.objects.filter(system__name="blackrock", path__endswith=".ns%d" % k, entry=self.id)
+                df_k = DataFile.objects.filter(system__name="ripple", path__endswith=".ns%d" % k, entry=self.id)
                 dfs += list(df_k)
 
             return [df.get_path() for df in dfs]
         except:
-            try:
-                dfs = []
-                for k in range(1, 7):
-                    df_k = DataFile.objects.filter(system__name="blackrock2", path__endswith=".ns%d" % k, entry=self.id)
-                    dfs+= list(df_k)
-                return [df.get_path() for df in dfs]
-            except:
-                return None
+            return None
+        # try:
+        #     dfs = []
+        #     for k in range(1, 7):
+        #         df_k = DataFile.objects.filter(system__name="blackrock", path__endswith=".ns%d" % k, entry=self.id)
+        #         dfs += list(df_k)
 
+        #     return [df.get_path() for df in dfs]
+        # except:
+        #     try:
+        #         dfs = []
+        #         for k in range(1, 7):
+        #             df_k = DataFile.objects.filter(system__name="blackrock2", path__endswith=".ns%d" % k, entry=self.id)
+        #             dfs+= list(df_k)
+        #         return [df.get_path() for df in dfs]
+        #     except:
+        #         return None
     @property
     def name(self):
         '''
@@ -864,6 +878,11 @@ class TaskEntry(models.Model):
             except:
                 return 'noname'
         elif recording_sys_make == 'blackrock':
+            try:
+                return str(os.path.basename(self.nev_file).rstrip('.nev'))
+            except:
+                return 'noname'        
+        elif recording_sys_make == 'ripple':
             try:
                 return str(os.path.basename(self.nev_file).rstrip('.nev'))
             except:

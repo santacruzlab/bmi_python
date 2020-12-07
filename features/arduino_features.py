@@ -381,7 +381,9 @@ class RippleSerialDIORowByte(SerialDIORowByte):
         self.file_pattern = []
         for file_ext in self.file_exts:
             self.file_pattern.append(os.path.join(self.data_root, '*' + file_ext))
-        print(self.file_pattern)
+            self.possible_filenames += self.filter_files(glob.glob(self.file_pattern[-1]))
+
+        self.possible_filesizes = np.array([os.stat(fname).st_size for fname in self.possible_filenames])
 
     def init(self):
         '''
@@ -449,6 +451,10 @@ class RippleSerialDIORowByte(SerialDIORowByte):
         # port = serial.Serial(glob.glob("/dev/ttyACM*")[0], baudrate=9600)
         # port.write('p')
         # port.close()
+        print("possible_filesizes")
+        print(self.possible_filesizes)
+        print("possible_filenames")
+        print(self.possible_filenames)
 
         super(RippleSerialDIORowByte, self).cleanup(database, saveid, **kwargs)
 
@@ -484,4 +490,22 @@ class RippleSerialDIORowByte(SerialDIORowByte):
 
     @property
     def data_files(self):
-        return None
+        if not hasattr(self, "_data_files"):
+            ## Ideally, the correct 'data_files' will be the only file whose filesize has changed since the 'init' function ran..
+            filesizes = np.array([os.stat(fname).st_size for fname in self.possible_filenames])
+            inds, = np.nonzero(filesizes - self.possible_filesizes)
+
+            files_which_changed_size = [self.possible_filenames[k] for k in inds]
+
+            # make sure that all the base filenames are the same
+            file_dates = [x.split(".")[0] for x in files_which_changed_size]
+            if len(np.unique(file_dates)) <= 1:
+                self._data_files = files_which_changed_size
+            else:
+                print("Filenames ambiguous! RippleSerialDIORowByte cannot figure out which files are associated with this block")
+                print("these are the options:")
+                print(files_which_changed_size)
+                print()
+
+        return self._data_files        
+        #return None
