@@ -1,5 +1,5 @@
 
-brain-python-interface (a.k.a. bmi3d)
+bmi_python (a.k.a. bmi3d)
 ====================================
 **This the unstable python 3 branch. It may not yet do what you want it to do. Use the master branch for the heavily-tested (but out of date) python 2 version**
 
@@ -11,6 +11,7 @@ in that it is primarily intended for intracortical BMI experiments.
 This package has been used with the following recording systems:
 - Omniplex neural recording system (Plexon, Inc.). 
 - Blackrock NeuroPort
+- Ripple Grapevine
 
 Code documentation can be found at http://carmenalab.github.io/bmi3d_docs/
 
