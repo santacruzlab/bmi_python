@@ -58,8 +58,15 @@ python3 manage.py migrate                  # make sure to do this twice!
 ```
 
 # Start server
+First, on Ubuntu, start the docker virtual environment with
 ```bash
-python3 manage.py runserver
+cd install
+sudo ./run_docker.sh
+```
+Then start the server with
+```bash
+cd db
+python3 manage.py runserver [::]:8000
 ```
 
 # Setup paths and configurations
