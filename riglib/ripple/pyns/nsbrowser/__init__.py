@@ -1,0 +1,4 @@
+from mplwidget import MplWidget
+from nsbrowser_main import Ui_NSBrowserMainWindow
+from nsbrowser_about import Ui_NSAboutDialog
+from nsbrowser_info import Ui_NSInfoDialog

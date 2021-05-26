@@ -1,0 +1,64 @@
+========
+Overview
+========
+The classes and functions provided by this interface do not exactly 
+replicate the functions provided by the Neuroshare API.  Instead of 
+the functional Neuroshare API generally written in c, 
+the pyns package was created using an object oriented programming style with 
+a focus on having a form natural to the Python language.  
+
+This project was put in place by Ripple LLC., after noticing the growing
+use of the Python language in the academic and scientific communities.
+
+=======================
+Required Python Modules
+=======================
+The pyns package makes use of a few Python modules outside the default
+modules that would be present in any Python installation.  These 
+modules are standard for any scientific or computational
+use of the Python language and are likely to be present on your system.
+
+These modules are:
+
+* numpy - A collection of array manipulation objects and functions.
+When data is returned from data in the pyns package, numpy arrays 
+are used to package the data for easy use with matplotlib.
+
+* matplotlib - A collection of plotting and analysis objects and functions.  
+These are not used explicitly in the pyns package, 
+but they are used in all the provided examples.
+
+* psutil - A module containing process utilities for Windows, Linux, and OS X
+This module is used to check the available system memory.  Cached data 
+for spike waveforms has the potential to arbitrarily large, and a check is made
+to ensure enough physical memory is present on a system.  However, files 
+large enough to cause problems are unlikely.
+
+On a Windows system the Python distribution Python(x, y) makes installing
+these modules and other useful analysis packages easy.  More information 
+may be found at: http://www.pythonxy.com.
+
+If using Linux platforms, the needed packages depend slightly on the 
+Linux flavor, though they represent the same libraries.  On Ubuntu install 
+the following packages: python-psutil, python-numpy, python-matplotlib.  
+They may be installed using apt-get with the following command::
+
+    $ sudo apt-get install python-psutil python-numpy python-matplotlib
+
+If using a Red Hat variant, install the packages python-psutil, 
+python-matplotlib, and numpy.  These may be installed using yum with the 
+command::
+
+    $ sudo yum install python-psutil numpy python-matplotlib
+
+============
+Installation
+============
+To install pyns system-wide on your machine either run the command line
+setup.py.  This command should install successfully on any platform.  If run
+in bash, this would look like::
+
+    $ python setup.py install
+
+If using a Windows system, a msi, produced by Python distutils, is also
+available.

@@ -1,0 +1,360 @@
+#!/usr/bin/env python
+"""
+Created on May 5th, 2012
+@author: Elliott L. Barcikowski
+
+A simple event browser for .nev and .nsx files based on the pyns package.
+pyns is a native Python implimentation of the Neuroshare API.  
+
+nsbrowser is written with PyQt4 using the qtdesigner.
+""" 
+import sys
+import os
+# use numpy for handle arrays for plotting
+import numpy
+from PyQt4 import QtGui
+from PyQt4 import QtCore
+# These are the three forms used in this program
+from nsbrowser import Ui_NSBrowserMainWindow, Ui_NSAboutDialog, Ui_NSInfoDialog
+from pyns.nsfile import NSFile 
+from pyns.nsentity import EntityType
+
+def dump_info(info):
+    """An ugly, direct dump of any class.  A place-holder before a pretty
+    dump routine is created for each of the info namedtuples.  Note: The output
+    of this doesn't look as bad as you may thing.  Going to leave it for now.
+    """
+    text = ""
+    for (key, value) in info._asdict().iteritems():
+        text += "{0}: {1:6}\n".format(key[:15], value)
+    return text
+
+class NSAboutDialog(QtGui.QDialog, Ui_NSAboutDialog):
+    """Provide small about dialog.  Consists of a simple dialog, rich text
+    label, and okay button.
+    """
+    def __init__(self, parent=None):
+        super(NSAboutDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.okay_button.clicked.connect(self.close)
+
+class NSInfoDialog(QtGui.QDialog, Ui_NSInfoDialog):
+    """Dialog to display the results of the pyns versions of the "info"
+    functions of the Neuroshare API.  Consists of a simple dialog, text browser,
+    and okay button.
+    """
+    def __init__(self, parent=None):
+        super(NSInfoDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.okay_button.clicked.connect(self.close)
+    def clear(self):
+        """Clear text browser."""
+        self.info_text.clear()
+    def set_text(self, text):
+        """Set text to input parameter text."""
+        self.info_text.setText(text)
+        
+class NSBrowserMainWindow(QtGui.QMainWindow, Ui_NSBrowserMainWindow):
+    """Main window for the pyns Neuroshare Browser program.  Holds four text
+    lists and a window to hold a matplotlib graph.  The user may select entities
+    from Segment, Event, and Analog entities found in the file(s) selected by
+    the user   
+    """
+    def __init__(self, parent=None):
+        super(NSBrowserMainWindow, self).__init__(parent)
+        self.setupUi(self)
+        
+        self.action_exit.triggered.connect(QtGui.qApp.quit)
+        # segment_list is filled with labels of segment entities
+        self.segment_list.itemSelectionChanged.connect(self.segment_selected)
+        # when a segment entity is selected, item_list is filled with a label
+        # "spike" and an index for each item held by the segment
+        #self.item_list.itemClicked.connect(self.segment_item_selected)
+        #self.item_list.itemActivated.connect(self.segment_item_selected)
+        self.item_list.itemSelectionChanged.connect(self.segment_item_selected)
+        # analog_list holds the label for each analog entity, the waveform
+        # is drawn when the entity is selected
+        self.analog_list.itemSelectionChanged.connect(self.analog_selected)
+        # event_list holds the label for each event entity found
+        self.event_list.itemSelectionChanged.connect(self.event_selected)
+        # open file opens up the file and gets us started        
+        self.action_open.triggered.connect(self.open_file)
+        # setup "about" menu item
+        self.action_about.triggered.connect(self.about_selected)
+        
+        # info button produces a dialog with the result of the Nueroshare
+        # info functions
+        self.file_info_button.clicked.connect(self.get_file_info)
+        self.entity_info_button.clicked.connect(self.get_entity_info)        
+        # hfile holds the NSFile class.  Initialize it to None so that we
+        # know when a file is open.
+        self.hfile = None
+        # Initialize Info and About dialogs
+        self.info_dialog = NSInfoDialog(self)
+        self.about_dialog = NSAboutDialog(self)
+        # retain the current path so that the open file dialog will start
+        # where we left off.  Start with current directory
+        self.current_path = os.path.curdir
+        # store the last entity that was selected so that the info button
+        # can know which entity to provide info for
+        self.current_entity = None
+    
+    def about_selected(self):
+        """open about dialog"""
+        self.about_dialog.show()
+        
+    def get_file_info(self):
+        """Get test for the info functions relevant to the selected entities
+        and put this text in the info_dialog's text_box.  For clean, looking
+        info, this function makes use of utility functions found in the 
+        dumpinfo module associated with this package.
+        """
+        self.info_dialog.clear()
+        file_info = self.hfile.get_file_info()
+        text = "### FileInfo ###\n"
+        text += dump_info(file_info)
+        self.info_dialog.set_text(text)
+        self.info_dialog.show()
+         
+    def get_entity_info(self):
+        """Print the text for all the Neuroshare info functions for 
+        whichever entity is currently selected.  Each time an entity is
+        selected the other lists should be de-selected, only one should be
+        selected at a time.
+        """
+        # Get whichever entity is currently selected.  There should only be
+        # one entity selected at a time
+        entity = self.current_entity
+        self.info_dialog.clear()
+        entity_info = dump_info(entity.get_entity_info())
+        text = "###" + " EntityInfo " + "###\n"
+        text += entity_info
+        if entity.entity_type == EntityType.segment:
+            segment_info = dump_info(entity.get_segment_info())
+            source_info = dump_info(entity.get_seg_source_info())
+            text += "\n###" + " SegmentInfo " + "###\n"
+            text += segment_info
+            text += "\n###" + " SegSourceInfo " + "###\n"            
+            text += source_info
+        elif entity.entity_type == EntityType.analog:
+            analog_info = dump_info(entity.get_analog_info())
+            text += "\n###" + " AnalogInfo " + "###\n"
+            text += analog_info
+        elif entity.entity_type == EntityType.event:
+            event_info = dump_info(entity.get_event_info())
+            text += "\n###" + " EventInfo " + "###\n"
+            text += event_info
+        self.info_dialog.set_text(text)            
+        self.info_dialog.show()
+                    
+    def clear_plot(self):
+        """clear MplWidget canvas."""
+        self.mpl.canvas.ax.clear()
+        self.mpl.canvas.draw()
+    
+    def draw_spikes(self, entity):
+        """Draw bar chart with bars of height 1 and width 1/resolution"""    
+        self.clear_plot()
+        # get the resolution directly from the nev file, though
+        res = 1.0/self.hfile.get_file_data("nev").parser.timestamp_resolution
+        # Use the time_span of the nev file.  Often times, the analog data will
+        # go longer.  This makes the spike plots fill the whole frame.
+        time_span = self.hfile.get_file_data("nev").time_span
+        
+        ts = [float(p[0])*res for p in entity.packet_data]
+        y  = numpy.ones(len(ts))
+        self.mpl.canvas.ax.bar(ts, y, res)
+        self.mpl.canvas.ax.set_xlabel("time [s]")
+        self.mpl.canvas.ax.set_title("triggered segments for {0:s}".format(entity.label))
+        self.mpl.canvas.ax.axis([0, time_span, 0, 1])
+        self.mpl.canvas.draw()
+        self.mpl.update()
+        
+    def draw_segment(self, entity, item_index):
+        """Draw the plot of the segment waveform for triggered data"""
+        self.clear_plot()
+        # This is a bit of a hack.  Sometimes we get here with an invalid
+        # item, event though there are a bunch of checks in place.  The 
+        # source of that bug should get figured out.
+        if entity == None:
+            return
+        (timestamp, waveform, unit_class) = entity.get_segment_data(item_index)
+        
+        t = numpy.arange(0, len(waveform))
+        t = 1.0/30.0*t
+        self.mpl.canvas.ax.plot(t, waveform)
+        
+        self.mpl.canvas.ax.set_xlabel("time [ms]")
+        title = "{0:s} at {1:5.3f} seconds".format(entity.label, timestamp)
+        self.mpl.canvas.ax.set_title(title)
+        self.mpl.canvas.draw()
+        self.mpl.update()
+                
+    def get_entity(self, entity_type, list_item):
+        """Returns the corresponding entity from entities from the 
+        selected list item from entities dict.  Mostly, this avoids re-writing
+        code that is needed in converting QListWidgetItem to Python string
+        """
+        label = str(list_item.text())
+        entity_index = self.entities[entity_type][label]
+        return self.hfile.entities[entity_index]
+    
+    def segment_selected(self):
+        """Entity is selected from list fill item_list the item list for 
+        this entity 
+        """
+        list_item = self.segment_list.currentItem()
+        # leave if no item is selected.  This occurs when
+        # a new entity is selected
+        if list_item.text() == None:
+            return        
+        # clear the item list
+        self.item_list.clear()
+        # clear any current plot
+        self.clear_plot()
+        # de-select other lists to clear up form.
+        # perhaps not.  It's slow.  
+        #self.analog_list.clearSelection()
+        #self.event_list.clearSelection()
+        entity = self.get_entity("Segment", list_item)
+        
+        #Use current_entity to track which list the user is focused on.
+        self.current_entity = entity         
+        # if this segment has no items, don't fill up the list.  There's
+        # nothing to see.  We leave the entity so that the use may look at 
+        # the segment info
+        if entity.item_count == 0:
+            return
+        # if we have a segment entity we include a "spike" plot
+        self.item_list.addItem("spikes")
+        # Fill up the list of items for the given entity
+        for i in xrange(0, entity.item_count):
+            self.item_list.addItem("{0:04d}".format(i))
+        # To start looking at this entity, select spikes
+        spikes_item = self.item_list.findItems("spikes", QtCore.Qt.MatchExactly)[0]
+        self.item_list.setCurrentItem(spikes_item)
+        
+    def segment_item_selected(self):
+        """item is selected from the item list. Draw the relevant 
+antity."""
+        list_item = self.item_list.currentItem()
+        segment_item = self.segment_list.currentItem()
+        # if nothing is selected don't plot.  This occurs when the item_list
+        # is cleared or after a new file is chosen.
+        if list_item == None or segment_item == None:
+            return        
+        entity = self.get_entity("Segment", segment_item)
+        # The current segment is does not have any spikes.  Don't do anything
+        if entity.item_count == 0:
+            return 
+        # list_item.text() returns a QString type.  Our
+        # entities were stored as Python str
+        item = str(list_item.text())
+        if item == "spikes":
+            self.draw_spikes(entity)                
+        else:
+            item_index = int(item)
+            self.draw_segment(entity, item_index)        
+
+    def analog_selected(self):
+        """analog entity is selected. Draw the analog waveform."""
+        list_item = self.analog_list.currentItem()
+        # leave if no item is selected.  This occurs when
+        # a new entity is selected
+        if list_item.text() == None:
+            return
+        # clear plot 
+        self.clear_plot()
+        # de-select other lists to clean up form.  
+        # Perhaps not.  It's slow!
+        #self.event_list.clearSelection()
+        #self.segment_list.clearSelection()
+        #self.item_list.clearSelection()
+                
+        entity = self.get_entity("Analog", list_item)
+        # current_entity to check which entity the user is focused on
+        self.current_entity = entity
+        
+        index_count = 2*entity.sample_freq
+            
+        waveform = entity.get_analog_data(0, index_count)
+        
+        t = numpy.arange(0, len(waveform), dtype=numpy.double)
+        t /= entity.sample_freq
+        self.mpl.canvas.ax.plot(t, waveform)
+        self.mpl.canvas.ax.set_title(entity.label)
+        self.mpl.canvas.ax.set_xlabel("time [s]")
+        self.mpl.canvas.draw()
+        self.mpl.update()
+
+    def event_selected(self):
+        """event entity selected.  Draw spike plot."""
+        list_item = self.event_list.currentItem()
+        # leave if no item is selected.  This occurs when
+        # a new entity is selected
+        if list_item.text() == None:
+            return        
+        # clear plot 
+        self.clear_plot()
+        
+        # de-select other lists to clear up form.
+        # perhaps not.  It's slow  
+        #self.analog_list.clearSelection()
+        #self.segment_list.clearSelection()
+        #self.item_list.clearSelection()        
+        
+        entity = self.get_entity("Event", list_item)
+        # use current entity to track which entity the user is focused on
+        self.current_entity = entity
+        self.draw_spikes(entity)        
+    
+    def reset(self):
+        """Internal function to reset the state of this class.  I.e., close
+        Neuroshare files, clear all lists and graph.
+        """
+#        del self.hfile
+        self.item_list.clear()
+        self.segment_list.clear()
+        self.item_list.clear()                
+        self.analog_list.clear()
+        self.event_list.clear()
+        
+        self.mpl.canvas.ax.clear()
+        self.mpl.canvas.draw()
+                
+    def open_file(self):
+        
+        # get wanted file(s), using the QtFileDialog
+        fname = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', 
+                                                      self.current_path)) 
+        self.current_path = os.path.dirname(fname)
+        # if theres a file open, reset the state of this class
+        if self.hfile:
+            self.reset()
+        self.hfile = NSFile(fname)
+        # record the entities that we put in the list so that
+        # we may reference them easily when selected by user
+        self.entities = {"Segment":{}, "Analog":{}, "Event":{}}
+        # Iterate through entities and add Segment, Analog, and Event
+        # entities to their respective list.  Currently, this browser
+        for (entity_id, entity) in enumerate(self.hfile.entities):
+            if entity.entity_type == EntityType.segment:
+                self.entities["Segment"][entity.label] = entity_id
+                self.segment_list.addItem(entity.label)
+            elif entity.entity_type == EntityType.analog:
+                self.entities["Analog"][entity.label] = entity_id
+                self.analog_list.addItem(entity.label)                
+            elif entity.entity_type == EntityType.event:
+                self.entities["Event"][entity.label] = entity_id
+                self.event_list.addItem(entity.label)                
+
+if __name__=="__main__":
+
+    app = QtGui.QApplication(sys.argv)
+    nsbrowser = NSBrowserMainWindow()
+    # Finally center this thing....
+    r = nsbrowser.geometry()
+    r.moveCenter(QtGui.QApplication.desktop().availableGeometry().center())
+    nsbrowser.setGeometry(r)
+    nsbrowser.show()
+    sys.exit(app.exec_())
