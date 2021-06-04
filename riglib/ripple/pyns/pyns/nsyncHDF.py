@@ -39,37 +39,12 @@ class nsyncHDF:
         else:
             raise Exception('Error: Not an .ns5 file')
 
-
-    def extract_row_numbers(self):
-        """Extract message type and row numbers (mod 256) saved in Ripple .ns5 file.
-        Parameters:
-        Return:
-        MSGTYPE -- array of ints containing message types
-        ROWNUMB -- array of ints containing row numbers mod 256
-        """
-
-        signals = self.output['data']
-        msgtype = signals[self.pins_util[8:], :]
-        rownum = signals[self.pins_util[:8], :]
-        # Convert to 0 or 1 integers (0 ~ 5000 mV from the recordings)
-        msgtype = np.flip((msgtype > 2500).astype(int), axis = 0)
-        rownum = np.flip((rownum > 2500).astype(int), axis = 0)
-
-        # Convert the binary digits into arrays
-        MSGTYPE = np.zeros(msgtype.shape[1])
-        ROWNUMB = np.zeros(rownum.shape[1])
-        for tp in range(MSGTYPE.shape[0]):
-            MSGTYPE[tp] = int(''.join(str(i) for i in msgtype[:,tp]), 2)
-            ROWNUMB[tp] = int(''.join(str(i) for i in rownum[:,tp]), 2)
-
-        return MSGTYPE, ROWNUMB
-
-
-    def make_syncHDF_file(self):
+    def extract_rows(self):
         """Create .mat synchronization file for synchronizing Ripple and behavioral data (saved in .hdf file).
 
         Parameters:
         Return:
+        hdf_times -- dict, contains row numbers and corresponding time stamps
         """
 
         # Create dictionary to store synchronization data
@@ -81,20 +56,30 @@ class nsyncHDF:
 
         signals = self.output['data']
         fs = self.output['samp_per_s']
+        msgtype = signals[self.pins_util[8:], :]
+        rownum = signals[self.pins_util[:8], :]
 
+        # Convert to 0 or 1 integers (0 ~ 5000 mV from the recordings)
         rstart = (signals[22 + 3,:] > 2500).astype(int)
         strobe = (signals[20 + 3,:] > 2500).astype(int)
+        msgtype = np.flip((msgtype > 2500).astype(int), axis = 0)
+        rownum = np.flip((rownum > 2500).astype(int), axis = 0)
 
-        MSGTYPE, ROWNUMB = self.extract_row_numbers()
+        # Convert the binary digits into arrays
+        MSGTYPE = np.zeros(msgtype.shape[1])
+        ROWNUMB = np.zeros(rownum.shape[1])
+        for tp in range(MSGTYPE.shape[0]):
+            MSGTYPE[tp] = int(''.join(str(i) for i in msgtype[:,tp]), 2)
+            ROWNUMB[tp] = int(''.join(str(i) for i in rownum[:,tp]), 2)
 
         find_recording_start = np.ravel(np.nonzero(strobe))[0]
-        find_data_rows = np.logical_and(np.ravel(np.equal(MSGTYPE,13)),np.ravel(np.greater(strobe,0))) 	
+        find_data_rows = np.logical_and(np.ravel(np.equal(MSGTYPE,13)),np.ravel(np.greater(strobe,0)))  
         find_data_rows_ind = np.ravel(np.nonzero(find_data_rows))
 
-        rows = ROWNUMB[find_data_rows_ind]	  # row numbers (mod 256)
+        rows = ROWNUMB[find_data_rows_ind]    # row numbers (mod 256)
 
-        prev_row = rows[0] 	# placeholder variable for previous row number
-        counter = 0 		# counter for number of cycles (i.e. number of times we wrap around from 255 to 0) in hdf row numbers
+        prev_row = rows[0]  # placeholder variable for previous row number
+        counter = 0         # counter for number of cycles (i.e. number of times we wrap around from 255 to 0) in hdf row numbers
 
         for ind in range(1,len(rows)):
             row = rows[ind]
@@ -109,9 +94,20 @@ class nsyncHDF:
         hdf_times['ripple_recording_start'] = find_recording_start
         hdf_times['ripple_dio_samplerate'] = fs
 
+        return hdf_times
+
+
+    def make_syncHDF_file(self):
+        """Create .mat synchronization file for synchronizing Ripple and behavioral data (saved in .hdf file).
+
+        """
+
+        # Create dictionary to store synchronization data
+        hdf_times = self.extract_rows()
+
         # Save syncing data as .mat file
         mat_filename = self.path + '/' + self.name + '_syncHDF.mat'
         print(mat_filename)
         sp.io.savemat(mat_filename,hdf_times)
 
-        return hdf_times
+        return
