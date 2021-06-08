@@ -8,6 +8,7 @@ from scipy.signal import butter, lfilter
 import math
 import os
 import nitime.algorithms as tsa
+from riglib.ripple.pyns import pyns
 
 class FeatureExtractor(object):
     '''
@@ -199,7 +200,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
         Parameters
         ----------
         files : dict
-            Data files used to train the decoder. Should contain exactly one type of neural data file (e.g., Plexon, Blackrock, TDT)
+            Data files used to train the decoder. Should contain exactly one type of neural data file (e.g., Plexon, Blackrock, TDT, Ripple)
         neurows: np.ndarray of shape (T,)
             Timestamps in the plexon time reference corresponding to bin boundaries
         binlen: float
@@ -209,7 +210,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
         extractor_kwargs: dict 
             Any additional parameters to be passed to the feature extractor. This function is agnostic to the actual extractor utilized
         strobe_rate: 60.0
-            The rate at which the task sends the sync pulse to the plx file
+            The rate at which the task sends the sync pulse to the neural recording file
 
         Returns
         -------
@@ -340,6 +341,58 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
 
             return spike_counts, units, extractor_kwargs  
                  
+        elif 'ripple' in file:
+            nev_fname = [name for name in files['ripple'] if '.nev' in name][0]  # only one of them
+            nevfile = pyns.NSFile(nev_fname)
+            
+            # interpolate between the rows to 180 Hz
+            if binlen < 1./strobe_rate:
+                interp_rows = []
+                neurows = np.hstack([neurows[0] - 1./strobe_rate, neurows])
+                for r1, r2 in zip(neurows[:-1], neurows[1:]):
+                    interp_rows += list(np.linspace(r1, r2, 4)[1:])
+                interp_rows = np.array(interp_rows)
+            else:
+                step = int(binlen/(1./strobe_rate)) # Downsample kinematic data according to decoder bin length (assumes non-overlapping bins)
+                interp_rows = neurows[::step]
+
+
+            electrode_list = units[:,0] # first column is electrode numbers
+            # access spike data for all electrodes indicated in units array
+            spike_entities = [e for e in nevfile.get_entities() if e.entity_type ==3]
+            spike_entities = [e for e in spike_entities if int(e.label[4:]) in electrode_list]
+
+            # there is one entity per electrode. now extract spike times and ids to do binning.
+            # spike_counts should be units x time
+            n_bins = len(interp_rows)
+            n_units = units.shape[0]
+            spike_counts = np.zeros((n_bins, n_units)) 
+            i = 0
+            for entity in spike_entities:
+                # placeholder matrix: spike count x 2, holds spike time in first column and spike id in second column
+                spike_data = np.zeros((entity.item_count, 2))
+                elec = int(entity.label[4:])            # electrode number
+                elec_uids = units[units[:,0]==elec,1]   # units on this electrode to be included
+                for item in range(0,entity.item_count):
+                    spike_data[item,0], data, spike_data[item,1] = entity.get_segment_data(item)
+                # check which spike data will be used
+                for uid in elec_uids:
+                    ts = spike_data[spike_data[:,1]==uid,0]
+                    spike_counts[:, i] = np.histogram(ts, interp_rows_)[0]
+                    i += 1
+
+            # discard units that never fired at all
+            if 'keep_zero_units' in extractor_kwargs:
+                print('keeping zero firing units')
+            else:
+                unit_inds, = np.nonzero(np.sum(spike_counts, axis=0))
+                units = units[unit_inds,:]
+                spike_counts = spike_counts[:, unit_inds]
+
+            extractor_kwargs['units'] = units
+
+            return spike_counts, units, extractor_kwargs
+
         elif 'tdt' in files:
             raise NotImplementedError     
 

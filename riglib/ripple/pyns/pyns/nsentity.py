@@ -11,7 +11,7 @@ that API.
 from collections import namedtuple
 import sys
 import numpy
-from nsexceptions import NeuroshareError, NSReturnTypes
+from riglib.ripple.pyns.pyns.nsexceptions import NeuroshareError, NSReturnTypes
 
 #def get_bits(byte, nbytes=8):
 #    """utility fucntion that returns a list of True and False for all 
@@ -237,7 +237,7 @@ class SegmentEntity(Entity):
         that is the case, I will at the location of each extended header to 
         the SegmentEntity class
         """
-        wanted_headers = ["NEUEVWAV", "NEUEVFLT", "NEUEVLBL"]
+        wanted_headers = [b'NEUEVWAV', b'NEUEVFLT', b'NEUEVLBL']
         headers = {}
         for header in self.parser.get_extended_headers():
             if header.header_type in wanted_headers:
@@ -272,8 +272,8 @@ class SegmentEntity(Entity):
         headers = self.get_extended_headers()
         
         scale = 1.0
-        if "NEUEVWAV" in headers.keys():
-            header = headers["NEUEVWAV"]
+        if b'NEUEVWAV' in headers.keys():
+            header = headers[b'NEUEVWAV']
             if header.dig_factor != 0:
                 # Scale factor in header is in units of ADC per nanovolt.  Put
                 # it into ADC to microvolts
@@ -328,8 +328,8 @@ class SegmentEntity(Entity):
         low_filter_type = "none"
         probe_info = ""
         headers = self.get_extended_headers()
-        if "NEUEVWAV" in headers.keys():
-            header = headers["NEUEVWAV"]
+        if b'NEUEVWAV' in headers.keys():
+            header = headers[b'NEUEVWAV']
             probe_info = "module {0:d}, pin {1:d}".format(header.phys_conn, header.conn_pin)
             if header.dig_factor != 0.0:
                 # This is another strange convention to be compatible with the Neuroshare DLLs.
@@ -340,8 +340,8 @@ class SegmentEntity(Entity):
                 # else:
                 resolution = header.dig_factor * 1.0e-3
                 
-        if "NEUEVFLT" in headers.keys():
-            header = headers["NEUEVFLT"]
+        if b'NEUEVFLT' in headers.keys():
+            header = headers[b'NEUEVFLT']
             # convert corner to Hz from mHz
             high_freq_corner = float(header.high_freq_corner) / 1000
             high_freq_order = header.high_freq_order
@@ -649,7 +649,7 @@ class AnalogEntity(Entity):
         location_user = 0.0
         # This the case of the NSx2.1 files.  These files have no extended headers
         # and some of the information in the analog info struct is not provided
-        if self.parser.file_type == "NEURALSG":
+        if self.parser.file_type == b'NEURALSG':
             # the timestamp_resolution here is hard coded, this is consistent with
             # the DLL.  Perhaps a better method would be to get this info from 
             # the NEV header file. 
@@ -698,7 +698,7 @@ class AnalogEntity(Entity):
             #sample_rate = float(header.timestamp_resolution) / header.period
             min_val = header.min_analog_value
             max_val = header.max_analog_value
-            units = header.units.split('\0')[0]
+            units = header.units.decode('utf-8')[:2]
 
         return AnalogInfo(self.sample_freq, min_val, max_val, units, self.scale, 
                           location_x, location_y, location_z, location_user, 
