@@ -1,31 +1,823 @@
 Running new task: 
 Spawning process...
-{'subj': 1, 'base_class': <class 'built_in_tasks.passivetasks.TargetCaptureVFB2DWindow'>, 'feats': [<class 'features.generator_features.Autostart'>, <class 'features.hdf_features.SaveHDF'>], 'params': <tracker.json_param.Parameters object at 0x7ff6ad82e100>, 'seq': (<function runseq at 0x7ff6b3dd1dc0>, {'seq': array([[[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-        [ 6.12323400e-16,  0.00000000e+00,  1.00000000e+01]],
+{'subj': 2, 'base_class': <class 'built_in_tasks.manualcontrolfreechoice_HLreward_test.FiveTargetsTask'>, 'feats': [<class 'features.peripheral_device_features.ArduinoJoystick'>, <class 'features.reward_features.TTLReward_arduino_tdt_2Systems_specific'>, <class 'features.generator_features.Autostart'>, <class 'features.hdf_features.SaveHDF'>], 'params': <tracker.json_param.Parameters object at 0x7f8b550beaf0>, 'seq': (<function runseq at 0x7f8b60ea9160>, {'seq': array([[[0. , 5. , 0. ],
+        [0. , 0.8, 1. ]],
 
-       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-        [-1.00000000e+01,  0.00000000e+00,  1.22464680e-15]],
+       [[0. , 1. , 0. ],
+        [0. , 0.8, 1. ]],
 
-       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-        [-7.07106781e+00,  0.00000000e+00, -7.07106781e+00]],
+       [[1. , 4. , 0. ],
+        [1. , 0.8, 1. ]],
 
        ...,
 
-       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-        [ 1.00000000e+01,  0.00000000e+00,  0.00000000e+00]],
+       [[0. , 2. , 0. ],
+        [1. , 0.8, 1. ]],
 
-       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-        [-7.07106781e+00,  0.00000000e+00,  7.07106781e+00]],
+       [[0. , 3. , 0. ],
+        [1. , 0.8, 1. ]],
 
-       [[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
-        [-1.83697020e-15,  0.00000000e+00, -1.00000000e+01]]])}), 'saveid': 2, 'seq_params': '{"nblocks": 100, "ntargets": 8, "boundaries": {"__builtin__": "tuple", "args": [[-18, 18, -12, 12]]}, "distance": 10}'}
+       [[0. , 1. , 0. ],
+        [1. , 0.8, 1. ]]])}), 'saveid': 838, 'seq_params': '{"length": 1000, "boundaries": {"__builtin__": "tuple", "args": [[-18, 18, -12, 12]]}}'}
 remote_runtask
 TaskWrapper constructor
 instantiating task with a generator
-Initial command: ('end_task', (), {})
+remotely getting attribute: update_report_stats
+Initial command: ('__getattr__', ['update_report_stats'], {})
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = target, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'target'), ('Runtime', '00:06:10'), ('Trial #', 140), ('Reward #', 140), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 23.5), ('Time Of Last Reward', '6:07')])
+task state = target, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_targetH'), ('Runtime', '00:12:14'), ('Trial #', 281), ('Reward #', 281), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 24.0), ('Time Of Last Reward', '12:11')])
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:12:17'), ('Trial #', 282), ('Reward #', 283), ('status', 'running'), ('Targs [0,1]', 3.0), ('ts', 999), ('Reward/min', 24.0), ('Time Of Last Reward', '12:16')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:12:20'), ('Trial #', 283), ('Reward #', 284), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 24.5), ('Time Of Last Reward', '12:18')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:12:34'), ('Trial #', 289), ('Reward #', 290), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 24.5), ('Time Of Last Reward', '12:33')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:19:20'), ('Trial #', 449), ('Reward #', 449), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 24.0), ('Time Of Last Reward', '19:17')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = target, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'target'), ('Runtime', '00:21:37'), ('Trial #', 504), ('Reward #', 504), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 24.0), ('Time Of Last Reward', '21:35')])
+task state = target, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'reward'), ('Runtime', '00:27:05'), ('Trial #', 630), ('Reward #', 631), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '27:04')])
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:27:45'), ('Trial #', 645), ('Reward #', 646), ('status', 'running'), ('Targs [0,1]', 5.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '27:43')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = target, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'target'), ('Runtime', '00:29:49'), ('Trial #', 692), ('Reward #', 692), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 22.5), ('Time Of Last Reward', '29:46')])
+task state = target, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:32:06'), ('Trial #', 743), ('Reward #', 744), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:05')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:32:09'), ('Trial #', 744), ('Reward #', 745), ('status', 'running'), ('Targs [0,1]', 5.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:07')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_targetH'), ('Runtime', '00:32:13'), ('Trial #', 746), ('Reward #', 746), ('status', 'running'), ('Targs [0,1]', 5.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:10')])
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = reward, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'reward'), ('Runtime', '00:32:14'), ('Trial #', 746), ('Reward #', 747), ('status', 'running'), ('Targs [0,1]', 5.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:13')])
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = reward, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'reward'), ('Runtime', '00:32:14'), ('Trial #', 746), ('Reward #', 747), ('status', 'running'), ('Targs [0,1]', 5.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:13')])
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:32:14'), ('Trial #', 746), ('Reward #', 747), ('status', 'running'), ('Targs [0,1]', 5.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:13')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:15'), ('Trial #', 747), ('Reward #', 747), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:13')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = hold_targetH, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_targetH'), ('Runtime', '00:32:16'), ('Trial #', 747), ('Reward #', 747), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:13')])
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = reward, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'reward'), ('Runtime', '00:32:16'), ('Trial #', 747), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 23.5), ('Time Of Last Reward', '32:16')])
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = reward, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'reward'), ('Runtime', '00:32:17'), ('Trial #', 747), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 4.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:16')])
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = wait, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'wait'), ('Runtime', '00:32:18'), ('Trial #', 748), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:16')])
+task state = wait, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = hold_center, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:18'), ('Trial #', 748), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:16')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:18'), ('Trial #', 748), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:16')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_targetH'), ('Runtime', '00:32:18'), ('Trial #', 748), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:16')])
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = hold_targetH, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_targetH'), ('Runtime', '00:32:19'), ('Trial #', 748), ('Reward #', 748), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:16')])
+task state = hold_targetH, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = reward, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'reward'), ('Runtime', '00:32:19'), ('Trial #', 748), ('Reward #', 749), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.5), ('Time Of Last Reward', '32:18')])
+task state = reward, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:32:19'), ('Trial #', 748), ('Reward #', 749), ('status', 'running'), ('Targs [0,1]', 2.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:18')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = hold_center, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:20'), ('Trial #', 749), ('Reward #', 749), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:18')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = hold_center, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:20'), ('Trial #', 749), ('Reward #', 749), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:18')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: reportstats
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:20'), ('Trial #', 749), ('Reward #', 749), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:18')])
+task state = hold_center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = rest_period, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'rest_period'), ('Runtime', '00:32:22'), ('Trial #', 749), ('Reward #', 750), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:21')])
+task state = rest_period, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = center, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'center'), ('Runtime', '00:32:22'), ('Trial #', 750), ('Reward #', 750), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:21')])
+task state = center, stop status=False, waiting for next command...
+remotely getting attribute: update_report_stats
+Done with command: __getattr__
+
+remote command received: __getattr__, ['update_report_stats'], {}
+return value: <bound method ManualControlFreeChoice_HLreward.update_report_stats of <FiveTargetsTask(Thread-8, started daemon 140236664420096)>>
+Traceback (most recent call last):
+  File "/src/db/tracker/tasktrack.py", line 197, in remote_runtask
+    task_end_of_pipe.send(ret)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <class 'traits.has_traits.FiveTargetsTask'>: attribute lookup FiveTargetsTask on traits.has_traits failed
+Done with command: __getattr__
+
+remote command received: update_report_stats, (), {}
+return value: None
+remotely getting attribute: reportstats
+task state = hold_center, stop status=False, waiting for next command...
+Done with command: update_report_stats
+
+remote command received: __getattr__, ['reportstats'], {}
+return value: OrderedDict([('State', 'hold_center'), ('Runtime', '00:32:22'), ('Trial #', 750), ('Reward #', 750), ('status', 'running'), ('Targs [0,1]', 1.0), ('ts', 999), ('Reward/min', 23.0), ('Time Of Last Reward', '32:21')])
+task state = hold_center, stop status=False, waiting for next command...
+Done with command: __getattr__
+
 remote command received: end_task, (), {}
 return value: None
-task state = target, stop status=True, waiting for next command...
+task state = reward, stop status=True, waiting for next command...
 Done with command: end_task
 
 End of task while loop

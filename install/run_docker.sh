@@ -14,6 +14,8 @@ docker volume create $WORK_VOLUME     # this will be persistent every time the i
 docker run --rm -ti \
 	--device /dev/snd \
 	--device /dev/dri:/dev/dri \
+	--device /dev/arduino_joystick \
+	--device /dev/arduino_neurosync \
     -v $WORK_VOLUME:/storage \
     -v $SOURCE_PATH:/src \
     -w /work \
