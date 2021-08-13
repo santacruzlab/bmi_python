@@ -80,13 +80,13 @@ def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslic
         TODO
     """
     os.environ['DJANGO_SETTINGS_MODULE'] = 'db.settings'
-    from .tracker import dbq
-    from . import namelist
-    from .tracker import models
-    from . import dbfunctions as dbfn
-    from .json_param import Parameters
-    from .tasktrack import Track
-    from .tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
+    from tracker import dbq
+    from db import namelist
+    from tracker import models
+    from db import dbfunctions as dbfn
+    from db.json_param import Parameters
+    from db.tasktrack import Track
+    from tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
 
     cellname = re.compile(r'(\d{1,3})\s*(\w{1})')
 
@@ -97,7 +97,7 @@ def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslic
     if 'spike' in extractor_cls.feature_type:  # e.g., 'spike_counts'
         # look at "cells" argument (ignore "channels")
 
-        cells = [ (int(c), ord(u) - 96) for c, u in cellname.findall(cells)]
+        cells = [ (int(c), 2**(ord(u) - 96)) for c, u in cellname.findall(cells)]    # Map a --> 2; b --> 4; c --> 8; and so on    080421 update DC
         if cells == []:
             units = None  # use all units by default
             # Note: inside training functions (e.g., _train_KFDecoder_manual_control,
@@ -112,6 +112,7 @@ def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslic
                     unique_cells.append(c)
             
             units = np.array(unique_cells).astype(np.int32)
+
     elif ('lfp' in extractor_cls.feature_type) or ('ai_' in extractor_cls.feature_type):  # e.g., 'lfp_power'
         # look at "channels" argument (ignore "cells")
         channels = np.array(channels.split(', ')).astype(np.int32)  # convert str to list of numbers
@@ -150,22 +151,33 @@ def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslic
     system_names = set(d.system.name for d in datafiles)
     for system_name in system_names:
         filenames = [d.get_path() for d in datafiles if d.system.name == system_name]
-        if system_name in ['blackrock', 'blackrock2']:
+        ## May still need to debug which filenames are used for Ripple (7/28/21)
+        print("Filenames:", filenames)
+        if system_name in ['blackrock', 'blackrock2','ripple']:
             files[system_name] = filenames  # list of (one or more) files
         else:
             assert(len(filenames) == 1)
             files[system_name] = filenames[0]  # just one file
 
     training_method = namelist.bmi_algorithms[clsname]
+    print(training_method)
     ssm = namelist.bmi_state_space_models[ssm]
     kin_extractor_fn = namelist.kin_extractors[kin_extractor]
     decoder = training_method(files, extractor_cls, extractor_kwargs, kin_extractor_fn, ssm, units, update_rate=binlen, tslice=tslice, pos_key=pos_key,
         zscore=zscore)
+    print(units)
+    print(decoder[0].units)
+    print(decoder[0].n_features)
+    print(decoder[0])
+    print(type(decoder[0]))
+    decoder = decoder[0]
     decoder.te_id = entry
 
     tf = tempfile.NamedTemporaryFile('wb')
     pickle.dump(decoder, tf, 2)
     tf.flush()
+    print(name)
+    print(tf.name)
     database.save_bmi(name, int(entry), tf.name)
 
 def cache_and_train(*args, **kwargs):
@@ -174,13 +186,13 @@ def cache_and_train(*args, **kwargs):
     """
 
     os.environ['DJANGO_SETTINGS_MODULE'] = 'db.settings'
-    from .tracker import dbq
-    from . import namelist
-    from .tracker import models
-    from . import dbfunctions as dbfn
-    from .json_param import Parameters
-    from .tasktrack import Track
-    from .tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
+    from tracker import dbq
+    #from . import namelist
+    from tracker import models
+    from db import dbfunctions as dbfn
+    from db.json_param import Parameters
+    from db.tasktrack import Track
+    from tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
 
     if config.recording_sys['make'] == 'plexon':
         print("cache and train")
@@ -199,6 +211,14 @@ def cache_and_train(*args, **kwargs):
     
     elif config.recording_sys['make'] == 'blackrock':
         make_bmi.delay(*args, **kwargs)
+    elif config.recording_sys['make'] == 'ripple':
+        print("cache and train ripple files")
+        entry = kwargs['entry']
+        print(entry)
+        print(kwargs)
+        #make_bmi.delay(*args, **kwargs)        # Commented original code on 8/2/21 (SRS)
+        #train = make_bmi.si(*args, **kwargs)    #  Added this line on 8/2/21 (SRS)
+        train = make_bmi(*args, **kwargs)
     
     else:
         raise Exception('Unknown recording_system!')
