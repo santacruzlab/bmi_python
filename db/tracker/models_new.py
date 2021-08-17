@@ -304,7 +304,7 @@ class System(models.Model):
 
     @staticmethod
     def populate():
-        for name in ["eyetracker", "hdf", "plexon", "bmi", "bmi_params", "juice_log", "blackrock"]:
+        for name in ["eyetracker", "hdf", "plexon", "bmi", "bmi_params", "juice_log", "blackrock", "ripple"]:
             try:
                 System.objects.get(name=name)
             except ObjectDoesNotExist:
@@ -854,6 +854,11 @@ class TaskEntry(models.Model):
             except:
                 return 'noname'
         elif config.recording_sys['make'] == 'blackrock':
+            try:
+                return str(os.path.basename(self.nev_file).rstrip('.nev'))
+            except:
+                return 'noname'
+        elif config.recording_sys['make'] == 'ripple':
             try:
                 return str(os.path.basename(self.nev_file).rstrip('.nev'))
             except:

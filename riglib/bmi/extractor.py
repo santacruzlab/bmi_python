@@ -341,7 +341,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
 
             return spike_counts, units, extractor_kwargs  
                  
-        elif 'ripple' in file:
+        elif 'ripple' in files:
             nev_fname = [name for name in files['ripple'] if '.nev' in name][0]  # only one of them
             nevfile = pyns.NSFile(nev_fname)
             
@@ -362,22 +362,36 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             spike_entities = [e for e in nevfile.get_entities() if e.entity_type ==3]
             spike_entities = [e for e in spike_entities if int(e.label[4:]) in electrode_list]
 
+            print('checkpoint1')
+            print(units)
+            print(units.shape[0])
+            print(electrode_list)
+
             # there is one entity per electrode. now extract spike times and ids to do binning.
             # spike_counts should be units x time
             n_bins = len(interp_rows)
             n_units = units.shape[0]
             spike_counts = np.zeros((n_bins, n_units)) 
+            # insert value interp_rows[0]-step to beginning of interp_rows array
+            interp_rows_ = np.insert(interp_rows, 0, interp_rows[0]-step)
             i = 0
+            print('checkpoint2')
+            print(n_bins)
+            print(interp_rows_)
             for entity in spike_entities:
                 # placeholder matrix: spike count x 2, holds spike time in first column and spike id in second column
                 spike_data = np.zeros((entity.item_count, 2))
                 elec = int(entity.label[4:])            # electrode number
                 elec_uids = units[units[:,0]==elec,1]   # units on this electrode to be included
+                print(entity)
+                print(elec)
+                print(elec_uids)
                 for item in range(0,entity.item_count):
                     spike_data[item,0], data, spike_data[item,1] = entity.get_segment_data(item)
                 # check which spike data will be used
                 for uid in elec_uids:
                     ts = spike_data[spike_data[:,1]==uid,0]
+                    print(ts)
                     spike_counts[:, i] = np.histogram(ts, interp_rows_)[0]
                     i += 1
 
@@ -385,11 +399,16 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             if 'keep_zero_units' in extractor_kwargs:
                 print('keeping zero firing units')
             else:
+                print(np.sum(spike_counts, axis=0))
                 unit_inds, = np.nonzero(np.sum(spike_counts, axis=0))
+                print(unit_inds)
                 units = units[unit_inds,:]
                 spike_counts = spike_counts[:, unit_inds]
 
             extractor_kwargs['units'] = units
+
+            print('File Extractor.py')
+            print(units)
 
             return spike_counts, units, extractor_kwargs
 
@@ -770,6 +789,7 @@ class SimBinnedSpikeCountsExtractor(BinnedSpikeCountsExtractor):
         SimBinnedSpikeCountsExtractor instance
         '''
         self.input_device = input_device
+        print("Yes we go here SimBinnedSpikeCountsExtractor")
         self.encoder = encoder
         self.n_subbins = n_subbins
         self.units = units
@@ -788,6 +808,7 @@ class SimBinnedSpikeCountsExtractor(BinnedSpikeCountsExtractor):
         ctrl = self.input_device.calc_next_state(current_state, target_state)
         #print current_state.T, target_state.T, ctrl.T
         self.sim_ctrl = ctrl
+        print("Yes we go here SimBinnedSpikeCountsExtractor")
         ts_data = self.encoder(ctrl)
         return ts_data
 

@@ -87,7 +87,7 @@ class ManualControlMulti(Sequence, Window):
 
     limit2d = 1
 
-    sequence_generators = ['centerout_2D_discrete', 'centerout_2D_discrete_offset', 'point_to_point_3D', 'centerout_3D', 'centerout_3D_cube', 'centerout_2D_discrete_upper','centerout_2D_discrete_rot', 'centerout_2D_discrete_multiring',
+    sequence_generators = ['point_to_point_3D_test', 'centerout_2D_discrete_test', 'centerout_2D_discrete', 'centerout_2D_discrete_offset', 'point_to_point_3D', 'centerout_3D', 'centerout_3D_cube', 'centerout_2D_discrete_upper','centerout_2D_discrete_rot', 'centerout_2D_discrete_multiring',
         'centerout_2D_discrete_randorder', 'centeroutback_2D', 'centeroutback_2D_farcatch', 'centeroutback_2D_farcatch_discrete',
         'outcenterout_2D_discrete', 'outcenter_2D_discrete', 'rand_target_sequence_3d', 'rand_target_sequence_2d', 'rand_target_sequence_2d_centerout',
         'rand_target_sequence_2d_partial_centerout', 'rand_multi_sequence_2d_centerout2step', 'rand_pt_to_pt',
@@ -344,6 +344,9 @@ class ManualControlMulti(Sequence, Window):
 
     #### Generator functions ####
     @staticmethod
+    def point_to_point_3D_test(length=2000, boundaries=(-18,18,-10,10,-15,15), distance=10, chain_length=2):1
+    
+    @staticmethod
     def point_to_point_3D(length=2000, boundaries=(-18,18,-10,10,-15,15), distance=10, chain_length=2):1
 
     @staticmethod
@@ -385,6 +388,45 @@ class ManualControlMulti(Sequence, Window):
 
     @staticmethod
     def centerout_2D_discrete(nblocks=100, ntargets=8, boundaries=(-18,18,-12,12),
+        distance=10):
+        '''
+        Generates a sequence of 2D (x and z) target pairs with the first target
+        always at the origin.
+        Parameters
+        ----------
+        length : int
+            The number of target pairs in the sequence.
+        boundaries: 6 element Tuple
+            The limits of the allowed target locations (-x, x, -z, z)
+        distance : float
+            The distance in cm between the targets in a pair.
+        Returns
+        -------
+        pairs : [nblocks*ntargets x 2 x 3] array of pairs of target locations
+        '''
+
+        # Choose a random sequence of points on the edge of a circle of radius 
+        # "distance"
+        
+        theta = []
+        for i in range(nblocks):
+            temp = np.arange(0, 2*np.pi, 2*np.pi/ntargets)
+            np.random.shuffle(temp)
+            theta = theta + [temp]
+        theta = np.hstack(theta)
+
+
+        x = distance*np.cos(theta)
+        y = np.zeros(len(theta))
+        z = distance*np.sin(theta)
+        
+        pairs = np.zeros([len(theta), 2, 3])
+        pairs[:,1,:] = np.vstack([x, y, z]).T
+        
+        return pairs
+
+    @staticmethod
+    def centerout_2D_discrete_test(nblocks=100, ntargets=8, boundaries=(-18,18,-12,12),
         distance=10):
         '''
         Generates a sequence of 2D (x and z) target pairs with the first target

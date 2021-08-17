@@ -94,6 +94,7 @@ def lookup_task_entries(*task_entry):
         if isinstance(task_entry, models.TaskEntry):
             pass
         elif isinstance(task_entry, int):
+            print("We're here dbfunctions")
             task_entry = models.TaskEntry.objects.using(db_name).get(pk=task_entry) #get_task_entry(task_entry)
         return task_entry
     else:

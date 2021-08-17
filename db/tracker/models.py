@@ -706,7 +706,6 @@ class TaskEntry(models.Model):
             js['datafiles'][name] = [d.get_path() + ' (backup available: %s)' % d.is_backed_up(backup_root) for d in datafiles if d.system.name == name]
 
         js['datafiles']['sequence'] = issubclass(Exp, experiment.Sequence) and len(self.sequence.sequence) > 0
-        
         # Parse the "report" data and put it into the JS response
         js['report'] = self.offline_report()
 
@@ -738,10 +737,39 @@ class TaskEntry(models.Model):
                 print("No plexon file found")
                 js['bmi'] = dict(_neuralinfo=None)
         
-        ###############INSERT RIPPLE##########################
         elif recording_sys_make == 'ripple':
-            print('This code does not yet know how to open Ripple files!')
-            js['bmi'] = dict(_neuralinfo=None)
+            
+
+            try:
+                
+                _neuralinfo = dict(is_seed=Exp.is_bmi_seed)
+                
+                from riglib.ripple.pyns.pyns import nsfile
+                
+                if Exp.is_bmi_seed and self.nev_file is not None:
+
+                    ripple_filename = self.nev_file
+                    print(ripple_filename)
+                    nevfile = nsfile.NSFile(ripple_filename)
+
+                    path, name = os.path.split(self.nev_file)
+                    name, ext = os.path.splitext(name)
+                    
+                    _neuralinfo['length'] = nevfile.get_file_info().time_span
+                    _neuralinfo['units'] = nevfile.get_units()
+                    _neuralinfo['name'] = nevfile.name
+
+                
+                js['bmi'] = dict(_neuralinfo=_neuralinfo)
+                print("success with ripple js dictionary")
+                
+            except MemoryError:
+                print("Memory error opening ripple file!")
+                js['bmi'] = dict(_neuralinfo=None)
+            except (ObjectDoesNotExist, AssertionError, IOError):
+                print("No ripple file found")
+                js['bmi'] = dict(_neuralinfo=None)
+
         elif recording_sys_make == 'blackrock':
             try:
                 print('skipping .nev conversion')
@@ -788,6 +816,7 @@ class TaskEntry(models.Model):
         entry_name = self.entry_name if not self.entry_name is None else ""
         js['entry_name'] = entry_name
         print("TaskEntry.to_json finished!")
+        print(js)
         return js
 
     @property
@@ -996,7 +1025,11 @@ class Decoder(models.Model):
 
     def load(self, db_name=None, **kwargs):
         data_path = self.get_data_path()
-        decoder_fname = os.path.join(data_path, 'decoders', self.path)
+        data_path = '/storage/rawdata/bmi/'
+        print(data_path)
+        print(self.path)
+        #decoder_fname = os.path.join(data_path, 'decoders', self.path)
+        decoder_fname = os.path.join(data_path, self.path)
 
         if os.path.exists(decoder_fname):
             try:
@@ -1193,6 +1226,82 @@ def parse_blackrock_file(nev_fname, nsx_files, task_entry, nsx_chan = np.arange(
 
     length = max([nev_length] + [tmax_cts])
     return length, units
+
+
+
+def parse_ripple_file(nev_fname, nsx_files, task_entry, nsx_chan = np.arange(96) + 1):
+    ''' Method to parse blackrock files using new
+    brpy from blackrock (with some modifications). Files are 
+    saved as a ____ file?
+    
+    # this code goes through the spike_set for each channel in order to:
+    #  1) determine the last timestamp in the file
+    #  2) create a list of units that had spikes in this file
+    '''
+
+    # First parse the NEV file: 
+    # if nev_fname is not None:
+    #     nev_hdf_fname = nev_fname + '.hdf'
+    #     if task_entry is not None:
+    #         datafiles = DataFile.objects.using(task_entry._state.db).filter(entry_id=task_entry.id)
+    #         files = [d.get_path() for d in datafiles]
+    #     else:
+    #         # Guess where the file shoudl be: 
+    #         files = ['/storage/rawdata/ripple/'+nev_hdf_fname]
+        
+    #     if nev_hdf_fname in files:
+    #         hdf = tables.openFile(nev_hdf_fname)
+    #         n_units = hdf.root.attr[0]['n_units']
+    #         last_ts = hdf.root.attr[0]['last_ts']
+    #         units = hdf.root.attr[0]['units'][:n_units]
+
+    #     else:
+    #         try:
+    #             nev_file = NevFile(nev_fname)
+    #             spk_data = nev_file.getdata()
+    #         except:
+    #             print('nev file is not available for opening. Try in a few seconds!')
+    #             raise Exception
+            
+    #         # Make HDF file from NEV file # 
+    #         last_ts, units, h5file = make_hdf_spks(spk_data, nev_hdf_fname)
+            
+    #         if task_entry is not None:
+    #             from . import dbq
+    #             dbq.save_data(nev_hdf_fname, 'ripple', task_entry.pk, move=False, local=True, custom_suffix='', dbname=task_entry._state.db)
+
+    #     fs = 30000.
+    #     nev_length = last_ts / fs
+    # else:
+    #     units = []
+    #     nev_length = 0
+
+    tmax_cts = 0
+    if nsx_files is not None:
+        for nsx_fname in nsx_files:
+            nsx_hdf_fname = nsx_fname + '.hdf'
+            if not os.path.isfile(nsx_hdf_fname):
+                
+                # convert .nsx file to hdf file using Blackrock's n2h5 utility
+                # subprocess.call(['n2h5', nsx_fname, nsx_hdf_fname])
+                nsx_file = NsxFile(nsx_fname)
+
+                # Extract data - note: data will be returned based on *SORTED* elec_ids, see cont_data['elec_ids']
+                cont_data = nsx_file.getdata(nsx_chan, 0, 'all', 1)
+
+                # Close the nsx file now that all data is out
+                nsx_file.close()
+
+                # Make HDF file: 
+                tmax_cts = make_hdf_cts(cont_data, nsx_hdf_fname, nsx_file)
+                if task_entry is not None:
+                    from . import dbq
+                    dbq.save_data(nsx_hdf_fname, 'ripple', task_entry.pk, move=False, local=True, custom_suffix='', dbname=task_entry._state.db)
+            else:
+                tmax_cts = 0
+
+    length = max([nev_length] + [tmax_cts])
+    return length, units2
 
 def make_hdf_spks(data, nev_hdf_fname):
     last_ts = 0

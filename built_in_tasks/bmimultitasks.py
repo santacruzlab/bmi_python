@@ -210,7 +210,7 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
     static_states = [] # states in which the decoder is not run
     hidden_traits = ['arm_hide_rate', 'arm_visible', 'hold_penalty_time', 'rand_start', 'reset', 'target_radius', 'window_size']
 
-    is_bmi_seed = False
+    is_bmi_seed = True
 
     cursor_color_adjust = traits.OptionsList(*list(target_colors.keys()), bmi3d_input_options=list(target_colors.keys()))
 

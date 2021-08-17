@@ -67,7 +67,7 @@ class PointProcessFilter(bmi.GaussianStateHMM):
             self.B = B
             self.F = F
 
-            if is_stochastic == None:
+            if is_stochastic is None:
                 n_states = A.shape[0]
                 self.is_stochastic = np.ones(n_states, dtype=bool)
             else:

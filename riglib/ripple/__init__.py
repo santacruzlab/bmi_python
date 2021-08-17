@@ -2,15 +2,22 @@
 Extensions of the generic riglib.source.DataSourceSystem for getting Spikes/LFP data from the Blackrock NeuroPort system over the rig's internal network (UDP)
 '''
 import numpy as np
-
-from . import cerelink
+import xipppy as xp
+import time
+import os
+import array
+from collections import namedtuple, Counter
 from riglib.source import DataSourceSystem
 
+SpikeEventData = namedtuple("SpikeEventData",
+                            ["chan", "unit", "ts", "arrival_ts"])
+ContinuousData = namedtuple("ContinuousData", 
+                            ["chan", "samples", "arrival_ts"])
 
 class Spikes(DataSourceSystem):
     '''
     For use with a DataSource in order to acquire streaming spike data from 
-    the Blackrock Neural Signal Processor (NSP).
+    the Ripple Neural Information Processor (NIP).
     '''
 
     update_freq = 30000.
@@ -20,16 +27,25 @@ class Spikes(DataSourceSystem):
                       ("arrival_ts", np.float64)])
 
     def __init__(self, channels):
-        self.conn = cerelink.Connection()
-        self.conn.connect()
-        self.conn.select_channels(channels)
+        self.conn = xp.xipppy_open()
+#        self.conn = cerelink.Connection()        
+#        self.conn.connect()
+        self.channels = channels
 
     def start(self):
-        self.conn.start_data()
-        self.data = self.conn.get_event_data()
+        # make sure all channels are available with spk and lfp data
+        recChans = np.array(xp.list_elec('nano')+xp.list_elec('micro'))
+        if len(recChans):
+            for ii in recChans:
+                xp.signal_set(ii.item(),'spk',True)
+                xp.signal_set(ii.item(),'lfp',True)
+                time.sleep(0.001)
+
+        self.streaming = True
+        self.data = self.get_event_data()
 
     def stop(self):
-        self.conn.stop_data()
+        self.streaming = False
 
     def get(self):
         d = next(self.data)
@@ -38,8 +54,30 @@ class Spikes(DataSourceSystem):
                           d.unit, 
                           d.arrival_ts)],
                         dtype=self.dtype)
+    
+    def get_event_data(self):
+        
+        sleep_time = 0
+        
+        while self.streaming:
+            
+            arrival_ts = time.time()
+            # Can use xp.spike_data(elec)
+            for chan in self.channels:
+                n, seg_data = xp.spk_data(chan)
+                if len(seg_data):
+                    for p in seg_data:
+                        un = p.class_id # DEREK: do we need to do log2 here? 
+                        ts = p.timestamp
+            
+                        yield SpikeEventData(chan=chan, unit=un, ts=ts, arrival_ts=arrival_ts)
 
+        time.sleep(sleep_time)        
 
+"""
+lfp NOT UPDATED FOR RIPPLE YET
+"""
+"""
 class LFP(DataSourceSystem):
     '''
     For use with a MultiChanDataSource in order to acquire streaming LFP 
@@ -50,17 +88,34 @@ class LFP(DataSourceSystem):
     dtype = np.dtype('float')
 
     def __init__(self, channels):
-        self.conn = cerelink.Connection()
-        self.conn.connect()
-        self.conn.select_channels(channels)
+#        self.conn = cerelink.Connection()
+#        self.conn.connect()
+        self.channels = channels
 
     def start(self):
-        self.conn.start_data()
-        self.data = self.conn.get_continuous_data()
+        self.streaming = True
+        self.data = self.get_continuous_data()
 
     def stop(self):
-        self.conn.stop_data()
+        self.streaming = False
 
     def get(self):
         d = next(self.data)
         return (d.chan, d.samples)
+
+    def get_continuous_data(self):
+        
+        sleep_time = 0
+        n_samples = 1000
+        
+        while self.streaming:
+            
+            arrival_ts = time.time()
+            data_out, ts_out = xp.cont_lfp(n_samples, self.channels)
+            for i, chan in enumerate(self.channels):
+                seg_data = np.array(data_out[i*n_samples:(i+1)*n_samples])
+            
+                yield ContinuousData(chan=chan, samples=seg_data, arrival_ts=arrival_ts)
+
+        time.sleep(sleep_time)  
+"""

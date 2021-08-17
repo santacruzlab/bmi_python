@@ -21,7 +21,7 @@ except:
     te_added.close()
     already_te_added = []
 
-systems_to_back_up = ['hdf', 'plexon']
+systems_to_back_up = ['hdf', 'ripple']
 
 #Open file for writing 
 #Open new file: 

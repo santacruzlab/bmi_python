@@ -184,7 +184,7 @@ class NevParser:
         """Static functiont to return the 8 byte header associated with this
         file.
         """
-        return b'NEURALEV'
+        return "NEURALEV"
             
     def get_basic_header(self):
         """Read the NEURALEV header from a nev file.
@@ -272,8 +272,8 @@ class NevParser:
             packets_to_read = min(max_packet_read, remaining_packets)
             bytes_to_read = packets_to_read*self.bytes_data_packet
             # TODO: check for valid read
-            buf = self.fid.read(int(bytes_to_read))
-            for packet_index in range(0, int(packets_to_read)):
+            buf = self.fid.read(bytes_to_read)
+            for packet_index in range(0, packets_to_read):
                 # Find where the current packet starts in the buffer that
                 # that we have read.
                 buf_pos = packet_index*self.bytes_data_packet

@@ -89,7 +89,7 @@ class RelayRipple(object):
             import comedi
             import config
             import time
-            com = comedi.comedi_open("/dev/comedi0")
+            com = comedi.comedi_open("/dev/arduino_neurosync")
             time.sleep(0.5)
             # strobe pin should already be low
 

@@ -52,3 +52,4 @@ class FuncProxy(object):
         if not self.event is None:
             self.event.set()
         return self.pipe.recv()
+        

@@ -138,8 +138,10 @@ class SerialDIORowByte(object):
         if self.data_files is None or len(self.data_files) == 0:
             print("\tData files not found properly!\n\tThey will have be manually linked using dbq.save_data!\n\n")
         elif isinstance(self.data_files, str):
+            print("----------- first elif statement------------")
             database.save_data(self.data_files, self.db_sys_name, saveid, True, False, **self.dbq_kwargs)
         elif np.iterable(self.data_files):
+            print("----------- second elif statement------------")
             for df in self.data_files:
                 ext = os.path.splitext(df)[1][1:]
                 database.save_data(df, self.db_sys_name, saveid, True, False, ext, **self.dbq_kwargs)

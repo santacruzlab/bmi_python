@@ -18,8 +18,10 @@ COPY requirements.txt /work
 
 RUN pip3 install -r /work/requirements.txt
 
+RUN pip3 install neo
+
 RUN apt-get install -y vim
 
 EXPOSE 8000
 
-RUN echo "cd /src && pip3 install -e . && cd riglib/plexon && pip3 install -e . && cd /src" >> /root/.bashrc
+RUN echo "cd /src && pip3 install -e . && pip3 install xipppy-0.9.0-cp38-cp38-linux_x86_64.whl && cd riglib/plexon && pip3 install -e . && cd /src" >> /root/.bashrc

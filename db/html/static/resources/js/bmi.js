@@ -293,7 +293,7 @@ BMI.prototype.destroy = function() {
 
 BMI.prototype.train = function() {
     this.update();
-    var csrf = $("#experiment input[name=csrfmiddlewaretoken]");
+    var csrf = $("#experiment input").filter("[name=csrfmiddlewaretoken]").attr("value");
     var data = {};
     data.bminame = $("#bminame").val();
     data.bmiclass = $("#bmiclass").val();
@@ -307,7 +307,7 @@ BMI.prototype.train = function() {
     data.kin_extractor = $("#kin_extractor").val();
     data.zscore = $("#zscore").val();
 
-    data.csrfmiddlewaretoken = csrf.val();
+    data.csrfmiddlewaretoken = csrf;
 
     $.post("/make_bmi/"+this.idx, data, function(resp) {
         if (resp.status == "success") {

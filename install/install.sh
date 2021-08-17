@@ -159,3 +159,5 @@ sudo chown -R $USER ~/.matplotlib
 cd $HOME/code/bmi3d/db
 python manage.py syncdb
 # Add superuser 'lab' with password 'lab'
+
+

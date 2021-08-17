@@ -606,6 +606,7 @@ class SimEMGData(EMGData):
             datafilt = np.ones((self.channelCount_all, self.points), dtype=self.dtype)
             datafilt['ts_arrival'] = ts_arrival
             #filtered_data = np.random.randn(channelCount_filt, self.points)
+            print("Yes we go here SimEMGData")
             filtered_data = self.encoder()
 
             datafilt['data'] = np.vstack([data['data'], filtered_data])

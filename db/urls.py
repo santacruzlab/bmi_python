@@ -50,7 +50,7 @@ urlpatterns = [
     path(r'ajax/gen_info/<int:idx>/', ajax.gen_info),
     path(r'exp_log/ajax/save_notes/<int:idx>/', ajax.save_notes),
     path(r'exp_log/all/ajax/save_notes/<int:idx>/', ajax.save_notes),
-    path(r'make_bmi/<int:idx>/?', ajax.train_decoder_ajax_handler),
+    path(r'make_bmi/<int:idx>', ajax.train_decoder_ajax_handler),
     path(r'ajax/setattr/<str:attr>/<str:value>', ajax.set_task_attr),
 
     path(r'start', ajax.start_experiment),

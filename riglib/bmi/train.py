@@ -69,6 +69,9 @@ def _get_tmask(files, tslice, sys_name='task'):
         else:
             fn = _get_tmask_blackrock
             fname = [str(name) for name in files['blackrock'] if '.nev' in name][0]  # only one of them
+    elif 'ripple' in files:
+        fn = _get_tmask_ripple
+        fname = [str(name) for name in files['ripple'] if '.nev' in name][0]
     else:
         raise Exception("Neural data file(s) not found!")
 
@@ -154,7 +157,7 @@ def _get_tmask_blackrock(nev_fname, tslice, sys_name='task'):
         
     #import h5py
     #nev_hdf = h5py.File(nev_hdf_fname, 'r')
-    nev_hdf = tables.openFile(nev_hdf_fname)
+    nev_hdf = tables.open_file(nev_hdf_fname)
 
     #path = 'channel/digital00001/digital_set'
     #ts = nev_hdf.get(path).value['TimeStamp']
@@ -210,13 +213,68 @@ def _get_tmask_blackrock_fake(hdf_fname, tslice, **kwargs):
     
     binlen = 0.1
     strobe_rate = 10
-    hdf = tables.openFile(hdf_fname)
+    hdf = tables.open_file(hdf_fname)
 
     n_rows = hdf.root.task[:]['plant_pos'].shape[0]
     first_ts = binlen
     rows = np.linspace(first_ts, first_ts + (n_rows-1)*(1./strobe_rate), num=n_rows)
     lower, upper = 0 < rows, rows < rows.max() + 1
     l, u = tslice
+    if l is not None:
+        lower = l < rows
+    if u is not None:
+        upper = rows < u
+    tmask = np.logical_and(lower, upper)
+
+    return tmask, rows
+
+def _get_tmask_ripple(ns5_fname, tslice, sys_name='task'):
+    
+    '''
+    Find the rows of the Ripple file to use for training the decoder
+
+    Parameters
+    ----------
+    ns5_fname : Ripple .ns5 instance
+        The Ripple file to sync
+    tslice : list of length 2
+        Specify the start and end time to examine the file, in seconds
+    sys_name : string, optional
+        The "system" being synchronized. When the task is running, each data source 
+        (i.e., each HDF table) is allowed to be asynchronous and thus is independently 
+        synchronized with the neural recording system.
+
+    Returns
+    -------
+    tmask: np.ndarray of shape (N, ) of booleans
+        Specifies which entries of "rows" (see below) are within the time bounds
+    rows: np.ndarray of shape (N, ) of integers
+        The times at which rows of the specified HDF table were recieved in the neural recording box
+    '''
+    # Open Ripple file
+    from riglib.ripple.pyns.pyns import nsyncHDF
+
+    if ns5_fname[-4:] != '.ns5':
+        ns5_fname = ns5_fname[:-4] + '.ns5'
+    nsfile = nsyncHDF.nsyncHDF(ns5_fname)
+
+    
+    # Get the corresponding hdf rows and their times (in s)
+    hdf_times = nsfile.extract_rows()
+    
+    sample_number = hdf_times['ripple_samplenumber']
+    fs = hdf_times['ripple_dio_samplerate']
+    rows = sample_number/fs
+    
+    # Determine which rows are within the time bounds
+    lower, upper = 0 < rows, rows < rows.max() + 1
+    
+    if tslice is None:
+        l = None;
+        u = None;
+    else:
+        l, u = tslice
+    
     if l is not None:
         lower = l < rows
     if u is not None:
@@ -254,7 +312,7 @@ def _get_neural_features_plx(files, binlen, extractor_fn, extractor_kwargs, tsli
         Keyword arguments used to construct the feature extractor used online
     '''
 
-    hdf = tables.openFile(files['hdf'])
+    hdf = tables.open_file(files['hdf'])
 
     plx_fname = str(files['plexon']) 
     from plexon import plexfile
@@ -308,6 +366,40 @@ def _get_neural_features_blackrock(files, binlen, extractor_fn, extractor_kwargs
 def _get_neural_features_tdt(files, binlen, extractor_fn, extractor_kwargs, tslice=None, units=None, source='task', strobe_rate=10.):
     raise NotImplementedError
 
+def _get_neural_features_ripple(files, binlen, extractor_fn, extractor_kwargs, tslice=None, units=None, source='task', strobe_rate=60.):    
+    '''
+    Extract the neural features used to train the decoder
+
+    Parameters
+    ----------
+    files: dict
+        keys of the dictionary are file-types (e.g., hdf, ripple, etc.), values are file names
+    binlen: float
+        Specifies the temporal resolution of the feature extraction
+    extractor_fn: callable
+        Function must have the call signature 
+        neural_features, units, extractor_kwargs = extractor_fn(rpl, neurows, binlen, units, extractor_kwargs)
+    extractor_kwargs: dictionary
+        Additional keyword arguments to the extractor_fn (specific to each feature extractor)
+
+    Returns
+    -------
+    neural_features: np.ndarray of shape (n_features, n_timepoints)
+        Values of each feature to be used in training the decoder parameters
+    units: np.ndarray of shape (N, -1)
+        Specifies identty of each neural feature
+    extractor_kwargs: dictionary
+        Keyword arguments used to construct the feature extractor used online
+    '''
+    #nev_fname = str(files['ripple'])
+    nev_fname = files['ripple']
+    tmask, rows = _get_tmask_ripple(nev_fname[0], tslice, sys_name=source)
+    neurows = rows[tmask]
+
+    neural_features, units, extractor_kwargs = extractor_fn(files, neurows, binlen, units, extractor_kwargs)
+
+    return neural_features, units, extractor_kwargs
+
 def get_neural_features(files, binlen, extractor_fn, extractor_kwargs, units=None, tslice=None, source='task', strobe_rate=60):
     '''
     Docstring
@@ -319,7 +411,7 @@ def get_neural_features(files, binlen, extractor_fn, extractor_kwargs, units=Non
     -------
     '''
     
-    hdf = tables.openFile(files['hdf'])
+    hdf = tables.open_file(files['hdf'])
 
     if 'plexon' in files:
         fn = _get_neural_features_plx
@@ -328,6 +420,8 @@ def get_neural_features(files, binlen, extractor_fn, extractor_kwargs, units=Non
         strobe_rate = 20.
     elif 'tdt' in files:
         fn = _get_neural_features_tdt
+    elif 'ripple' in files:
+        fn = _get_neural_features_ripple
     else:
         raise Exception('Could not find any recognized neural data files!')
 
@@ -339,7 +433,7 @@ def get_neural_features(files, binlen, extractor_fn, extractor_kwargs, units=Non
 ## Kinematic data retrieval
 ################################################################################
 def null_kin_extractor(files, binlen, tmask, update_rate_hz=60., pos_key='cursor', vel_key=None):
-    hdf = tables.openFile(files['hdf'])    
+    hdf = tables.open_file(files['hdf'])    
     kin = np.squeeze(hdf.root.task[:][pos_key])
 
     inds, = np.nonzero(tmask)
@@ -372,7 +466,7 @@ def get_plant_pos_vel(files, binlen, tmask, update_rate_hz=60., pos_key='cursor'
     if pos_key == 'plant_pos':  # used for ibmi tasks
         vel_key = 'plant_vel'
 
-    hdf = tables.openFile(files['hdf'])    
+    hdf = tables.open_file(files['hdf'])    
     kin = hdf.root.task[:][pos_key]
 
     inds, = np.nonzero(tmask)
@@ -755,7 +849,6 @@ def train_KFDecoder(files, extractor_cls, extractor_kwargs, kin_extractor, ssm, 
     KFDecoder instance
     '''
     import sys
-    print(files)
     # sys.stdout.write(files)
     # sys.stdout.write(extractor_cls)
     # sys.stdout.write(extractor_kwargs.keys())
@@ -766,6 +859,7 @@ def train_KFDecoder(files, extractor_cls, extractor_kwargs, kin_extractor, ssm, 
 
     ## get kinematic data
     tmask, rows = _get_tmask(files, tslice, sys_name=kin_source)
+
     kin = kin_extractor(files, binlen, tmask, pos_key=pos_key, vel_key=vel_key, update_rate_hz=config.hdf_update_rate_hz)
 
     ## get neural features
@@ -779,13 +873,13 @@ def train_KFDecoder(files, extractor_cls, extractor_kwargs, kin_extractor, ssm, 
 
     # Remove 1st kinematic sample and last neural features sample to align the 
     # velocity with the neural features
-    kin = kin[1:].T
+    kin = kin[1:].T     # 6 x length, 3 rows for pos, 3 rows for velocity
     neural_features = neural_features[:-1].T
-    
     if filter_kin:
-        filts = get_filterbank(fs=1./update_rate)
+        filts = get_filterbank(n_channels=6,fs=1./update_rate)  # previously was get_filterbank(fs = 1./update_rate) using default 14 channels
+        print('filts length:', len(filts))
         kin_filt = np.zeros_like(kin)
-        for chan in range(14):
+        for chan in range(6):   # previously was range(14)
             for filt in filts[chan]:
                 kin_filt[chan, :] = filt(kin[chan, :])
     else:
@@ -910,12 +1004,17 @@ def train_KFDecoder_abstract(ssm, kin, neural_features, units, update_rate, tsli
     print('end of kwargs')
     
     #### Train the actual KF decoder matrices ####
+    print(zscore)
     if type(zscore) is bool:
         pass
     else:
         if zscore == 'True':
             zscore = True
+        elif zscore == 'true':
+            zscore = True
         elif zscore == 'False':
+            zscore = False
+        elif zscore == 'false':
             zscore = False
         else:
             raise Exception
@@ -1136,7 +1235,7 @@ def lookup_cells(cells):
         Each element of the list is a tuple of (channel, unit), e.g., [(1, 1), (2, 2)]
     '''
     cellname = re.compile(r'(\d{1,3})\s*(\w{1})')
-    cells = [ (int(c), ord(u) - 96) for c, u in cellname.findall(cells)]
+    cells = [ (int(c), (ord(u) - 96)*2) for c, u in cellname.findall(cells)]
     return cells
 
 def inflate(A, current_states, full_state_ls, axis=0):

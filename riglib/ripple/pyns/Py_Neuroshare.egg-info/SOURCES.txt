@@ -1,0 +1,11 @@
+README
+setup.py
+Py_Neuroshare.egg-info/PKG-INFO
+Py_Neuroshare.egg-info/SOURCES.txt
+Py_Neuroshare.egg-info/dependency_links.txt
+Py_Neuroshare.egg-info/top_level.txt
+pyns/__init__.py
+pyns/nsentity.py
+pyns/nsexceptions.py
+pyns/nsfile.py
+pyns/nsparser.py

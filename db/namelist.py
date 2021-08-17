@@ -18,11 +18,11 @@ except ImportError:
     # raise Exception("Error importing featurelist!\n\n")
     features = dict()
 else:
-    from featurelist import features
+    from ismore.featurelist import features
 
 ## Get the list of tasks
 try:
-    from tasklist import tasks
+    from ismore.tasklist import tasks
 except ImportError:
     print ('Import Error in db.namelist: from tasklist import tasks -- likely error in a single task preventing import')
     tasks = dict()
@@ -89,7 +89,7 @@ class SubclassDict(dict):
 ################################################################################
 ################################################################################
 try:
-    from bmilist import *
+    from ismore.bmilist import *
 except:
     print ("error importing BMI configuration variables")
     import traceback

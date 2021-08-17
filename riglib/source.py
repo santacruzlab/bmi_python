@@ -103,6 +103,11 @@ class DataSource(mp.Process):
         # so, set send_data_to_sink_manager to False if you want to avoid this
         self.send_data_to_sink_manager = send_data_to_sink_manager
 
+        print("Im here")
+        print(self)
+        print(self.status)
+        print(self.status.value)
+
     def start(self, *args, **kwargs):
         '''
         From Python's docs on the multiprocessing module:
@@ -197,6 +202,7 @@ class DataSource(mp.Process):
         np.recarray 
             Datatype of record array is the dtype of the DataSourceSystem
         '''
+        
         if self.status.value <= 0:
             raise Exception('\n\nError starting datasource: %s\n\n' % self.name)
             

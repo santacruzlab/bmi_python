@@ -22,7 +22,7 @@ from . import exp_tracker
 
 http_request_queue = []
 
-
+@csrf_exempt
 def train_decoder_ajax_handler(request, idx):
     '''
     AJAX handler for creating a new decoder.
@@ -40,6 +40,7 @@ def train_decoder_ajax_handler(request, idx):
         Indicates 'success' if all commands initiated without error.
     '''
     ## Check if the name of the decoder is already taken
+    print('Am I here ? ? ? ?')
     collide = Decoder.objects.filter(entry=idx, name=request.POST['bminame'])
     if len(collide) > 0:
         return _respond(dict(status='error', msg='Name collision -- please choose a different name'))
@@ -59,7 +60,9 @@ def train_decoder_ajax_handler(request, idx):
         kin_extractor=request.POST['kin_extractor'],
         zscore=request.POST['zscore'],
     )
+    print(kwargs)
     trainbmi.cache_and_train(**kwargs)
+    print("done with cache and train")
     return _respond(dict(status="success"))
 
 
@@ -68,7 +71,11 @@ class encoder(json.JSONEncoder):
     Encoder for JSON data that defines how the data should be returned. 
     '''
     def default(self, o):
+        print('What is encoder o?')
+        print(type(o))
+        print(o)
         if isinstance(o, np.ndarray):
+            print("Change to list:",o.tolist())
             return o.tolist()
         elif isinstance(o, Parameters):
             return o.params
@@ -123,7 +130,6 @@ def task_info(request, idx, dbname='default'):
         task_info['annotations'] = task_cls.annotations
     else:
         task_info['annotations'] = []
-
     return _respond(task_info)
 
 def exp_info(request, idx, dbname='default'):
@@ -147,6 +153,7 @@ def exp_info(request, idx, dbname='default'):
         entry_data = entry.to_json()
         tracker = exp_tracker.get()
         entry_data["state"] = tracker.get_status()
+        print('I am clicking the task entry for exp info LLLLLLLLLLLLL')
     except:
         print("##### Error trying to access task entry data: id=%s, dbname=%s" % (idx, dbname))
         import traceback

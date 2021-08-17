@@ -10,7 +10,6 @@ from glob import glob
 from collections import namedtuple
 import datetime
 import sys 
-import numpy as np
 from riglib.ripple.pyns.pyns.nsexceptions import NeuroshareError, NSReturnTypes
 #import riglib.ripple.pyns.pyns.nsparser
 from riglib.ripple.pyns.pyns.nsparser import ParserFactory
@@ -190,6 +189,7 @@ class NSFile:
         # it will be stored in entity_label.  Then, we will add it to the entity
         # at the end.
         entity_labels = {}
+        print(parser.get_extended_headers())
         for header in parser.get_extended_headers():
             if header == None:
                 sys.stderr.write("Warning: invalid nev header found\n")            
@@ -202,18 +202,9 @@ class NSFile:
                 entity_search[entity.electrode_id] = entity
             elif header.header_type == b'NEUEVLBL':
                 if header.packet_id in entity_search.keys():
-                    # BUG with entity label
-                    '''
-                    print('header label:', header.label)
-                    print('old label:', entity_search[header.packet_id].label)
-                    entity = entity_search[header.packet_id]
-                    entity.label = header.label.decode('utf-8')
-                    entity_search[header.packet_id] = entity
-                    print('old label:', entity_search[header.packet_id].label)
-                    '''
-                    #entity_search[header.packet_id].label = header.label.decode('utf-8')
+                    entity_search[header.packet_id].label = header.label.decode('utf-8')
                     #entity_search[header.packet_id].label = header.label.split("\0")[0]
-                    entity_labels[header.packet_id] = header.label
+
                 else:
                     # save the label and check on it later
                     entity_labels[header.packet_id] = header.label
@@ -234,7 +225,7 @@ class NSFile:
                 sys.stderr.write("warning: buffered memory may exceed available system memory\n")
         ''' 
         # finish dealing with these entity_labels
-        '''
+        #for (electrode_id, label) in entity_labels.iteritems():
         for (electrode_id, label) in iter(entity_labels.items()):
             try:
                 # set the label for corresponding entity, label is NULL terminated
@@ -242,7 +233,6 @@ class NSFile:
             except KeyError:
                 # this should never happen
                 sys.stderr.write("warning: Cannot find electrode: {0:d} for label {1:s}".format(electrode_id, label))
-        '''
         # create a event entity dict to record event entities
         # These sometimes have event DIGLABELs and sometimes do not
         event_entities = {}
@@ -345,7 +335,7 @@ class NSFile:
         info = self.get_file_info()
         time = datetime.datetime(info.time_year, info.time_month, info.time_day,
                                  info.time_hour, info.time_min, info.time_sec,
-                                 info.time_millisec*int(1000),UTC())
+                                 info.time_millisec*1000,UTC())
         return time
     
     def get_entities(self, entity_type=None):
@@ -392,21 +382,21 @@ class NSFile:
         comment = ""
         # Putting a spaces at the end of this string makes 
         # this exactly equivalent the the Neuroshare DLL
-        if self.has_file_type(b'NEURALEV'):
-            file_type = b'NEURALEV'
-            if self.has_file_type(b'NEURALCD') or self.has_file_type(b'NEURALSG'):
+        if self.has_file_type("NEURALEV"):
+            file_type = "NEURALEV"
+            if self.has_file_type("NEURALCD") or self.has_file_type("NEURALSG"):
                 # Putting a space at the end of this string makes 
                 # this exactly equivalent the the Neuroshare DLL
-                file_type = b'NEURALEV+ NEURAL'
-        elif self.has_file_type(b'NEURALCD') or self.has_file_type(b'NEURALSG'):
+                file_type = "NEURALEV+ NEURAL"
+        elif self.has_file_type("NEURALCD") or self.has_file_type("NEURALSG"):
             # Putting a space at the end of this string makes this exactly equivalent
             # the the Neuroshare DLL
-            file_type = b'NEURAL'  
+            file_type = "NEURAL"  
         for f in self._files:
             if f.time_span > time_span: 
                 time_span = f.time_span
             header = f.parser.get_basic_header()
-            if header.header_type == b'NEURALEV':
+            if header.header_type == "NEURALEV":
                 year = header.time_origin.year
                 month = header.time_origin.month
                 day = header.time_origin.day
@@ -420,30 +410,11 @@ class NSFile:
                 # in most files (and in more recent Ripple files) this number should
                 # be the same as sample_resolution and 30000
                 timestamp_resolution = 1.0 / header.sample_resolution
-                app_name = header.application.decode("utf-8")
-                comment = header.comment
+                app_name = header.application.split("\0")[0]
+                comment = header.comment.split("\0")[0]
         return FileInfo(file_type, self.get_entity_count(), timestamp_resolution,
                         time_span, app_name, year, month, day, hour, minute, second,
                         millisec, comment)
-
-    def get_units(self):
-        '''
-        Method to determine all units recorded. Returns list, with channel numbers as first columns and units as second column.
-        Note: BMI3D does not like unit sort codes labeled as 0. Also, all Ripple units seem to be power of 2. So, for now we
-        are relabeling everything using log base 2 and getting rid of any units with sort code 0.
-        '''
-        units = []
-        spike_entities = [e for e in self.get_entities() if e.entity_type==3]
-        for entity in spike_entities:
-            elec = int(entity.label[4:])
-            if entity.item_count > 0:
-                uids = np.zeros(entity.item_count)
-                for item in range(0, entity.item_count):
-                    ts, data, uids[item] = entity.get_segment_data(item)
-                sort_codes = np.unique(uids)
-                units += [[int(elec), int(np.log2(sc))] for sc in sort_codes if sc != 0]
-
-        return units
 
 class UTC(datetime.tzinfo):
 	"""UTC"""

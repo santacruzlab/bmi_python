@@ -2675,6 +2675,7 @@ class SimBMIControl(BMIControl):
                                                        target_state, 
                                                        1, 
                                                        mode=self.state)[0]
+        print("Yes we go here SimBMIControl")
         neural_features = self.encoder(intended_state)
 
         return dict(spike_counts=neural_features)

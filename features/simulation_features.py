@@ -213,6 +213,10 @@ class SimCosineTunedEnc(SimNeuralEnc):
         ## Simulation neural encoder
         from riglib.bmi.sim_neurons import GenericCosEnc#CLDASimCosEnc
         print('SimCosineTunedEnc SSM:', self.ssm)
+        # self.encoder = GenericCosEnc(self.sim_C, self.ssm, return_ts=True, DT=0.1, call_ds_rate=6)
+        self.n_neurons = 128
+        self.n_states = 3
+        self.sim_C = np.zeros((self.n_neurons, self.n_states))
         self.encoder = GenericCosEnc(self.sim_C, self.ssm, return_ts=True, DT=0.1, call_ds_rate=6)
         
     def create_feature_extractor(self):

@@ -64,7 +64,7 @@ class nsyncHDF:
         strobe = (signals[20 + 3,:] > 2500).astype(int)
         msgtype = np.flip((msgtype > 2500).astype(int), axis = 0)
         rownum = np.flip((rownum > 2500).astype(int), axis = 0)
-
+        
         # Convert the binary digits into arrays
         MSGTYPE = np.zeros(msgtype.shape[1])
         ROWNUMB = np.zeros(rownum.shape[1])
@@ -107,7 +107,6 @@ class nsyncHDF:
 
         # Save syncing data as .mat file
         mat_filename = self.path + '/' + self.name + '_syncHDF.mat'
-        print(mat_filename)
         sp.io.savemat(mat_filename,hdf_times)
 
         return

@@ -27,7 +27,7 @@ class CorticalData(object):
     send_data_to_sink_manager = False
 
     def init(self):
-        sys_module = self.sys_module # e.g., riglib.plexon, riglib.blackrock
+        sys_module = self.sys_module # e.g., riglib.plexon, riglib.blackrock, riglib.ripple
 
         kwargs = dict(send_data_to_sink_manager=self.send_data_to_sink_manager, channels=self.cortical_channels)
 

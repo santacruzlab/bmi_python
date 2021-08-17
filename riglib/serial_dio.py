@@ -5,7 +5,7 @@ import serial
 from collections import defaultdict
 import struct
 from numpy import binary_repr
-from .dio.parse import MSG_TYPE_ROWBYTE, MSG_TYPE_REGISTER
+from .dio.parse import MSG_TYPE_ROWBYTE, MSG_TYPE_REGISTER, MSG_TYPE_ROW
 import time
 
 def construct_word(aux, msg_type, data, n_bits_data=8, n_bits_msg_type=3):
@@ -102,7 +102,18 @@ class SendRowByte(object):
         # there's no point in sending a message, since every message is 
         # stored in the HDF table anyway with a row number, 
         # and every row number is automatically synced.
-        pass
+        # if not (system in self.systems):
+        #     # if the system is not registered, do nothing
+        #     return
+
+        current_sys_rowcount = self.rowcount[system]
+        self.rowcount[system] += 1
+
+        # construct the data packet
+        word = construct_word(self.systems[system], MSG_TYPE_ROW, current_sys_rowcount % 256)
+        self._send_data_word_to_serial_port(word)
+        
+        # pass
 
     def send(self, system, data):
         '''

@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from distutils.version import StrictVersion
 
 from riglib import experiment
-from .models import TaskEntry, Subject, Calibration, System, DataFile, Decoder
+from tracker.models import TaskEntry, Subject, Calibration, System, DataFile, Decoder
 import pickle
 import tempfile
 
@@ -105,8 +105,10 @@ def save_bmi(name, entry, filename, dbname='default'):
         subj=entry.subject.name[:4].lower(),
         time=entry.date.strftime('%Y%m%d'),
         num=num, name=name)
+    pklname = "{name}.pkl".format(name=name)  # If the name specified on the interface already contains all the info
+    #System(name='bmi', path="/storage/rawdata/%s"%'bmi').save() Run this line because the original Queryset does not have bmi
+    print(System.objects.using(dbname))
     base = System.objects.using(dbname).get(name='bmi').path
-
     #Make sure decoder name doesn't exist already:
     #Make sure new decoder name doesn't already exist: 
     import os.path

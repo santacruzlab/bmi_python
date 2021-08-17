@@ -21,6 +21,9 @@ v1.3.1 - 08/02/2016 - bug fixes to NsxFile.getdata() for usability with Python 2
                       __future__ import for use with Python 2.7 (division)
                       minor modifications to allow use of Python 2.6+
 v1.3.2 - 08/12/2016 - bug fixes to NsXFile.getdata()
+V2.0.0 - 05/25/2-21 - adding class NevFile_Ripple for reading Ripple files. Additional global variables added for this 
+                      class, including variables defining packet Is for stimulation waveforms. Still need to add code
+                      in the class to handle the stimulation waveforms.
 """
 
 
@@ -77,6 +80,9 @@ MARKER_SIZE             = 5
 DIGITAL_PACKET_ID       = 0
 NEURAL_PACKET_ID_MIN    = 1
 NEURAL_PACKET_ID_MAX    = 2048
+NEURAL_PACKET_ID_MAX_RIPPLE    = 32
+STIM_PACKET_ID_MIN      = 5121
+STIM_PACKET_ID_MAX      = 5632
 COMMENT_PACKET_ID       = 65535
 VIDEO_SYNC_PACKET_ID    = 65534
 TRACKING_PACKET_ID      = 65533
@@ -92,6 +98,7 @@ SECOND_BIT_MASK         = 2
 
 CLASSIFIER_MIN          = 1
 CLASSIFIER_MAX          = 16
+CLASSIFIER_MAX_RIPPLE   = 4
 CLASSIFIER_NOISE        = 255
 
 CHARSET_ANSI            = 0
@@ -467,7 +474,7 @@ class NevFile:
 
             time_stamp = unpack('<I', self.datafile.read(4))[0]
             packet_id  = unpack('<H', self.datafile.read(2))[0]
-
+            
             # skip unwanted neural data packets if only asking for certain channels
             if not (elec_ids == 'all' or ( (packet_id in elec_ids) and
                                            NEURAL_PACKET_ID_MIN <= packet_id <= NEURAL_PACKET_ID_MAX )):
@@ -477,7 +484,7 @@ class NevFile:
             # For digital event data, read reason, skip one byte (reserved), read digital value,
             # and skip X bytes (reserved)
             if packet_id == DIGITAL_PACKET_ID:
-
+                
                 # See if the dictionary exists in output
                 if 'dig_events' not in output:
                     output['dig_events'] = {'Reason': [], 'TimeStamps': [], 'Data': []}
@@ -534,6 +541,7 @@ class NevFile:
                 # Check if data for this electrode exists and update parameters accordingly
                 if packet_id in output['spike_events']['ChannelID']:
                     idx = output['spike_events']['ChannelID'].index(packet_id)
+                    print('Yes, data for electrode exists')
                 else:
                     idx = -1
                     output['spike_events']['ChannelID'].append(packet_id)
@@ -574,7 +582,7 @@ class NevFile:
 
             # For comment events
             elif packet_id == COMMENT_PACKET_ID:
-
+                
                 # See if the dictionary exists in output, if not, create it
                 if 'comments' not in output:
                     output['comments'] = {'TimeStamps': [], 'CharSet': [], 'Flag': [], 'Data': [], 'Comment': []}
@@ -600,7 +608,7 @@ class NevFile:
 
             # For video sync event
             elif packet_id == VIDEO_SYNC_PACKET_ID:
-
+                
                 # See if the dictionary exists in output, if not, create it
                 if 'video_sync_events' not in output:
                     output['video_sync_events'] = {'TimeStamps': [], 'VideoFileNum': [], 'VideoFrameNum': [],
@@ -615,7 +623,7 @@ class NevFile:
 
             # For tracking event
             elif packet_id == TRACKING_PACKET_ID:
-
+                
                 # See if the dictionary exists in output, if not, create it
                 if 'tracking_events' not in output:
                     output['tracking_events'] = {'TimeStamps': [], 'ParentID': [], 'NodeID': [], 'NodeCount': [],
@@ -632,7 +640,7 @@ class NevFile:
 
             # For button trigger event
             elif packet_id == BUTTON_PACKET_ID:
-
+                
                 # See if the dictionary exists in output, if not, create it
                 if 'button_trigger_events' not in output:
                     output['button_trigger_events'] = {'TimeStamps': [], 'TriggerType': []}
@@ -647,7 +655,7 @@ class NevFile:
 
             # For configuration log event
             elif packet_id == CONFIGURATION_PACKET_ID:
-
+                
                 # See if the dictionary exists in output, if not, create it
                 if 'configuration_events' not in output:
                     output['configuration_events'] = {'TimeStamps': [], 'ConfigChangeType': [], 'ConfigChanged': []}
@@ -705,6 +713,311 @@ class NevFile:
         self.datafile.close()
         print(('\n' + name.split('/')[-1] + ' closed'))
 
+class NevFile_Ripple:
+    """
+    attributes and methods for all Ripple event data files.  Initialization opens the file and extracts the
+    basic header information.
+    """
+
+    def __init__(self, datafile=''):
+        self.datafile         = datafile
+        self.basic_header     = {}
+        self.extended_headers = []
+
+        # Run openfilecheck and open the file passed or allow user to browse to one
+        self.datafile = openfilecheck('rb', file_name=self.datafile, file_ext='.nev', file_type='Blackrock NEV Files')
+
+        # extract basic header information
+        self.basic_header = processheaders(self.datafile, nev_header_dict['basic'])
+
+        # Extract extended headers
+        for i in range(self.basic_header['NumExtendedHeaders']):
+            self.extended_headers.append({})
+            header_string = bytes.decode(unpack('<8s', self.datafile.read(8))[0], 'latin-1')
+            self.extended_headers[i]['PacketID'] = header_string.split(STRING_TERMINUS, 1)[0]
+            self.extended_headers[i].update(
+                processheaders(self.datafile, nev_header_dict[self.extended_headers[i]['PacketID']]))
+
+            # Must set this for file spec 2.1 and 2.2
+            if header_string == 'NEUEVWAV' and float(self.basic_header['FileSpec']) < 2.3:
+                self.extended_headers[i]['SpikeWidthSamples'] = WAVEFORM_SAMPLES_21
+
+    def getdata(self, elec_ids='all'):
+        """
+        This function is used to return a set of data from the NSx datafile.
+
+        :param elec_ids: [optional] {list} User selection of elec_ids to extract specific spike waveforms (e.g., [13])
+        :return: output: {Dictionary} with one or more of the following dictionaries (all include TimeStamps)
+                    dig_events:            Reason, Data, [for file spec 2.2 and below, AnalogData and AnalogDataUnits]
+                    spike_events:          Units='nV', ChannelID, NEUEVWAV_HeaderIndices, Classification, Waveforms
+                    comments:              CharSet, Flag, Data, Comment
+                    video_sync_events:     VideoFileNum, VideoFrameNum, VideoElapsedTime_ms, VideoSourceID
+                    tracking_events:       ParentID, NodeID, NodeCount, PointCount, TrackingPoints
+                    button_trigger_events: TriggerType
+                    configuration_events:  ConfigChangeType, ConfigChanged
+
+        Note: For digital and neural data - TimeStamps, Classification, and Data can be lists of lists when more
+        than one digital type or spike event exists for a channel
+        """
+
+        # Initialize output dictionary and reset position in file (if read before, may not be here anymore)
+        output = dict()
+        self.datafile.seek(self.basic_header['BytesInHeader'], 0)
+
+        # Safety checks
+        elec_ids = check_elecid(elec_ids)
+
+        # Must go through each data packet and process separately until end of file
+        while self.datafile.tell() != ospath.getsize(self.datafile.name):
+
+            print('unpacked timestamp:',self.datafile.read(4))
+            time_stamp = unpack('<I', self.datafile.read(4))[0]
+            print('TimeStamp:', time_stamp)
+            print('unpacked packet ID:', self.datafile.read(2))
+            packet_id  = unpack('<H', self.datafile.read(2))[0]
+            print("packet ID:", packet_id)
+
+            # skip unwanted neural data packets if only asking for certain channels
+            if not (elec_ids == 'all' or ( (packet_id in elec_ids) and
+                                           NEURAL_PACKET_ID_MIN <= packet_id <= NEURAL_PACKET_ID_MAX_RIPPLE )):
+                self.datafile.seek(self.basic_header['BytesInDataPackets'] - 6, 1)
+                continue
+
+            # For digital event data, read reason, skip one byte (reserved), read digital value,
+            # and skip X bytes (reserved)
+            if packet_id == DIGITAL_PACKET_ID:
+                print('Digital packet ID')
+                # See if the dictionary exists in output
+                if 'dig_events' not in output:
+                    output['dig_events'] = {'Reason': [], 'TimeStamps': [], 'Data': []}
+
+                reason = unpack('B', self.datafile.read(1))[0]
+                if   reason == PARALLEL_REASON: reason = 'parallel'
+                elif reason == PERIODIC_REASON: reason = 'periodic'
+                elif reason == SERIAL_REASON:   reason = 'serial'
+                else:                           reason = 'unknown'
+                self.datafile.seek(1, 1)
+
+                # Check if this type of data already exists, if not, create an empty list, and then append data
+                if reason in output['dig_events']['Reason']:
+                    idx = output['dig_events']['Reason'].index(reason)
+                else:
+                    idx = -1
+                    output['dig_events']['Reason'].append(reason)
+                    output['dig_events']['TimeStamps'].append([])
+                    output['dig_events']['Data'].append([])
+
+                output['dig_events']['TimeStamps'][idx].append(time_stamp)
+                output['dig_events']['Data'][idx].append(unpack('<H', self.datafile.read(2))[0])
+
+                # For serial data, strip off upper byte
+                if reason == 'serial':
+                    output['dig_events']['Data'][idx][-1] &= LOWER_BYTE_MASK
+
+                '''
+                # For File Spec < 2.3, also capture analog Data, otherwise skip remaining packet bytes
+                if float(self.basic_header['FileSpec']) < 2.3:
+                    if 'AnalogDataUnits' not in output['dig_events']:
+                        output['dig_events']['AnalogDataUnits'] = 'mv'
+
+                    output['dig_events']['AnalogData'].append([])
+                    for j in range(5):
+                        output['dig_events']['AnalogData'][-1].append(unpack('<h', self.datafile.read(2))[0])
+                else:
+                    self.datafile.seek(self.basic_header['BytesInDataPackets'] - 10, 1)
+                '''
+
+            # For neural waveforms, read classifier, skip one byte (reserved), and read waveform data
+            elif NEURAL_PACKET_ID_MIN <= packet_id <= NEURAL_PACKET_ID_MAX_RIPPLE:
+                print('Neural packet ID')
+                # See if the dictionary exists in output, if not, create it
+                if 'spike_events' not in output:
+                    output['spike_events'] = {'Units': 'nV', 'ChannelID': [], 'TimeStamps': [],
+                                              'NEUEVWAV_HeaderIndices': [], 'Classification': [], 'Waveforms': []}
+
+                classifier = unpack('B', self.datafile.read(1))[0]
+                if classifier == UNDEFINED:          classifier = 'none'
+                elif CLASSIFIER_MIN <= classifier <= CLASSIFIER_MAX_RIPPLE: classifier = classifier
+                elif classifier == CLASSIFIER_NOISE: classifier = 'noise'
+                else:                                classifier = 'error'
+                print('Classifier:', classifier)
+                self.datafile.seek(1, 1)
+
+                # Check if data for this electrode exists and update parameters accordingly
+                if packet_id in output['spike_events']['ChannelID']:
+                    idx = output['spike_events']['ChannelID'].index(packet_id)
+                    print('Yes, data for electrode exists')
+                else:
+                    print('No, data for electrode does not exist')
+                    idx = -1
+                    output['spike_events']['ChannelID'].append(packet_id)
+                    output['spike_events']['TimeStamps'].append([])
+                    output['spike_events']['Classification'].append([])
+
+                    # Find neuevwav extended header for this electrode for use in calculating data info
+                    output['spike_events']['NEUEVWAV_HeaderIndices'].append(
+                        next(item for (item, d) in enumerate(self.extended_headers)
+                             if d["ElectrodeID"] == packet_id and d["PacketID"] == 'NEUEVWAV'))
+
+                output['spike_events']['TimeStamps'][idx].append(time_stamp)
+                output['spike_events']['Classification'][idx].append(classifier)
+
+                # Use extended header idx to get specific data information
+                ext_header_idx = output['spike_events']['NEUEVWAV_HeaderIndices'][idx]
+                samples    = self.extended_headers[ext_header_idx]['SpikeWidthSamples']
+                dig_factor = self.extended_headers[ext_header_idx]['DigitizationFactor']
+                num_bytes  = self.extended_headers[ext_header_idx]['BytesPerWaveform']
+                if num_bytes <= 1:   data_type = np.int8
+                elif num_bytes == 2: data_type = np.int16
+
+                # Extract and scale the data
+                if idx == -1:
+                    output['spike_events']['Waveforms'].append(
+                        [np.fromfile(file=self.datafile, dtype=data_type, count=samples).astype(np.int32) * dig_factor])
+                else:
+                    try:
+                        output['spike_events']['Waveforms'][idx] = \
+                            np.append(output['spike_events']['Waveforms'][idx],
+                                [np.fromfile(file=self.datafile, dtype=data_type, count=samples).astype(np.int32) *
+                                dig_factor], axis=0)
+                    except:
+                        output['spike_events']['Waveforms'][idx] = \
+                            np.append(output['spike_events']['Waveforms'][idx],
+                                [np.zeros((samples,)).astype(np.int32) * dig_factor], axis=0)
+                        print('adding zero waveform')
+
+            # For comment events
+            elif packet_id == COMMENT_PACKET_ID:
+                print('Comment packet ID')
+                # See if the dictionary exists in output, if not, create it
+                if 'comments' not in output:
+                    output['comments'] = {'TimeStamps': [], 'CharSet': [], 'Flag': [], 'Data': [], 'Comment': []}
+
+                output['comments']['TimeStamps'].append(time_stamp)
+
+                char_set = unpack('B', self.datafile.read(1))[0]
+                if char_set == CHARSET_ANSI:  output['comments']['CharSet'].append('ANSI')
+                elif char_set == CHARSET_UTF: output['comments']['CharSet'].append('UTF-16')
+                elif char_set == CHARSET_ROI: output['comments']['CharSet'].append('NeuroMotive ROI')
+                else:                         output['comments']['CharSet'].append('error')
+
+                comm_flag = unpack('B', self.datafile.read(1))[0]
+                if comm_flag == COMM_RGBA:   output['comments']['Flag'].append('RGBA color code')
+                elif comm_flag == COMM_TIME: output['comments']['Flag'].append('timestamp')
+                else:                        output['comments']['Flag'].append('error')
+
+                output['comments']['Data'].append(unpack('<I', self.datafile.read(4))[0])
+
+                samples = self.basic_header['BytesInDataPackets'] - 12
+                comm_string = bytes.decode(self.datafile.read(samples), 'latin-1')
+                output['comments']['Comment'].append(comm_string.split(STRING_TERMINUS, 1)[0])
+
+            # For video sync event
+            elif packet_id == VIDEO_SYNC_PACKET_ID:
+                print('Video packet ID')
+                # See if the dictionary exists in output, if not, create it
+                if 'video_sync_events' not in output:
+                    output['video_sync_events'] = {'TimeStamps': [], 'VideoFileNum': [], 'VideoFrameNum': [],
+                                                   'VideoElapsedTime_ms': [], 'VideoSourceID': []}
+
+                output['video_sync_events']['TimeStamps'].append(          time_stamp)
+                output['video_sync_events']['VideoFileNum'].append(        unpack('<H', self.datafile.read(2))[0])
+                output['video_sync_events']['VideoFrameNum'].append(       unpack('<I', self.datafile.read(4))[0])
+                output['video_sync_events']['VideoElapsedTime_ms'].append( unpack('<I', self.datafile.read(4))[0])
+                output['video_sync_events']['VideoSourceID'].append(       unpack('<I', self.datafile.read(4))[0])
+                self.datafile.seek((self.basic_header['BytesInDataPackets'] - 20), 1)
+
+            # For tracking event
+            elif packet_id == TRACKING_PACKET_ID:
+                print('Tracking packet ID')
+                # See if the dictionary exists in output, if not, create it
+                if 'tracking_events' not in output:
+                    output['tracking_events'] = {'TimeStamps': [], 'ParentID': [], 'NodeID': [], 'NodeCount': [],
+                                                 'PointCount': [], 'TrackingPoints': []}
+
+                output['tracking_events']['TimeStamps'].append( time_stamp)
+                output['tracking_events']['ParentID'].append(   unpack('<H', self.datafile.read(2))[0])
+                output['tracking_events']['NodeID'].append(     unpack('<H', self.datafile.read(2))[0])
+                output['tracking_events']['NodeCount'].append(  unpack('<H', self.datafile.read(2))[0])
+                output['tracking_events']['PointCount'].append( unpack('<H', self.datafile.read(2))[0])
+                samples = (self.basic_header['BytesInDataPackets'] - 14) // 2
+                output['tracking_events']['TrackingPoints'].append(
+                    np.fromfile(file=self.datafile, dtype=np.uint16, count=samples))
+
+            # For button trigger event
+            elif packet_id == BUTTON_PACKET_ID:
+                print('Button packet ID')
+                # See if the dictionary exists in output, if not, create it
+                if 'button_trigger_events' not in output:
+                    output['button_trigger_events'] = {'TimeStamps': [], 'TriggerType': []}
+
+                output['button_trigger_events']['TimeStamps'].append(time_stamp)
+                trigger_type = unpack('<H', self.datafile.read(2))[0]
+                if trigger_type == UNDEFINED:      output['button_trigger_events']['TriggerType'].append('undefined')
+                elif trigger_type == BUTTON_PRESS: output['button_trigger_events']['TriggerType'].append('button press')
+                elif trigger_type == BUTTON_RESET: output['button_trigger_events']['TriggerType'].append('event reset')
+                else:                              output['button_trigger_events']['TriggerType'].append('error')
+                self.datafile.seek((self.basic_header['BytesInDataPackets'] - 8), 1)
+
+            # For configuration log event
+            elif packet_id == CONFIGURATION_PACKET_ID:
+                print('Configuration packet ID')
+                # See if the dictionary exists in output, if not, create it
+                if 'configuration_events' not in output:
+                    output['configuration_events'] = {'TimeStamps': [], 'ConfigChangeType': [], 'ConfigChanged': []}
+
+                output['configuration_events']['TimeStamps'].append(time_stamp)
+                change_type = unpack('<H', self.datafile.read(2))[0]
+                if change_type == CHG_NORMAL:     output['configuration_events']['ConfigChangeType'].append('normal')
+                elif change_type == CHG_CRITICAL: output['configuration_events']['ConfigChangeType'].append('critical')
+                else:                             output['configuration_events']['ConfigChangeType'].append('error')
+
+                samples = self.basic_header['BytesInDataPackets'] - 8
+                output['configuration_events']['ConfigChanged'].append(unpack(('<' + str(samples) + 's'),
+                                                                              self.datafile.read(samples))[0])
+
+            # Otherwise, packet unknown, skip to next packet
+            else:  self.datafile.seek((self.basic_header['BytesInDataPackets'] - 6), 1)
+
+        return output
+
+    def processroicomments(self, comments):
+        """
+        used to process the comment data packets associated with NeuroMotive region of interest enter/exit events.
+        requires that read_data() has already been run.
+        :return: roi_events:   a dictionary of regions, enter timestamps, and exit timestamps for each region
+        """
+
+        roi_events = {'Regions': [], 'EnterTimeStamps': [], 'ExitTimeStamps': []}
+
+        for i in range(len(comments['TimeStamps'])):
+            if comments['CharSet'][i] == 'NeuroMotive ROI':
+
+                temp_data = pack('<I', comments['Data'][i])
+                roi   = unpack_from('<B', temp_data)[0]
+                event = unpack_from('<B', temp_data, 1)[0]
+
+                # Determine the label of the region source
+                source_label = next(d['VideoSource'] for d in self.extended_headers if d["TrackableID"] == roi)
+
+                # update the timestamps for events
+                if source_label in roi_events['Regions']:
+                    idx = roi_events['Regions'].index(source_label)
+                else:
+                    idx = -1
+                    roi_events['Regions'].append(source_label)
+                    roi_events['EnterTimeStamps'].append([])
+                    roi_events['ExitTimeStamps'].append([])
+
+                if   event == ENTER_EVENT: roi_events['EnterTimeStamps'][idx].append(comments['TimeStamp'][i])
+                elif event == EXIT_EVENT:  roi_events['ExitTimeStamps'][idx].append(comments['TimeStamp'][i])
+
+        return roi_events
+
+    def close(self):
+        name = self.datafile.name
+        self.datafile.close()
+        print(('\n' + name.split('/')[-1] + ' closed'))
 
 class NsxFile:
     """

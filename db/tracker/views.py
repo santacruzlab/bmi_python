@@ -73,7 +73,7 @@ def _list_exp_history(dbname='default', subject=None, task=None, max_entries=Non
         systems=models.System.objects.all(),
         n_blocks=len(entries),
     )
-
+    
     try:
         from config import bmiconfig
         fields['bmi_update_rates'] = bmiconfig.bmi_update_rates
@@ -83,6 +83,7 @@ def _list_exp_history(dbname='default', subject=None, task=None, max_entries=Non
         fields['default_extractor'] = bmiconfig.default_extractor
         fields['pos_vars'] = bmiconfig.bmi_training_pos_vars      # 'pos_vars' indicates which column of the task HDF table to look at to extract kinematic data 
         fields['kin_extractors'] = bmiconfig.kin_extractors       # post-processing methods on the selected kinematic variable
+        fields['zscores'] = bmiconfig.zscores          #  Added this line on 8/2/21 (DC)
     except ImportError:
         pass
     return fields

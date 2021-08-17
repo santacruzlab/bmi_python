@@ -167,7 +167,7 @@ class LQRController_accel_limit_armassist(LQRController):
         self.prev_assister_output = np.nan
         self.accel_lim_armassist = .1 
         self.accel_lim_psi = .02
-        print 'LQRController'        
+        print('LQRController')
         super(LQRController_accel_limit_armassist, self).__init__(*args, **kwargs)
 
     def calc_next_state(self, current_state, target_state, mode=None):
@@ -202,7 +202,7 @@ class LQRController_accel_limit_rehand(LQRController):
     def __init__(self, *args, **kwargs):
         self.prev_assister_output = np.nan
         self.accel_lim = .02
-        print 'LQRController'
+        print('LQRController')
         super(LQRController_accel_limit_rehand, self).__init__(*args, **kwargs)
 
     def calc_next_state(self, current_state, target_state, mode=None):
@@ -261,10 +261,10 @@ class LQRController_accel_limit_ismore(LQRController):
             for i in np.arange(10,14):
                 #print "accel rh", assister_output_accel[i, 0]
                 if assister_output_accel[i, 0] > self.accel_lim_rehand:
-                    print "excedeed rh accel limit in DoF ", i
+                    print("excedeed rh accel limit in DoF ", i)
                     assister_output[i, 0] = self.prev_assister_output[i, 0] + self.accel_lim_rehand
                 elif assister_output_accel[i, 0] < -1*self.accel_lim_rehand:
-                    print "excedeed rh accel limit"
+                    print("excedeed rh accel limit")
                     assister_output[i, 0] = self.prev_assister_output[i, 0] - self.accel_lim_rehand
         #print 'assister_output_accel after',  assister_output - self.prev_assister_output
         self.prev_assister_output = assister_output

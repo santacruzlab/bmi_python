@@ -118,12 +118,12 @@ class BasePlantUDP(Plant):
         
 
         if all(v <= 0.00000001 for v in abs(self.last_sent_vel)):
-            print 'last sent vel'
-            print self.last_sent_vel 
+            print ('last sent vel')
+            print (self.last_sent_vel)
 
 
         if (self.last_data_ts_arrival() == 0) or ((self.last_data_ts_arrival() - time.time()) > self.sensor_data_timeout):
-            print "sensor data not received for %s recently enough, not sending velocity command!" % self.plant_type
+            print ("sensor data not received for %s recently enough, not sending velocity command!" % self.plant_type)
             return 
 
         
@@ -153,16 +153,16 @@ class BasePlantUDP(Plant):
 
 
         if self.debug:
-            print "input vel"
-            print vel
-            print "vel sent to %s" % self.plant_type
-            print vel
-            print "current_pos"
-            print current_pos
-            print "projected_pos"  
-            print projected_pos
-            print "actual velocity"
-            print self.get_vel()
+            print ("input vel")
+            print (vel)
+            print ("vel sent to %s" % self.plant_type)
+            print (vel)
+            print ("current_pos")
+            print (current_pos)
+            print ("projected_pos")
+            print (projected_pos)
+            print ("actual velocity")
+            print (self.get_vel())
 
 
         if self.lpf_vel:
@@ -180,14 +180,14 @@ class BasePlantUDP(Plant):
             vel[faster_than_max_speed] = self.max_speed[faster_than_max_speed] * np.sign(vel[faster_than_max_speed])
 
             if faster_than_max_speed > 0:
-                print 'faster_than_max_speed'
-                print faster_than_max_speed
+                print ('faster_than_max_speed')
+                print (faster_than_max_speed)
 
             if self.debug:
-                print "input vel"
-                print vel
-                print "vel sent to %s" % self.plant_type
-                print vel
+                print ("input vel")
+                print (vel)
+                print ("vel sent to %s" % self.plant_type)
+                print (vel)
                 #print "current_pos"
                 #print current_pos
                 #print "projected_pos"  
@@ -356,10 +356,10 @@ class ArmAssistPlantUDP(BasePlantUDP):
             # print vel
 
             if faster_than_max_speed.any() > 0:
-                print 'faster_than_max_speed'
-                print faster_than_max_speed
-                print "speed set to: "
-                print vel
+                print ('faster_than_max_speed')
+                print (faster_than_max_speed)
+                print ("speed set to: ")
+                print (vel)
 
 
         self._send_command('SetSpeed ArmAssist %f %f %f\r' % tuple(vel))
@@ -389,7 +389,7 @@ class ArmAssistPlantUDP(BasePlantUDP):
         #filt_vel = np.array([self.vel_command_lpfs[k](vel[k]) for k in range(self.n_dof)]).ravel() #nerea --> to test!
 
         if ts[0] != 0 and any(np.isnan(v) for v in vel):
-            print "WARNING -- delta_ts = 0 in AA vel calculation:", vel
+            print ("WARNING -- delta_ts = 0 in AA vel calculation:", vel)
             for i in range(3):
                 if np.isnan(vel[i]):
                     vel[i] = 0
@@ -408,7 +408,7 @@ class ArmAssistPlantUDP(BasePlantUDP):
         vel = delta_pos / delta_ts
 
         if ts[0] != 0 and any(np.isnan(v) for v in vel):
-            print "WARNING -- delta_ts = 0 in AA vel calculation:", vel
+            print ("WARNING -- delta_ts = 0 in AA vel calculation:", vel)
             for i in range(3):
                 if np.isnan(vel[i]):
                     vel[i] = 0
@@ -446,10 +446,10 @@ class ArmAssistPlantUDP(BasePlantUDP):
         pos_command[4] = mode
 
 
-        print "pos"
-        print pos
-        print "time"
-        print time
+        print ("pos")
+        print (pos)
+        print ("time")
+        print (time)
         self._send_command('SetPosition ArmAssist %f %f %f %f %f\r' % tuple(pos_command))
 
 
@@ -461,7 +461,7 @@ class ArmAssistPlantUDP(BasePlantUDP):
         self._send_command('SetControlMode ArmAssist Disable\r')
 
     def enable_watchdog(self, timeout_ms):
-        print 'ArmAssist watchdog not enabled, doing nothing'
+        print ('ArmAssist watchdog not enabled, doing nothing')
 
 
     def send_traj(self, pos_vel):
@@ -478,9 +478,9 @@ class ArmAssistPlantUDP(BasePlantUDP):
         pos_vel_int = pos_vel
 
 
-        print "trajectory sent to AA"
-        print "x     y  psi     vx      vy     vpsi"
-        print pos_vel_int
+        print ("trajectory sent to AA")
+        print ("x     y  psi     vx      vy     vpsi")
+        print (pos_vel_int)
 
         traj_command = np.zeros(6)
         traj_command[0] = pos_vel_int[0]
@@ -566,10 +566,10 @@ class ReHandPlantUDP(BasePlantUDP):
             # print filt_vel #*np.array([deg_to_rad, deg_to_rad, deg_to_rad, deg_to_rad])
 
             if faster_than_max_speed.any() > 0:
-                print 'faster_than_max_speed'
-                print faster_than_max_speed
-                print "speed set to: "
-                print vel
+                print ('faster_than_max_speed')
+                print (faster_than_max_speed)
+                print ("speed set to: ")
+                print (vel)
 
 
         # self.plant.enable() #when we send vel commands always enable the rehand motors 
@@ -1111,7 +1111,7 @@ class IsMorePlantHybridBMI(IsMorePlantUDP): # Plant used for the hybrid (EMG + b
         self.pre_drive_state = current_state.copy()
         
         if self.blocking_joints is not None:
-            print 'self.blocking_joints  --> ', self.blocking_joints
+            print ('self.blocking_joints  --> ', self.blocking_joints)
             vel_bl_fb_gain[self.blocking_joints] = 0
 
         vel_bl_aa0 = vel_bl_fb_gain[0:3].copy()
@@ -1175,7 +1175,7 @@ class IsMorePlantHybridBMI(IsMorePlantUDP): # Plant used for the hybrid (EMG + b
             if len(self.aa_plant.aa_xy_ix) > 0:
                 x_tmp = self.safety_grid.is_valid_pos(pos_pred_aa[self.aa_plant.aa_xy_ix])
                 if x_tmp == False:
-                    print 'false position'
+                    print ('false position')
                     current_pos = current_state[self.aa_plant.aa_xy_ix]
                     pos_valid = attractor_point_aa[self.aa_plant.aa_xy_ix]
 

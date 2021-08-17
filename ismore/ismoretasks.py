@@ -105,13 +105,13 @@ def check_plant_and_DoFs(plant_type, DoF_control, DoF_target):
     if plant_type in ['ArmAssist', 'ReHand']:
         if DoF_control.startswith(plant_type) == False:
             plant_and_DoFs_correct = False
-            print "DoF_control selected not possible for the selected plant_type"
+            print ("DoF_control selected not possible for the selected plant_type")
             
     #check if the selected DoF_target is possible with the selected DoF_control
     if DoF_control != 'IsMore':
         if DoF_target.startswith(DoF_control) == False:
             plant_and_DoFs_correct = False
-            print "DoF_target selected not possible for the selected DoF_control"
+            print ("DoF_target selected not possible for the selected DoF_control")
 
     if plant_and_DoFs_correct == True:
         # define DoF target indexes for each case
@@ -157,7 +157,7 @@ def check_plant_and_DoFs(plant_type, DoF_control, DoF_target):
             DoF_not_control_idx_init = np.nan
             DoF_not_control_idx_end  = np.nan
     else:
-        print "ERROR!!! Plant and selected target or control DoFs incorrect!!!"
+        print ("ERROR!!! Plant and selected target or control DoFs incorrect!!!")
 
     return [DoF_target_idx_init,DoF_target_idx_end, DoF_not_control_idx_init,DoF_not_control_idx_end]
 
@@ -188,7 +188,7 @@ class IsMoreBase(WindowDispl2D):
         self.ssm_states = [s.name for s in self.ssm.states]
         self.pos_states = [s.name for s in self.ssm.states if s.order == 0]
         self.vel_states = [s.name for s in self.ssm.states if s.order == 1]
-        print 'self.vel_states', self.vel_states
+        print ('self.vel_states', self.vel_states)
         if 0: #self.simulate:
             # use locally running IsMoreBasesimulated ArmAssist and/or ReHand
             #   for which we can magically set the initial position
@@ -197,8 +197,8 @@ class IsMoreBase(WindowDispl2D):
         else:
             self.plant = plants.UDP_PLANT_CLS_DICT[self.plant_type]()
                 
-        print 'self.pos_states', self.pos_states
-        print 'plant_type', self.plant_type
+        print ('self.pos_states', self.pos_states)
+        print ('plant_type', self.plant_type)
 
         self.plant_pos_raw = pd.Series(self.plant.get_pos_raw(), self.pos_states)
         self.plant_pos = pd.Series(self.plant.get_pos(), self.pos_states)
@@ -225,7 +225,7 @@ class IsMoreBase(WindowDispl2D):
         if 'targets_matrix' in locals()['kwargs']:
             self.display_targets()    
         else: 
-            print 'no targets matrix'
+            print ('no targets matrix')
 
     def _set_workspace_size(self):
         MAT_SIZE = settings.MAT_SIZE
@@ -251,7 +251,7 @@ class IsMoreBase(WindowDispl2D):
             self.plant.stop()
 
     def _play_sound(self, fpath, fname):
-        print 'play sound: ', fname
+        print ('play sound: ', fname)
         if hasattr(self, 'replace_ya_w_pausa'):
             if self.replace_ya_w_pausa == 'Yes':
                 if fname[0] == 'go':
@@ -320,7 +320,7 @@ class IsMoreBase(WindowDispl2D):
                                 pygame.mixer.music.play()
 
                         else:
-                            print 'cant play: ', filename
+                            print ('cant play: ', filename)
             else:
                 sound_fname = os.path.join(fpath, filename + '.wav')
                 pygame.mixer.music.load(sound_fname)
@@ -348,11 +348,11 @@ class IsMoreBase(WindowDispl2D):
         if self.plant_type in ['ArmAssist', 'ReHand']:
             if time_since_started > n_secs:
                 if last_ts_arrival == 0:
-                    print 'No %s data has arrived at all' % self.plant_type
+                    print ('No %s data has arrived at all' % self.plant_type)
                 else:
                     t_elapsed = time.time() - last_ts_arrival
                     if t_elapsed > n_secs:
-                        print 'No %s data in the last %.1f s' % (self.plant_type, t_elapsed)
+                        print ('No %s data in the last %.1f s' % (self.plant_type, t_elapsed))
                     
                     # Run IsMore application automatically in a second terminal
                     # if (self.plant_type == 'ArmAssist' and t_elapsed > 3):
@@ -363,11 +363,11 @@ class IsMoreBase(WindowDispl2D):
             for plant_type in ['ArmAssist', 'ReHand']:
                 if time_since_started > n_secs:
                     if last_ts_arrival[plant_type] == 0:
-                        print 'No %s data has arrived at all' % plant_type
+                        print ('No %s data has arrived at all' % plant_type)
                     else:
                         t_elapsed = time.time() - last_ts_arrival[plant_type]
                         if t_elapsed > n_secs:
-                            print 'No %s data in the last %.1f s' % (plant_type, t_elapsed)
+                            print ('No %s data in the last %.1f s' % (plant_type, t_elapsed))
 
                         # Run IsMore application automatically in a second terminal
                         # if (plant_type == 'ArmAssist' and t_elapsed > 3):
@@ -534,7 +534,7 @@ class IsMoreBase(WindowDispl2D):
             trial_types_list_all.remove('subgoal_names')
             # trial_types_list.remove('rest')
 
-            print "trial_types_list " , trial_types_list_all
+            print ("trial_types_list " , trial_types_list_all)
             if self.plant_type in ['ArmAssist', 'IsMore']:
                 # base -- 2D movement
                 x_pos_rest = self.targets_matrix['rest'][0]['aa_px']
@@ -592,7 +592,7 @@ class IsMoreBase(WindowDispl2D):
             if self.plant_type=='ReHand':
                 self.safety_area_plant = self.safety_area_plant_rh
 
-            print "self.safety_area_plant" , self.safety_area_plant
+            print ("self.safety_area_plant" , self.safety_area_plant)
 
     def display_safety_area(self):
     # use (rotating) lines to represent ReHand's angles
@@ -607,11 +607,11 @@ class IsMoreBase(WindowDispl2D):
         self.rh_angle_lines_safety = OrderedDict()
         self.rh_angle_lines_safety_angles = self.safety_area_plant_rh
         # self.rh_angle_lines_safety_angles = self.safety_area_plant_rh[safety_states_min_max['ReHand']]
-        print "self.rh_angle_lines_safety_angles ", self.rh_angle_lines_safety_angles
+        print ("self.rh_angle_lines_safety_angles ", self.rh_angle_lines_safety_angles)
                 
         for state in rh_pos_states:
-            print "state : ", state
-            print "min + state ", ['min_' + state]
+            print ("state : ", state)
+            print ("min + state ", ['min_' + state])
             rh_line_min = Line(self.rh_angle_line_positions[state], 10, 0.5, 5, COLORS['white'])
             rh_line_max = Line(self.rh_angle_line_positions[state], 10, 0.5, 5, COLORS['white'])
             self.rh_angle_lines_safety['min_' + state] = rh_line_min
@@ -654,8 +654,8 @@ class IsMoreBase(WindowDispl2D):
 
         # check actual velocity directions to see if it is driving the DoFs out of the range of security
             if border_safety_lower[safety_dof] == True:
-                print "plant going out of safety area (lower boundary)"
-                print "safety_dof ", safety_dof
+                print ("plant going out of safety area (lower boundary)")
+                print ("safety_dof ", safety_dof)
 
                 if safety_dof != 'aa_distXY':
                     if command_vel[safety_states_vel_plant[ind_safety_dof]] < 0:
@@ -663,8 +663,8 @@ class IsMoreBase(WindowDispl2D):
 
 
             if border_safety_upper[safety_dof] == True:
-                print "plant going out of safety area (upper boundary)"
-                print "safety_dof " ,safety_dof
+                print ("plant going out of safety area (upper boundary)")
+                print ("safety_dof " ,safety_dof)
                 if safety_dof != 'aa_distXY':
                     if command_vel[safety_states_vel_plant[ind_safety_dof]] > 0:
                         command_vel[safety_states_vel_plant[ind_safety_dof]] == 0
@@ -1045,7 +1045,7 @@ class IsMoreBase(WindowDispl2D):
 
         if new_exercise: available_targets.append('new_exercise')
 
-        print available_targets, length, shuffle
+        print (available_targets, length, shuffle)
         targets = NonInvasiveBase._make_block_rand_targets(length, available_targets, shuffle=shuffle)
         return targets 
 
@@ -1213,7 +1213,7 @@ class IsMoreBase(WindowDispl2D):
         if linear_green: available_targets.append('linear_green')
         if linear_red: available_targets.append('linear_red')
         if sequence: available_targets.append('sequence')
-        print available_targets
+        print (available_targets)
         targets = NonInvasiveBase._make_block_rand_targets(length, available_targets, shuffle=shuffle)
         return targets
    
@@ -1422,7 +1422,7 @@ class RecordBrainAmpData(Autostart):
 
     def __init__(self, *args, **kwargs):
         super(RecordBrainAmpData, self).__init__(*args, **kwargs)
-        print self.channel_list_name
+        print (self.channel_list_name)
         self.brainamp_channels = getattr(brainamp_channel_lists, self.channel_list_name)  
 
     def init(self):
@@ -1441,7 +1441,7 @@ class RecordBrainAmpData(Autostart):
         #exclude_parent_traits : the name of the emg channels trait.
 
     def cleanup(self, database, saveid, **kwargs):
-        print 'cleaning up in brainampdata'
+        print ('cleaning up in brainampdata')
         # from socket import *
         # self.sock3 = socket(AF_INET, SOCK_STREAM)
         # self.sock3.connect(('192.168.137.1',6700))
@@ -1462,7 +1462,7 @@ class Disable_System(NonInvasiveBase):
     def __init__(self, *args, **kwargs):
         super(Disable_System, self).__init__(*args, **kwargs)
         self.plant.disable()
-        print 'Motors disabled'
+        print ('Motors disabled')
 
 class RecordGoalTargets(NonInvasiveBase):
     '''
@@ -1547,7 +1547,7 @@ class RecordGoalTargets(NonInvasiveBase):
         self.trial_type = self.next_trial
 
     def _start_trial(self):
-        print 'Move the exo to target ', self.trial_type
+        print ('Move the exo to target ', self.trial_type)
 
     def _test_end_trial(self, ts):
         return ts > self.trial_time
@@ -1763,12 +1763,12 @@ class GoToTarget(NonInvasiveBase):
         self.reached_goal_position = False
 
     def _start_trial(self):
-        print self.trial_type
+        print (self.trial_type)
         if self.index_targets_matrix > len(self.targets_matrix[self.trial_type].keys()) -1:
-            print "ERROR: Selected index out of bounds. Sending the exo towards first position in targets_matrix"
+            print ("ERROR: Selected index out of bounds. Sending the exo towards first position in targets_matrix")
             self.index_targets_matrix = 0
         self.goal_position = self.targets_matrix[self.trial_type][self.index_targets_matrix][self.pos_states]
-        print "goal position: ", self.goal_position
+        print ("goal position: ", self.goal_position)
 
     def _test_end_trial(self, ts):
         return self.reached_goal_position
@@ -1955,7 +1955,7 @@ class EndPointMovement(NonInvasiveBase):
                 self.parallel_sound.stop()
                 self.goal_idx +=1
 
-                print 'heading to next subtarget'
+                print ('heading to next subtarget')
                 self.goal_position = self.targets_matrix[self.trial_type][self.goal_idx][self.pos_states]
                 self._play_sound(self.sounds_dir, self.subgoal_names[self.trial_type][self.goal_idx]) #nerea
 
@@ -1967,7 +1967,7 @@ class EndPointMovement(NonInvasiveBase):
                 # self._play_sound(self.sounds_dir_classical, [self.subgoal_names[self.trial_type][self.goal_idx][0]])  #nerea
 
             else:
-                print 'all subtargets reached'
+                print ('all subtargets reached')
                 self.reached_goal_position = True
                 self.task_data['reached_goal_position']  = self.reached_goal_position
         
@@ -2155,7 +2155,7 @@ class EndPointMovement(NonInvasiveBase):
         # except IOError as e:
         #     print(e)
         self._play_sound(self.sounds_dir, ['rest'])
-        print 'rest'
+        print ('rest')
 
     def _start_instruct_trial_type(self):
         self._play_sound(self.sounds_dir, self.subgoal_names[self.trial_type][0])
@@ -2179,7 +2179,7 @@ class EndPointMovement(NonInvasiveBase):
             self._play_sound(self.sounds_dir_classical, [self.subgoal_names[self.trial_type][self.goal_idx][0]])
        
     def _start_trial_return(self):
-        print 'return trial'
+        print ('return trial')
         self.goal_position = self.targets_matrix['rest'][0][self.pos_states]
         if self.music_feedback:
             self._play_sound(self.sounds_dir_classical, [self.subgoal_names[self.trial_type][self.goal_idx][0]])
@@ -2462,7 +2462,7 @@ class EndPointMovement_testing(NonInvasiveBase):
         self.rest_time = random.random() * (max_time - min_time) + min_time
 
         self.goal_idx = 0
-        print "trial type : ", self.trial_type
+        print ("trial type : ", self.trial_type)
         super(EndPointMovement_testing, self)._start_wait()
 
     def _test_end_rest(self, ts):
@@ -2480,7 +2480,7 @@ class EndPointMovement_testing(NonInvasiveBase):
     def _start_instruct_rest(self):
         self.parallel_sound.stop()
         self._play_sound(self.sounds_dir, ['rest'])
-        print 'rest'
+        print ('rest')
 
     def _start_instruct_trial_type(self):
         self._play_sound(self.sounds_dir, self.subgoal_names[self.trial_type][self.goal_idx])
@@ -2495,11 +2495,11 @@ class EndPointMovement_testing(NonInvasiveBase):
         return self.reached_goal_position
 
     def _end_alltrials(self):
-        print 'all trials reached'
+        print ('all trials reached')
         self.task_data['reached_goal_position']  = self.reached_goal_position
 
     def _start_trial(self):
-        print "subtrial : ", self.subgoal_names[self.trial_type][self.goal_idx]
+        print ("subtrial : ", self.subgoal_names[self.trial_type][self.goal_idx])
         self.goal_position = self.targets_matrix[self.trial_type][self.goal_idx][self.pos_states]
         if self.music_feedback:
             self._play_sound(self.sounds_dir_classical, [self.subgoal_names[self.trial_type][self.goal_idx][0]])
@@ -2510,7 +2510,7 @@ class EndPointMovement_testing(NonInvasiveBase):
         self.parallel_sound.stop()
         self.goal_idx +=1   
         self.task_data['reached_subtarget']  = self.reached_subtarget
-        print 'trial end - heading to next subtarget'
+        print ('trial end - heading to next subtarget')
 
     def _test_end_trial(self, ts):
         return self.reached_subtarget   
@@ -2705,7 +2705,7 @@ class CyclicEndPointMovement(NonInvasiveBase):
      
         # print 'distance to target', self.pos_diff(self.goal_position[self.pos_states],self.plant.get_pos())
         if np.all(np.abs(self.pos_diff(self.goal_position[self.DoF_target_idx_init:self.DoF_target_idx_end],self.plant.get_pos()[self.DoF_target_idx_init:self.DoF_target_idx_end])) < self.target_margin[self.pos_states[self.DoF_target_idx_init:self.DoF_target_idx_end]]):
-            print "approaching goal target"
+            print ("approaching goal target")
             #self.task_data['audio_feedback_start'] = 1
             if self.give_feedback:
                 # self._play_sound(os.path.join(self.sounds_general_dir, 'beep.wav'))
@@ -2713,17 +2713,17 @@ class CyclicEndPointMovement(NonInvasiveBase):
             if self.goal_idx < len(self.targets_matrix[self.trial_type].keys())-1:
                 self.goal_idx +=1
                 # print "goal position ", self.goal_position
-                print 'heading to next subtarget'
+                print ('heading to next subtarget')
                 self.goal_position = self.targets_matrix[self.trial_type][self.goal_idx][self.pos_states + self.vel_states]
-                print self.goal_position
+                print (self.goal_position)
 
             elif self.reps < self.repetitions_cycle:
-                print 'cycle completed'
+                print ('cycle completed')
                 self.reps += 1
                 self.goal_position = self.targets_matrix[self.trial_type][0][self.pos_states + self.vel_states]
                 self.goal_idx = 0
             else: 
-                print 'all cycles completed'
+                print ('all cycles completed')
                 self.reached_goal_position = True
                 self.goal_idx = 0
 
@@ -2791,12 +2791,12 @@ class CyclicEndPointMovement(NonInvasiveBase):
     def _start_instruct_rest(self):
         # self._play_sound(os.path.join(self.sounds_dir, 'rest.wav'))
         self._play_sound(self.sounds_dir, ['rest'])
-        print 'rest'
+        print ('rest')
 
     def _start_instruct_trial_type(self):
         # sound_fname = os.path.join(self.sounds_dir, self.trial_type + '.wav')
         # self._play_sound(sound_fname)
-        print "self.subgoal_names[self.trial_type] ", self.subgoal_names[self.trial_type]
+        print ("self.subgoal_names[self.trial_type] ", self.subgoal_names[self.trial_type])
         self._play_sound(self.sounds_dir, self.subgoal_names[self.trial_type][0])
         
     def _end_instruct_trial_type(self):
@@ -2902,14 +2902,14 @@ class RecordTrajectoriesBase(NonInvasiveBase):
 
     def _start_instruct_rest(self):
         self._play_sound(os.path.join(self.sounds_dir, 'rest.wav'))
-        print 'rest'
+        print ('rest')
 
     def _start_instruct_trial_type(self):
         sound_fname = os.path.join(self.sounds_dir, self.trial_type + '.wav')
         self._play_sound(sound_fname)
 
     def _start_trial(self):
-        print self.trial_type
+        print (self.trial_type)
 
     def _test_end_trial(self, ts):
         return self.finished_vel_playback
@@ -2917,7 +2917,7 @@ class RecordTrajectoriesBase(NonInvasiveBase):
     def _test_at_starting_config(self, *args, **kwargs):
         traj = self.ref_trajectories[self.trial_type]['traj']
         diff_to_start = np.abs(self.plant.get_pos() - traj[self.pos_states].ix[0].ravel())
-        print "diff_to_start: ", diff_to_start
+        print ("diff_to_start: ", diff_to_start)
         return np.all(diff_to_start < self.target_rect[:len(self.pos_states)])
 
     def _end_trial(self):
@@ -3205,7 +3205,7 @@ class RecordEXG(RecordBrainAmpData,NonInvasiveBase):
         self.rest_time = random.random() * (max_time - min_time) + min_time
 
         self.goal_idx = 0
-        print "trial type : ", self.trial_type
+        print ("trial type : ", self.trial_type)
         super(RecordEXG, self)._start_wait()
 
     def _test_end_rest(self, ts):
@@ -3223,7 +3223,7 @@ class RecordEXG(RecordBrainAmpData,NonInvasiveBase):
     def _start_instruct_rest(self):
         self.parallel_sound.stop()
         self._play_sound(self.sounds_dir, ['rest'])
-        print 'rest'
+        print ('rest')
 
     def _start_instruct_trial_type(self):
         self._play_sound(self.sounds_dir, self.subgoal_names[self.trial_type][self.goal_idx])
@@ -3238,11 +3238,11 @@ class RecordEXG(RecordBrainAmpData,NonInvasiveBase):
         return self.reached_goal_position
 
     def _end_alltrials(self):
-        print 'all trials reached'
+        print ('all trials reached')
         self.task_data['reached_goal_position']  = self.reached_goal_position
 
     def _start_trial(self):
-        print "subtrial : ", self.subgoal_names[self.trial_type][self.goal_idx]
+        print ("subtrial : ", self.subgoal_names[self.trial_type][self.goal_idx])
         #self.goal_position = self.targets_matrix[self.trial_type][self.goal_idx][self.pos_states]
         if self.music_feedback:
             self._play_sound(self.sounds_dir_classical, [self.subgoal_names[self.trial_type][self.goal_idx][0]])
@@ -3254,7 +3254,7 @@ class RecordEXG(RecordBrainAmpData,NonInvasiveBase):
         self.parallel_sound.stop()
         self.goal_idx +=1   
         self.task_data['reached_subtarget']  = self.reached_subtarget
-        print 'trial end - heading to next subtarget'
+        print ('trial end - heading to next subtarget')
 
     def _test_end_trial(self, ts):
         if ts > self.subtrial_time:
@@ -3444,10 +3444,10 @@ class TrajectoryFollowingController(FeedbackController):
 
     def calc_next_state(self, current_state, target_state, mode=None):
         if 0:
-            print "current_state"
-            print np.array(current_state).ravel()
-            print "target state"
-            print np.array(target_state).ravel()
+            print ("current_state")
+            print (np.array(current_state).ravel())
+            print ("target state")
+            print (np.array(target_state).ravel())
 
         # filter the position state
         # for k in range(len(self.pos_states)):
