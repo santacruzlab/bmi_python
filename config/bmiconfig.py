@@ -1,7 +1,6 @@
 import numpy as np
 from riglib import bmi
 from riglib.bmi import state_space_models, train, extractor
-
 bmi_update_rates = [10, 20, 30, 60, 120, 180]
 
 bmi_algorithms = dict(
@@ -25,6 +24,7 @@ tentacle_2D_state_space = bmi.state_space_models.StateSpaceNLinkPlanarChain(n_li
 
 ## Velocity SSMs
 from riglib.bmi.state_space_models import offset_state, State
+
 endpt_2D_states = [State('hand_px', stochastic=False, drives_obs=False, min_val=-25., max_val=25., order=0),
                    State('hand_py', stochastic=False, drives_obs=False, order=0),
                    State('hand_pz', stochastic=False, drives_obs=False, min_val=-14., max_val=14., order=0),
@@ -32,7 +32,8 @@ endpt_2D_states = [State('hand_px', stochastic=False, drives_obs=False, min_val=
                    State('hand_vy', stochastic=False, drives_obs=False, order=1),
                    State('hand_vz', stochastic=True,  drives_obs=True, order=1),
                    offset_state]
-endpt_2D_state_space = state_space_models.LinearVelocityStateSpace(endpt_2D_states)
+#endpt_2D_state_space = state_space_models.LinearVelocityStateSpace(endpt_2D_states)
+endpt_2D_state_space = state_space_models.StateSpaceEndptVel2D() # changed on 7/28/21 to test this
 
 bmi_state_space_models=dict(
     Endpt2D=endpt_2D_state_space,
@@ -49,6 +50,11 @@ kin_extractors = dict(
     pos_vel=train.get_plant_pos_vel,
     null=train.null_kin_extractor,
 )
+
+zscores = dict(
+    true="True",
+    false="False"
+)  #  Added this line on 8/2/21 (DC) 
 
 default_extractor = "spikecounts"
 
