@@ -7,6 +7,9 @@ bmi3d.egg-info/requires.txt
 bmi3d.egg-info/top_level.txt
 built_in_tasks/__init__.py
 built_in_tasks/bmimultitasks.py
+built_in_tasks/manualcontrolfreechoice_HLreward.py
+built_in_tasks/manualcontrolfreechoice_HLreward_developing.py
+built_in_tasks/manualcontrolfreechoice_v1_1118.py
 built_in_tasks/manualcontrolmultitasks.py
 built_in_tasks/passivetasks.py
 built_in_tasks/plantlist.py
@@ -69,6 +72,8 @@ features/reward_features.py
 features/ripple_features.py
 features/serial_port_sensor.py
 features/simulation_features.py
+features/test_comedi.py
+features/test_comedi2Serial.py
 features/touch_features.py
 features/video_recording_features.py
 ismore/__init__.py
@@ -313,9 +318,6 @@ riglib/hdfwriter/hdfwriter/hdfwriter.py
 riglib/positioner/__init__.py
 riglib/positioner/calib.py
 riglib/ripple/__init__.py
-riglib/ripple/brMiscFxns.py
-riglib/ripple/brpylib.py
-riglib/ripple/cerelink.py
 riglib/stereo_opengl/__init__.py
 riglib/stereo_opengl/environment.py
 riglib/stereo_opengl/ik.py
