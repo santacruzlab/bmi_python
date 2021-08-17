@@ -47,3 +47,10 @@ tests/*.mat
 tests/*.hdf
 *.h5
 riglib/plexon/Plexfile_utilities.egg-info/*
+*/__pycache__/*
+db/db.sqlite3
+db/tracker/__pycache__/*
+db/tracker/migrations/__pycache__/*
+riglib/*/__pycache__/*
+riglib/fsm/fsm/__pycache__/*
+riglib/stereo_opengl/render/__pycache__/*
