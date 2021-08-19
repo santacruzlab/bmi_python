@@ -36,7 +36,7 @@ void loop() {
     if (c == 'j') {
       digitalWrite(REWARD1, HIGH);
     }
-    else if (c == 'u') {
+    else if (c == 'r') {
       digitalWrite(REWARD2, HIGH);
     }
     else if (c == 'n') {
@@ -47,7 +47,7 @@ void loop() {
     }
 
     // Start recording
-    else if ((c == 'r') && (en == 0)) {
+    else if ((c == 'u') && (en == 0)) {
         if (rstart_init == 0) {
           pinMode(rstart, OUTPUT);        
           rstart_init = 1;

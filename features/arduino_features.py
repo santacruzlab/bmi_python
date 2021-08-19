@@ -141,7 +141,7 @@ class SerialDIORowByte(object):
             print("----------- first elif statement------------")
             database.save_data(self.data_files, self.db_sys_name, saveid, True, False, **self.dbq_kwargs)
         elif np.iterable(self.data_files):
-            print("----------- second elif statement------------")
+            print("----------- second elif statement------------") # saves all 3 data files
             for df in self.data_files:
                 ext = os.path.splitext(df)[1][1:]
                 database.save_data(df, self.db_sys_name, saveid, True, False, ext, **self.dbq_kwargs)
@@ -155,7 +155,7 @@ class SerialDIORowByte(object):
             port = serial.Serial('/dev/arduino_neurosync',baudrate=baudrate)
             port.write(b'p')
             time.sleep(0.5)
-            port.write(b'r')
+            port.write(b'u')
             time.sleep(3)
 
             port.close()
@@ -484,7 +484,7 @@ class RippleSerialDIORowByte(SerialDIORowByte):
             # for k in range(5):
             port.write(b'p')
             time.sleep(0.5)
-            port.write(b'r')
+            port.write(b'u')
             port.close()
 
             time.sleep(3)
