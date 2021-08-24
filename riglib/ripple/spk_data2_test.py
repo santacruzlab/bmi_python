@@ -7,8 +7,8 @@ numElec = 16 #number of electrodes to rec from
 max_spk=1 #number of spikes to grab
 iter_avg=[]
 
-with xp.xipppy_open(): 
-#with xp.xipppy_open(tcp_flag): 
+#with xp.xipppy_open(): 
+with xp.xipppy_open(tcp_flag):
     
     recCh = xp.list_elec('nano')+xp.list_elec('micro')
     print(recCh)
