@@ -141,8 +141,8 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
  #lightsteelblue, dodgerblue, teal, aquamarine
  # olive, chiffonlemon, juicyorange, salmon, wood, elephant
 
-    color1 = target_colors['teal'] #Low target color? #target_colors['purple'] 'magenta' olive# high color
-    color2 = target_colors['elephant'] #High target color? #target_colors['lightsteelblue'] 'teal' juicyorange #low color
+    color1 = target_colors['juicyorange'] #Low target color? #target_colors['purple'] 'magenta' olive# high color
+    color2 = target_colors['lightsteelblue'] #High target color? #target_colors['lightsteelblue'] 'teal' juicyorange #low color
 
     sequence_generators = ['colored_targets_with_probabilistic_reward','block_probabilistic_reward','colored_targets_with_randomwalk_reward','randomwalk_probabilistic_reward', \
                            'colored_targets_with_different_reward_times', 'fivetargetstask_training_seq'] #HS
@@ -949,6 +949,7 @@ class FiveTargetsTask(ManualControlFreeChoice_HLreward):
 
     
     def _start_center(self):
+
         #set target colors 
         self.target1.color = (1,0,0,.5)      # center target red
         #self.targetH.color = self.color_targets*(1,1,0,.5) + (1 - self.color_targets)*(0,0,1,.5)     # high probability target red if color_targets = 1
