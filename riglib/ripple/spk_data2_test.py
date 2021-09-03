@@ -7,14 +7,14 @@ numElec = 16 #number of electrodes to rec from
 max_spk=1 #number of spikes to grab
 iter_avg=[]
 
-#with xp.xipppy_open(): 
-with xp.xipppy_open(tcp_flag):
+with xp.xipppy_open(): 
     
     recCh = xp.list_elec('nano')+xp.list_elec('micro')
     print(recCh)
     rec_ch = recCh[0:numElec]
+    print('Channel data type:', type(rec_ch[0]))
     spk,c=xp.spk_data(rec_ch[0]) #clear spike buffer
-    #spk,c=xp.spk_data(rec_ch) #clear spike buffer
+    #spk,c=xp.spk_data2(rec_ch) #clear spike buffer
     print(rec_ch)
     
     iMAX=50

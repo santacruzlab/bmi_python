@@ -3,6 +3,7 @@ Extensions of the generic riglib.source.DataSourceSystem for getting Spikes/LFP 
 '''
 import numpy as np
 import xipppy as xp
+import itertools
 import time
 import os
 import array
@@ -27,52 +28,74 @@ class Spikes(DataSourceSystem):
                       ("arrival_ts", np.float64)])
 
     def __init__(self, channels):
-        self.conn = xp.xipppy_open()
+        #self.conn = xp
 #        self.conn = cerelink.Connection()        
-#        self.conn.connect()
+        xp._open()
         self.channels = channels
-
-    def start(self):
+        self.chan = itertools.cycle(self.channels)
+        recChans = np.array(xp.list_elec('nano'))
+        self.recChans = recChans
         # make sure all channels are available with spk and lfp data
-        recChans = np.array(xp.list_elec('nano')+xp.list_elec('micro'))
-        if len(recChans):
-            for ii in recChans:
+        if len(self.recChans):
+            for ii in self.recChans:
                 xp.signal_set(ii.item(),'spk',True)
                 xp.signal_set(ii.item(),'lfp',True)
                 time.sleep(0.001)
 
-        self.streaming = True
+    def start(self):
         self.data = self.get_event_data()
 
     def stop(self):
-        self.streaming = False
+        xp._close()
 
     def get(self):
+        '''
+        self.data = self.get_event_data()
         d = next(self.data)
         return np.array([(d.ts / self.update_freq, 
                           d.chan, 
                           d.unit, 
                           d.arrival_ts)],
                         dtype=self.dtype)
+        '''
+        arrival_ts = time.time()
+        ch = next(self.chan)
+        n, seg_data = xp.spk_data(int(ch - 1),max_spk=10)
+        if len(seg_data):
+            for p in seg_data:
+                un = 2 ** (p.class_id + 0) # class_id's are 0,1,2,3,4, but self.unit is 2,4,8,16
+                print("Chan, Unit:", ch, un)
+                ts = p.timestamp
+                data = np.array([(ts / self.update_freq, 
+                          ch, 
+                          un, 
+                          arrival_ts)],
+                        dtype=self.dtype)
+        else:
+            data = None
+        return data
     
     def get_event_data(self):
-        
+        '''
         sleep_time = 0
         
-        while self.streaming:
             
-            arrival_ts = time.time()
-            # Can use xp.spike_data(elec)
-            for chan in self.channels:
-                n, seg_data = xp.spk_data(chan)
-                if len(seg_data):
-                    for p in seg_data:
-                        un = p.class_id # DEREK: do we need to do log2 here? 
-                        ts = p.timestamp
-            
-                        yield SpikeEventData(chan=chan, unit=un, ts=ts, arrival_ts=arrival_ts)
+        arrival_ts = time.time()
+        # Can use xp.spike_data(elec)
+        #for chan in self.channels:
+        for chan in self.channels:
+            print('Channel data type:', type(chan))
+            n, seg_data = xp.spk_data(int(chan))
+            if len(seg_data):
+                for p in seg_data:
+                    un = p.class_id # DEREK: do we need to do log2 here? 
+                    ts = p.timestamp
+                    print("Timestamp", ts)
+                    yield SpikeEventData(ts=ts, chan=chan, unit=un, arrival_ts=arrival_ts)
 
-        time.sleep(sleep_time)        
+        time.sleep(sleep_time)
+        '''
+        return        
 
 """
 lfp NOT UPDATED FOR RIPPLE YET

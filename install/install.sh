@@ -1,7 +1,7 @@
 #!/bin/bash
 ####### Declare environment variables
-CODE=$HOME/code
-BMI3D=$CODE/bmi3d ### Directory in which to install the bmi3d software
+CODE=$HOME
+BMI3D=$CODE/bmi_python ### Directory in which to install the bmi3d software
 
 
 ####### Set up directories
@@ -30,6 +30,7 @@ fi
 # make log directory
 mkdir $BMI3D/log
 
+# SRS did not reinstall this, seemed to be working
 ####### Reconfigure Ubuntu package manager
 sudo apt-add-repository "deb http://www.rabbitmq.com/debian/ testing main"
 cd $HOME
@@ -42,14 +43,15 @@ sudo apt-get update
 
 
 ####### Install Ubuntu dependencies
+sudo apt-get install python3.8-dev
 sudo apt-get -y install python-pip libhdf5-serial-dev
 sudo apt-get -y install python-numpy
 sudo apt-get -y install python-scipy
-# setup the CIFS 
+# setup the CIFS, SRS error with smbfs
 sudo apt-get -y install smbclient cifs-utils smbfs
 # matplotlib
 sudo apt-get -y install python-matplotlib
-# pygame
+# pygame: SRS >>python3 -m pip install -U pygame --user
 sudo apt-get -y install mercurial python-dev python-numpy ffmpeg libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libsdl1.2-dev  libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev
 # install tools
 sudo apt-get -y install libtool automake bison flex
@@ -75,30 +77,32 @@ sudo apt-get install arduino arduino-core
 sudo apt-get install setserial
 
 ####### Install Python dependencies
-sudo pip install numexpr 
-sudo pip install cython 
-sudo pip install django-celery 
-sudo pip install traits 
-sudo pip install pandas 
-sudo pip install patsy 
-sudo pip install statsmodels 
-sudo pip install PyOpenGL PyOpenGL_accelerate
-sudo pip install Django==1.6 
-sudo pip install pylibftdi
-sudo pip install nitime
-sudo pip install sphinx
-sudo pip install numpydoc
-sudo pip install tornado
-sudo pip install tables==2.4.0
-sudo pip install sklearn
+sudo pip3 install numexpr 
+sudo pip3 install cython 
+sudo pip3 install django-celery 
+sudo pip3 install traits 
+sudo pip3 install pandas 
+sudo pip3 install patsy 
+sudo pip3 install statsmodels 
+sudo pip3 install PyOpenGL PyOpenGL_accelerate 
+sudo pip3 install Django==1.6 # SRS previously had django 3.2.6 installed
+sudo pip3 install pylibftdi 
+sudo pip3 install nitime 
+sudo pip3 install sphinx
+sudo pip3 install numpydoc
+sudo pip3 install tornado
+sudo pip3 install tables  # SRS install 3.6.1 instead of suggested 2.4.0 (incompatible with Python 3)
+sudo pip3 install sklearn
+sudo pip3 install anyjson
+sudo pip3 install billiard
 
 
 ####### Download any src code
 git clone https://github.com/sgowda/plot $HOME/code/plotutil
 git clone https://github.com/sgowda/robotics_toolbox $HOME/code/robotics
-# pygame
+# pygame: SRS did not run this, error
 hg clone https://bitbucket.org/pygame/pygame $HOME/code/pygame
-# Phidgets code
+# Phidgets code: SRS not using phidgets, didn't do this
 wget http://www.phidgets.com/downloads/libraries/libphidget.tar.gz
 wget http://www.phidgets.com/downloads/libraries/PhidgetsPython.zip
 
@@ -106,11 +110,11 @@ wget http://www.phidgets.com/downloads/libraries/PhidgetsPython.zip
 
 
 ####### Install source code, configure software
-# plexread module
+# plexread module: SRS ValueError: 'plexon/psth.pyx' doesn't match any files
 cd $BMI3D/riglib
-sudo python setup.py install
+sudo python3 setup.py install
 
-# pygame
+# pygame: SRS didn't do this since bitbucket didn't clone
 cd $HOME/code/pygame
 sudo python setup.py install
 
@@ -120,7 +124,7 @@ sudo ln -s /usr/bin/ipython /usr/bin/ipy
 # NIDAQ software -- deprecated!
 # $HOME/code/bmi3d/riglib/nidaq/build.sh
 
-# Phidgets libraries
+# Phidgets libraries: SRS didn't do this since we aren't using phidgets
 cd $CODE/src/
 tar xzf libphidget.tar.gz 
 cd libphidget*
@@ -136,28 +140,28 @@ sudo python setup.py install
 
 
 ####### Configure udev rules, permissions
-# Phidgets
+# Phidgets: SRS didn't do this since we aren't using phidgets
 sudo cp $CODE/src/libphidget*/udev/99-phidgets.rules /etc/udev/rules.d
 sudo chmod a+r /etc/udev/rules.d/99-phidgets.rules
-# NIDAQ
+# NIDAQ: SRS didn't do this since we aren't using NIDAQ
 sudo cp $HOME/code/bmi3d/install/udev/comedi.rules /etc/udev/rules.d/
 sudo chmod a+r /etc/udev/rules.d/comedi.rules 
 sudo udevadm control --reload-rules
 # Group permissions
-sudo usermod -a -G iocard $USER # NIDAQ card belongs to iocard group
+sudo usermod -a -G iocard $USER # NIDAQ card belongs to iocard group - SRS didn't do this since we aren't using NIDAQ
 sudo usermod -a -G dialout $USER # Serial ports belong to 'dialout' group
 
 
 ####### Reconfigure .bashrc
-sed -i '$a export PYTHONPATH=$PYTHONPATH:$HOME/code/robotics' $HOME/.bashrc
-sed -i '$a export BMI3D=/home/lab/code/bmi3d' $HOME/.bashrc
-sed -i '$a source $HOME/code/bmi3d/pathconfig.sh' $HOME/.bashrc
+#sed -i '$a export PYTHONPATH=$PYTHONPATH:$HOME/code/robotics' $HOME/.bashrc
+sed -i '$a export BMI3D=/home/samantha/bmi_python' $HOME/.bashrc
+sed -i '$a source $HOME/bmi_python/pathconfig.sh' $HOME/.bashrc
 source $HOME/.bashrc
 
-sudo chown -R $USER ~/.matplotlib
+sudo chown -R $USER ~/.matplotlib # SRS directory doesn't exist
 
-cd $HOME/code/bmi3d/db
-python manage.py syncdb
+cd $BMI3D/db
+python3 manage.py syncdb
 # Add superuser 'lab' with password 'lab'
 
 

@@ -23,7 +23,7 @@ class Config(object):
         self.display_start_pos = '%s,%s' % (self.window_start_x, self.window_start_y)
 
         self.reward_system_version = int(dict(parser.items('reward_sys'))['version'])        
-        self.log_dir = '/home/lab/code/bmi3d/log'
+        self.log_dir = '/home/samantha/log'
         self.plexon_ip = dict(parser.items('plexon IP address'))['addr']
         self.plexon_port = dict(parser.items('plexon IP address'))['port']
 
