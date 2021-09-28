@@ -61,7 +61,7 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
 
     background = (0,0,0,1)
     shoulder_anchor = np.array([2., 0., -15.]) # Coordinates of shoulder anchor point on screen
-
+    
     arm_visible = traits.Bool(True, desc='Specifies whether entire arm is displayed or just endpoint')
 
     cursor_radius = traits.Float(.5, desc="Radius of cursor")
@@ -146,6 +146,7 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
 
     sequence_generators = ['colored_targets_with_probabilistic_reward','block_probabilistic_reward','colored_targets_with_randomwalk_reward','randomwalk_probabilistic_reward', \
                            'colored_targets_with_different_reward_times', 'fivetargetstask_training_seq'] #HS
+
 
     def __init__(self, *args, **kwargs):
         super(ManualControlFreeChoice_HLreward, self).__init__(*args, **kwargs)
@@ -405,7 +406,6 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         #print 'TARGET SELECTED', self.target_selected
         return d <= self.target_radius - self.cursor_radius
 
-
     def _test_enter_targetL(self, ts):
         if self.target_index == 1 and self.LH_target_on[0]==0:
             #return false if instructed trial and this target is not on
@@ -538,13 +538,6 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         #print 'high value target reward prob', self.targs[0,1]
         self.rewardL = np.greater(self.targs[1,1],assign_reward[1])
 
-
-        #print 'TARGET GENERATOR', self.targs[0,]
-        self.task_data['targetH'] = self.targs[0,].copy()
-        self.task_data['reward_scheduleH'] = self.rewardH.copy()
-        self.task_data['targetL'] = self.targs[1,].copy()
-        self.task_data['reward_scheduleL'] = self.rewardL.copy()
-
         self.requeue()
 
     def _start_center(self):
@@ -555,12 +548,10 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         self.target1.color = (1,0,0,.5)      # center target red
         #self.targetH.color = self.color_targets*(1,1,0,.5) + (1 - self.color_targets)*(0,0,1,.5)     # high probability target red if color_targets = 1
         #self.targetL.color = (1 - self.color_targets)*(1,1,0,.5) + self.color_targets*(0,0,1,.5)    # low probability target blue if color_targets = 1
-
         self.targetH.color = self.color_targets*self.color1 + (1 - self.color_targets)*self.color2 # high is magenta if color_targets = 1, juicyorange otherwise
         self.targetL.color = (1 - self.color_targets)*self.color1 + self.color_targets*self.color2        
         self.show_object(self.target1, True)
         self.show_object(self.cursor, True)
-
         # Third argument in self.targs determines if target is on left or right
         # First argument in self.targs determines if location is offset to farther distances
         offsetH = (2*self.targs[0,2] - 1)*(self.starting_dist + self.location_offset_allowed*self.targs[0,0]*4.0)
@@ -609,6 +600,7 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         self.show_object(self.target1, False)
         #self.target_location1 = self.target1.xfm.move
         self.show_object(self.cursor, True)
+
 
         self.update_cursor()
         self.requeue()
@@ -824,6 +816,7 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         position offset (yes/no), reward probability (fixed in this case), and location (binary returned where the
         ouput indicates either left or right).
         UPDATE: CHANGED SO THAT THE SECOND DIMENSION CARRIES THE REWARD PROBABILITY RATHER THAN THE REWARD SCHEDULE
+
         Updated (5/10/2021 - HS):
         Generator should return array of ntrials x 2 x 3. 
         
@@ -871,6 +864,7 @@ class ManualControlFreeChoice_HLreward(Sequence, Window):
         """
         Same as "colored_targets_with_different_reward_times" but for a different number of targets (<5 targets)
         Length changed so that total number of trials is evenly divisible by the number of targets
+
         Updated (5/20/2021 - HS):
         Generator should return array of ntrials x 2 x 3. 
         
@@ -945,11 +939,11 @@ class FiveTargetsTask(ManualControlFreeChoice_HLreward):
 
 
     def _start_center(self):
+
         #set target colors 
         self.target1.color = (1,0,0,.5)      # center target red
         #self.targetH.color = self.color_targets*(1,1,0,.5) + (1 - self.color_targets)*(0,0,1,.5)     # high probability target red if color_targets = 1
         #self.targetL.color = (1 - self.color_targets)*(1,1,0,.5) + self.color_targets*(0,0,1,.5)    # low probability target blue if color_targets = 1
-
         color_dict = {
             1: "purple",
             2: "blue",#"hibiscus",
@@ -1909,3 +1903,4 @@ class FreeChoicePilotTask_PseudoRandom(ManualControlFreeChoice_PseudoRandom):
         base_channel = 0
         comedi.comedi_dio_bitfield2(self.com, subdevice, write_mask, val, base_channel)
 """
+
