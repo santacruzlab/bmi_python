@@ -30,7 +30,7 @@ class Spikes(DataSourceSystem):
     def __init__(self, channels):
         #self.conn = xp
 #        self.conn = cerelink.Connection()        
-        xp._open()
+        xp._open('tcp')
         self.channels = channels
         self.chan = itertools.cycle(self.channels)
         recChans = np.array(xp.list_elec('nano'))
