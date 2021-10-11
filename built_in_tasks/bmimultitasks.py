@@ -22,9 +22,8 @@ import tempfile, pickle, traceback, datetime
 from riglib.bmi.bmi import GaussianStateHMM, Decoder, GaussianState, BMISystem, BMILoop
 from riglib.bmi.assist import Assister, SSMLFCAssister, FeedbackControllerAssist
 from riglib.bmi import feedback_controllers
-from riglib.stereo_opengl.window import WindowDispl2D
-from riglib.stereo_opengl.primitives import Line
-
+from riglib.stereo_opengl.window import WindowDispl2D, Window
+#from riglib.stereo_opengl.primitives import Line60 #HS! 20210908
 
 from riglib.bmi.state_space_models import StateSpaceEndptVel2D, StateSpaceNLinkPlanarChain
 
@@ -235,7 +234,6 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
         if hasattr(self, 'assist_speed'):
             kwargs['assist_speed'] = self.assist_speed
-
         if isinstance(self.decoder.ssm, StateSpaceEndptVel2D) and isinstance(self.decoder, ppfdecoder.PPFDecoder):
             self.assister = OFCEndpointAssister()
         elif isinstance(self.decoder.ssm, StateSpaceEndptVel2D):
@@ -313,8 +311,10 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
     #     d = np.linalg.norm(cursor_pos - self.target_location)
     #     return d <= self.target_radius
 
-class BMIControlMulti2DWindow(BMIControlMulti, WindowDispl2D):
-    fps = 20.
+class BMIControlMulti2DWindow(BMIControlMulti, Window): # YZ changed the WindowDispl2D into Window so that the experimental screen is shown on both monitors
+    fps = 60. # YZ the original fps is set to 60, not sure why here change into 20
+    background = (0,0,0,1)
+    window_size = traits.Tuple((1920*2, 1080), desc='window size')
     def __init__(self,*args, **kwargs):
         super(BMIControlMulti2DWindow, self).__init__(*args, **kwargs)
     
@@ -333,6 +333,223 @@ class BMIControlMulti2DWindow(BMIControlMulti, WindowDispl2D):
         
     def _test_start_trial(self, ts):
         return ts > self.wait_time and not self.pause
+
+
+########################
+###### CLDA cursor tasks  - added by HMS 10/4/2021 - from cursor_clda_tasks.py in task analysis folder
+########################
+class CursorGoalLearner2(clda.Learner):
+    '''
+    CLDA intention estimator based on CursorGoal/Refit-KF ("innovation 1" in Gilja*, Nuyujukian* et al, Nat Neurosci 2012)
+    '''
+    def __init__(self, *args, **kwargs):
+        '''
+        Constructor for CursorGoalLearner2
+
+        Parameters
+        ----------
+        int_speed_type: string, optional, default='dist_to_target'
+            Specifies the method to use to estimate the intended speed of the target.
+            * dist_to_target: scales based on remaining distance to the target position
+            * decoded_speed: use the speed output provided by the decoder, i.e., the difference between the intention and the decoder output can be described by a pure vector rotation
+
+        Returns
+        -------
+        CursorGoalLearner2 instance
+        '''
+        int_speed_type = kwargs.pop('int_speed_type', 'dist_to_target')
+        self.int_speed_type = int_speed_type
+        if not self.int_speed_type in ['dist_to_target', 'decoded_speed']:
+            raise ValueError("Unknown type of speed for cursor goal: %s" % self.int_speed_type)
+
+        super(CursorGoalLearner2, self).__init__(*args, **kwargs)
+
+        if self.int_speed_type == 'dist_to_target':
+            self.input_state_index = 0
+
+    def calc_int_kin(self, decoder_state, target_state, decoder_output, task_state, state_order=None):
+        """
+        Calculate the intended kinematics and pair with the neural data
+        """
+        if state_order is None:
+            raise ValueError("New cursor goal requires state order to be specified!")
+
+        # The intended direction (abstract space) from the current state of the decoder to the target state for the task
+        int_dir = target_state - decoder_state
+        vel_inds, = np.nonzero(state_order == 1)
+        pos_inds, = np.nonzero(state_order == 0)
+        
+        # Calculate intended speed
+        if task_state in ['hold', 'origin_hold', 'target_hold']:
+            speed = 0
+        #elif task_state in ['target', 'origin', 'terminus']:
+        else:
+            if self.int_speed_type == 'dist_to_target':
+                speed = np.linalg.norm(int_dir[pos_inds])
+            elif self.int_speed_type == 'decoded_speed':
+                speed = np.linalg.norm(decoder_output[vel_inds])
+        #else:
+        #    speed = np.nan
+
+        int_vel = speed*self.normalize(int_dir[pos_inds])
+        int_kin = np.hstack([decoder_output[pos_inds], int_vel, 1]).reshape(-1, 1)
+
+        if np.any(np.isnan(int_kin)):
+            int_kin = None
+
+        return int_kin
+
+    def __call__(self, spike_counts, decoder_state, target_state, decoder_output, task_state, state_order=None):
+        """
+        Calculate the intended kinematics and pair with the neural data
+        """
+        if state_order is None:
+            raise ValueError("CursorGoalLearner2.__call__ requires state order to be specified!")
+        super(CursorGoalLearner2, self).__call__(spike_counts, decoder_state, target_state, decoder_output, task_state, state_order=state_order)
+    
+    @staticmethod
+    def normalize(vec):
+        '''
+        Vector normalization. If the vector to be normalized is of norm 0, a vector of 0's is returned
+
+        Parameters
+        ----------
+        vec: np.ndarray of shape (N,) or (N, 1)
+            Vector to be normalized
+
+        Returns
+        -------
+        norm_vec: np.ndarray of shape matching 'vec'
+            Normalized version of vec
+        '''
+        norm_vec = vec / np.linalg.norm(vec)
+        
+        if np.any(np.isnan(norm_vec)):
+            norm_vec = np.zeros_like(vec)
+        
+        return norm_vec
+
+class CLDAControlMulti(BMIControlMulti, LinearlyDecreasingHalfLife):
+    '''
+    BMI task that periodically refits the decoder parameters based on intended
+    movements toward the targets. Inherits directly from BMIControl. Can be made
+    to automatically linearly decrease assist level over set time period, or
+    to provide constant assistance by setting assist_level and assist_min equal.
+    '''
+    fps = 60. #HS YZ changed from 20 to 60.
+    background = (0,0,0,1)
+    window_size = traits.Tuple((1920*2, 1080), desc='window size')
+
+    batch_time = traits.Float(80.0, desc='The length of the batch in seconds')
+    decoder_sequence = traits.String('test', desc='signifier to group together sequences of decoders')
+
+    ordered_traits = ['session_length', 'assist_level', 'assist_level_time', 'batch_time', 'half_life', 'half_life_time']
+
+    def __init__(self, *args, **kwargs):
+        super(CLDAControlMulti, self).__init__(*args, **kwargs)
+        self.learn_flag = True
+
+    def create_learner(self):
+        self.batch_size = int(self.batch_time/self.decoder.binlen)
+        self.learner = CursorGoalLearner2(self.batch_size)
+        self.learn_flag = True
+
+    def create_updater(self):
+        half_life_start, half_life_end = self.half_life
+        self.updater = clda.KFSmoothbatch(self.batch_time, half_life_start)
+
+    def call_decoder(self, *args, **kwargs):
+        kwargs['half_life'] = self.current_half_life
+        return super(CLDAControlMulti, self).call_decoder(*args, **kwargs)
+
+class CLDARMLKF(CLDAControlMulti):
+    def create_updater(self):
+        self.updater = clda.KFRML(self.batch_time, self.half_life[0])
+
+    def init(self):
+        super(CLDARMLKF, self).init()
+        self.batch_time = self.decoder.binlen
+
+class CLDARMLKF_2DWindow(CLDARMLKF, Window):# HS changed from WindowDispl2D to Window):
+    fps = 60.#HS YZ changed from 20 to 60.
+    def __init__(self,*args, **kwargs):
+        super(CLDARMLKF_2DWindow, self).__init__(*args, **kwargs)
+        self.braimamp_channels = ['InterFirst', 'AbdPolLo', 'ExtCU',
+            'ExtCarp',
+            'ExtDig',
+            'FlexDig',
+            'FlexCarp',
+            'PronTer',
+            'Biceps',
+            'Triceps',
+            'FrontDelt',
+            'MidDelt',
+            'TeresMajor',
+            'PectMajor',
+        ]
+    
+    def create_learner(self):
+        self.batch_size = int(self.batch_time/self.decoder.binlen)
+        self.learner = CursorGoalLearner2(self.batch_size)
+        self.learn_flag = True
+
+    def create_assister(self):
+        kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
+        if hasattr(self, 'assist_speed'):
+            kwargs['assist_speed'] = self.assist_speed 
+        #from bmimultitasks import SimpleEndpointAssister   
+        self.assister = SimpleEndpointAssister(**kwargs)
+
+    def _start_wait(self):
+        self.wait_time = 0.
+        super(CLDARMLKF_2DWindow, self)._start_wait()
+    
+    def create_goal_calculator(self):
+        from riglib.bmi import goal_calculators #ZeroVelocityGoal
+        self.goal_calculator = goal_calculators.ZeroVelocityGoal(self.decoder.ssm)
+    
+    def _test_start_trial(self, ts):
+        return ts > self.wait_time and not self.pause
+
+
+
+
+# class CLDAKFSmoothBatch_2DWindow(CLDAControlMulti, Window): #HS#Displ2D):
+#     fps = 20.
+#     def __init__(self,*args, **kwargs):
+#         super(CLDAKFSmoothBatch_2DWindow, self).__init__(*args, **kwargs)
+
+#     def create_learner(self):
+#         self.batch_size = int(self.batch_time/self.decoder.binlen)
+#         self.learner = CursorGoalLearner2(self.batch_size)
+#         self.learn_flag = True
+
+#     def create_assister(self):
+#         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
+#         if hasattr(self, 'assist_speed'):
+#             kwargs['assist_speed'] = self.assist_speed 
+#         #from bmimultitasks import SimpleEndpointAssister   
+#         self.assister = SimpleEndpointAssister(**kwargs)
+
+#     def _start_wait(self):
+#         self.wait_time = 0.
+#         super(CLDAKFSmoothBatch_2DWindow, self)._start_wait()
+    
+#     def create_goal_calculator(self):
+#         from riglib.bmi import goal_calculators #ZeroVelocityGoal
+#         self.goal_calculator = goal_calculators.ZeroVelocityGoal(self.decoder.ssm)
+
+#     def _test_start_trial(self, ts):
+#         return ts > self.wait_time and not self.pause
+
+#     #     if self.memory_decay_rate[0] == -1:
+#     #         F, K = self.decoder.filt.get_sskf()
+#     #         n = np.mean([F[3,3], F[5,5]])
+#     #         self.memory_decay_rate[0] = n
+#     #     super(CLDARMLKFOFCIVC, self).init()
+
+############################################### - end of addition
+
 
 
 class BMIResetting(BMIControlMulti):
