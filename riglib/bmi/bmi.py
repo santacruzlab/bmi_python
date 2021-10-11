@@ -486,6 +486,8 @@ class Decoder(object):
         self.bminum = int(self.binlen/(1/call_rate))
         self.spike_counts = np.zeros([len(units), 1])
 
+        print('HS call_rate bmi.py:', call_rate)
+
         self.set_call_rate(call_rate)
 
         self._pickle_init()
@@ -696,6 +698,7 @@ class Decoder(object):
         None
         '''
         self.call_rate = call_rate
+        print('HS bmi.py call_rate:', call_rate)
         self.bmicount = 0
         self.bminum = int(self.binlen/(1./self.call_rate))
         self.n_subbins = int(np.ceil(1./self.binlen /self.call_rate))
@@ -1111,8 +1114,13 @@ class BMILoop(object):
         from . import accumulator
         feature_shape = [self.decoder.n_features, 1]
         feature_dtype = np.float64
+        print('HS update rate (1/60):', self.update_rate)
+        print('HS binlen (.1):', self.decoder.binlen)
+        print('YZ math',self.decoder.binlen / self.update_rate)
         acc_len = int(self.decoder.binlen / self.update_rate)
         acc_len = max(1, acc_len)
+        print('YZ update rate (1/60):', self.update_rate)
+        print('HS acc_len:', str(acc_len))
         if self.extractor.feature_type in ['lfp_power', 'emg_amplitude']:
             self.feature_accumulator = accumulator.NullAccumulator(acc_len)
         else:
@@ -1296,7 +1304,8 @@ class BMILoop(object):
         Re-open the HDF file and save any extra task data kept in RAM
         '''
         super(BMILoop, self).cleanup_hdf()
-        log_file = open('/home/samantha/bmi_python/log/clda_log', 'w')
+        #log_file = open('/home/samantha/bmi_python/log/clda_log', 'w')
+        log_file = open('/src/log/clda_log', 'w')
         log_file.write(str(self.state) + '\n')
         try:
             from . import clda
