@@ -30,7 +30,7 @@ class Spikes(DataSourceSystem):
     def __init__(self, channels):
         #self.conn = xp
 #        self.conn = cerelink.Connection()        
-        xp._open('tcp')
+        xp._open('tcp') #HS tcp vs udp mode
         self.channels = channels
         self.chan = itertools.cycle(self.channels)
         recChans = np.array(xp.list_elec('nano'))
@@ -60,7 +60,7 @@ class Spikes(DataSourceSystem):
         '''
         arrival_ts = time.time()
         ch = next(self.chan)
-        n, seg_data = xp.spk_data(int(ch - 1),max_spk=10)
+        n, seg_data = xp.spk_data(int(ch - 1),max_spk=10) # channel id input is zero-indexed
         if len(seg_data):
             for p in seg_data:
                 un = 2 ** (p.class_id + 0) # class_id's are 0,1,2,3,4, but self.unit is 2,4,8,16
@@ -97,9 +97,6 @@ class Spikes(DataSourceSystem):
         '''
         return        
 
-"""
-lfp NOT UPDATED FOR RIPPLE YET
-"""
 
 class LFP(DataSourceSystem):
     '''
