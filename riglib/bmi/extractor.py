@@ -171,12 +171,10 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             Extracted features to be saved in the task. 
         '''
         ts = self.get_spike_ts(*args, **kwargs)
-        print("Retrieved spike time:", ts)
         if len(ts) == 0:
             counts = np.zeros([len(self.units), self.n_subbins])
         elif self.n_subbins > 1:
             subbin_edges = np.linspace(self.last_get_spike_counts_time, start_time, self.n_subbins+1)
-            print("Bin edges:", subbin_edges)
             # Decrease the first subbin index to include any spikes that were
             # delayed in getting to the task layer due to threading issues
             # An acceptable delay is 1 sec or less. Realistically, most delays should be
@@ -478,9 +476,8 @@ class LFPMTMPowerExtractor(object):
 
         self.n_pts = int(self.win_len * self.fs)
         self.nfft = 2**int(np.ceil(np.log2(self.n_pts)))  # nextpow2(self.n_pts)
-        print('what is nfft?')
-        print(self.nfft)
         fft_freqs = np.arange(0., fs, float(fs)/self.nfft)[:int(self.nfft/2) + 1]
+        #fft_freqs = np.arange(0., fs, float(fs)/self.nfft)[:self.nfft/2 + 1]
         self.fft_inds = dict()
         for band_idx, band in enumerate(bands):
             self.fft_inds[band_idx] = [freq_idx for freq_idx, freq in enumerate(fft_freqs) if band[0] <= freq < band[1]]
