@@ -478,7 +478,9 @@ class LFPMTMPowerExtractor(object):
 
         self.n_pts = int(self.win_len * self.fs)
         self.nfft = 2**int(np.ceil(np.log2(self.n_pts)))  # nextpow2(self.n_pts)
-        fft_freqs = np.arange(0., fs, float(fs)/self.nfft)[:self.nfft/2 + 1]
+        print('what is nfft?')
+        print(self.nfft)
+        fft_freqs = np.arange(0., fs, float(fs)/self.nfft)[:int(self.nfft/2) + 1]
         self.fft_inds = dict()
         for band_idx, band in enumerate(bands):
             self.fft_inds[band_idx] = [freq_idx for freq_idx, freq in enumerate(fft_freqs) if band[0] <= freq < band[1]]
@@ -555,7 +557,8 @@ class LFPMTMPowerExtractor(object):
             Extracted features to be saved in the task.         
         '''
         cont_samples = self.get_cont_samples(*args, **kwargs)  # dims of channels x time
-        lfp_power = self.extract_features(cont_samples)
+        print(cont_samples)
+        lfp_power = self.extract_features(cont_samples['samples'])
 
         return dict(lfp_power=lfp_power)
 
@@ -645,6 +648,78 @@ class LFPMTMPowerExtractor(object):
 
         elif 'blackrock' in files:
             raise NotImplementedError
+
+        elif 'ripple' in files:
+
+
+            ns5_fname = [name for name in files['ripple'] if '.ns5' in name][0]  # only one of them
+            ns5file = pyns.NSFile(ns5_fname)
+            
+            # interpolate between the rows to 180 Hz
+            if binlen < 1./strobe_rate:
+                interp_rows = []
+                neurows = np.hstack([neurows[0] - 1./strobe_rate, neurows])
+                for r1, r2 in zip(neurows[:-1], neurows[1:]):
+                    interp_rows += list(np.linspace(r1, r2, 4)[1:])
+                interp_rows = np.array(interp_rows)
+            else:
+                step = int(binlen/(1./strobe_rate)) # Downsample kinematic data according to decoder bin length (assumes non-overlapping bins)
+                interp_rows = neurows[::step]
+
+            electrode_list = units[:,0] # first column is electrode numbers
+            # access spike data for all electrodes indicated in units array
+            lfp_entities = [e for e in ns5file.get_entities() if e.entity_type ==2]
+            lfp_entities = [e for e in lfp_entities if (e.label[:3]=='lfp') and (int(e.label.split('\x00')[0][4:]) in electrode_list)]
+
+            print('checkpoint1')
+            print(units)
+            print(units.shape[0])
+            print(electrode_list)
+
+            # create extractor object
+            f_extractor = LFPMTMPowerExtractor(None, **extractor_kwargs)
+            extractor_kwargs = f_extractor.extractor_kwargs
+
+            win_len  = f_extractor.win_len
+            bands    = f_extractor.bands
+            channels = f_extractor.channels
+            fs       = f_extractor.fs
+            print(('bands:', bands))
+
+            n_itrs = len(interp_rows)
+            n_chan = len(channels)
+            lfp_power = np.zeros((n_itrs, n_chan * len(bands)))
+
+            n_data = lfp_entities[0].item_count
+            lfp = np.zeros((n_data, n_chan))
+            for i, e in enumerate(lfp_entities):
+                lfp[:, i] = e.get_analog_data()
+            
+            # for i, t in enumerate(interp_rows):
+            #     cont_samples = plx.lfp[t-win_len:t].data[:, channels-1]
+            #     lfp_power[i, :] = f_extractor.extract_features(cont_samples.T).T
+            #lfp = plx.lfp[:].data[:, channels-1]
+            n_pts = int(win_len * fs)
+            for i, t in enumerate(interp_rows):
+                try:
+                    sample_num = int(t * fs)
+                    cont_samples = lfp[sample_num-n_pts:sample_num, :]
+                    lfp_power[i, :] = f_extractor.extract_features(cont_samples.T).T
+                except:
+                    print("Error with LFP decoder training")
+                    print((i, t))
+                    pass
+
+
+            # TODO -- discard any channel(s) for which the log power in any frequency 
+            #   bands was ever equal to -inf (i.e., power was equal to 0)
+            # or, perhaps just add a small epsilon inside the log to avoid this
+            # then, remember to do this:  extractor_kwargs['channels'] = channels
+            #   and reset the units variable
+
+            return lfp_power, units, extractor_kwargs
+
+
 
 
 #########################################################

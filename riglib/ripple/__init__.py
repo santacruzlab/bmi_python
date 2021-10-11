@@ -30,7 +30,7 @@ class Spikes(DataSourceSystem):
     def __init__(self, channels):
         #self.conn = xp
 #        self.conn = cerelink.Connection()        
-        xp._open()
+        xp._open('tcp')
         self.channels = channels
         self.chan = itertools.cycle(self.channels)
         recChans = np.array(xp.list_elec('nano'))
@@ -100,34 +100,57 @@ class Spikes(DataSourceSystem):
 """
 lfp NOT UPDATED FOR RIPPLE YET
 """
-"""
+
 class LFP(DataSourceSystem):
     '''
     For use with a MultiChanDataSource in order to acquire streaming LFP 
     data from the Blackrock Neural Signal Processor (NSP).
     '''
     
-    update_freq = 1000
-    dtype = np.dtype('float')
+    update_freq = 1000.
+    # dtype = np.dtype([("samples", np.float)])
+    dtype = np.dtype([("chan", np.int32),
+                      ("samples", np.float)])
 
-    def __init__(self, channels):
-#        self.conn = cerelink.Connection()
-#        self.conn.connect()
+    def __init__(self, channels):     
+        xp._open('tcp')
         self.channels = channels
+        self.chan = itertools.cycle(self.channels)
+        recChans = np.array(xp.list_elec('nano'))
+        self.recChans = recChans
+        # make sure all channels are available with spk and lfp data
+        if len(self.recChans):
+            for ii in self.recChans:
+                xp.signal_set(ii.item(),'spk',True)
+                xp.signal_set(ii.item(),'lfp',True)
+                time.sleep(0.001)
 
     def start(self):
-        self.streaming = True
         self.data = self.get_continuous_data()
 
     def stop(self):
-        self.streaming = False
+        xp._close()
 
     def get(self):
-        d = next(self.data)
-        return (d.chan, d.samples)
+
+        n_lfp = 1000
+        # chs = [int(ch-1) for ch in self.channels]
+        # lfpData,lfpTimestamp=xp.cont_lfp(n_lfp,chs)
+        # data = np.zeros((len(self.channels), n_lfp))
+        # for i in range(len(self.channels)):
+        #     data[i, :] = lfpData[i*n_lfp:(i+1)*n_lfp]
+
+        ch = next(self.chan)
+        lfpData, lfpTimestamp = xp.cont_lfp(1000, [int(ch - 1)])
+
+        data = np.array(lfpData, dtype='float')
+
+        # data = np.array([ch, np.array(lfpData)], dtype=self.dtype)
+        # data = np.array(lfpData, dtype=self.dtype)
+        return (ch, data)
 
     def get_continuous_data(self):
-        
+        '''
         sleep_time = 0
         n_samples = 1000
         
@@ -141,4 +164,6 @@ class LFP(DataSourceSystem):
                 yield ContinuousData(chan=chan, samples=seg_data, arrival_ts=arrival_ts)
 
         time.sleep(sleep_time)  
-"""
+        '''
+        return
+

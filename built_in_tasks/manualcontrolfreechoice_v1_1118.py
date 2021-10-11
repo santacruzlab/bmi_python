@@ -134,7 +134,7 @@ class ManualControlFreeChoice(Sequence, Window):
     color1 = target_colors['purple']#target_colors['purple'] 'magenta' olive# high color
     color2 = target_colors['blue']#target_colors['lightsteelblue'] 'teal' juicyorange #low color
 
-    sequence_generators = ['colored_targets_with_probabilistic_reward','block_probabilistic_reward','colored_targets_with_randomwalk_reward','randomwalk_probabilistic_reward']
+    sequence_generators = ['colored_targets_with_probabilistic_reward','block_probabilistic_reward','colored_targets_with_randomwalk_reward','randomwalk_probabilistic_reward','colored_targets_with_probabilistic_reward_5p']
     
     def __init__(self, *args, **kwargs):
         super(ManualControlFreeChoice, self).__init__(*args, **kwargs)
@@ -731,6 +731,51 @@ class ManualControlFreeChoice(Sequence, Window):
         pairs = colored_targets_with_probabilistic_reward(length=length, boundaries=boundaries,reward_high_prob=reward_high_prob,reward_low_prob=reward_low_prob)
         return pairs
 
+
+    @staticmethod
+    def colored_targets_with_probabilistic_reward_5p(length=1000, boundaries=(-18,18,-10,10,-15,15),num_blocks=5): #! 20210723 YZ added
+
+        """
+        Generator should return array of ntrials x 2 x 3. The second dimension is for each target.
+        For example, first is the target with high probability of reward, and the second 
+        entry is for the target with low probability of reward.  The third dimension holds three variables indicating 
+        position offset (yes/no), reward probability (fixed in this case), and location (binary returned where the
+        ouput indicates either left or right).
+        UPDATE: CHANGED SO THAT THE SECOND DIMENSION CARRIES THE REWARD PROBABILITY RATHER THAN THE REWARD SCHEDULE
+        """
+
+        position_offsetH = np.random.randint(2,size=(1,length))
+        position_offsetL = np.random.randint(2,size=(1,length))
+        location_int = np.random.randint(2,size=(1,length))
+
+        # coin flips for reward schedules, want this to be elementwise comparison
+        #assign_rewardH = np.random.randint(0,100,size=(1,length))
+        #assign_rewardL = np.random.randint(0,100,size=(1,length))
+        probability = np.array([0,20,40,60,80,100],dtype=int)
+        import random
+        random.shuffle(probability)
+        high_prob = np.ones((1,length))
+        low_prob = np.ones((1,length))
+        block_trials = int(length/num_blocks)
+        for i in range(num_blocks):
+            high_prob[0,int(i*block_trials):int((i+1)*block_trials)] = probability[i]
+            low_prob[0,int(i*block_trials):int((i+1)*block_trials)] = 100 - probability[i]
+        #reward_high = np.greater(high_prob,assign_rewardH)
+        #reward_low = np.greater(low_prob,assign_rewardL)
+
+        pairs = np.zeros([length,2,3])
+        pairs[:,0,0] = position_offsetH
+        #pairs[:,0,1] = reward_high
+        pairs[:,0,1] = high_prob
+        pairs[:,0,2] = location_int
+
+        pairs[:,1,0] = position_offsetL
+        #pairs[:,1,1] = reward_low
+        pairs[:,1,1] = low_prob
+        pairs[:,1,2] = 1 - location_int
+
+        return pairs
+
     @staticmethod
     def colored_targets_with_randomwalk_reward(length=1000,reward_high_prob=80,reward_low_prob=40,reward_high_span = 20, reward_low_span = 20,step_size_mean = 0, step_size_var = 1):
 
@@ -865,7 +910,7 @@ class FreeChoicePilotTask(ManualControlFreeChoice):
         reward = dict(reward_end="wait")
     )
 
-    sequence_generators = ['colored_targets_with_probabilistic_reward','block_probabilistic_reward','colored_targets_with_randomwalk_reward','randomwalk_probabilistic_reward']
+    sequence_generators = ['colored_targets_with_probabilistic_reward','block_probabilistic_reward','colored_targets_with_randomwalk_reward','randomwalk_probabilistic_reward','colored_targets_with_probabilistic_reward_5p']
     
     def __init__(self, *args, **kwargs):
         super(FreeChoicePilotTask, self).__init__(*args, **kwargs)

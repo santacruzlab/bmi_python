@@ -110,7 +110,7 @@ def _proc_timestamp_struct(tup):
     input: tup holding eight integers
     returns: datetime instance
     """
-    return datetime(tup[0], tup[1], tup[3], tup[4],
+    return datetime(tup[0], tup[1], tup[3]-1, tup[4],
         tup[5], tup[6], tup[7]*1000)
 
 def ParserFactory(filename):
@@ -203,6 +203,7 @@ class NevParser:
                                   "cannot find NEURALEV header\n")
         # NEURALEV files contains Windows SYSTEMTIME struct.  We want to store
         # this as a Python datetime class
+        print(tup)
         timestamp = _proc_timestamp_struct(tup[8:16])
         return NEURALEV._make(tup[:8] + (timestamp,) + tup[16:])
     
@@ -697,15 +698,17 @@ class Nsx22Parser:
         Returns:
             Requested waveform as a numpy.array
         """
-        if index_count <= 0 or \
-            index_count + start_index > self.n_data_points:
-            NeuroshareError(NSReturnTypes.NS_BADINDEX, 
-                            'invalid index count')
-        if start_index < 0:
-            NeuroshareError(NSReturnTypes.NS_BADINDEX,
-                            'invalid start index')
+
         if index_count == None:
             index_count = self.n_data_points - start_index
+        # else: 
+        #     if index_count <= 0 or \
+        #         index_count + start_index > self.n_data_points:
+        #         NeuroshareError(NSReturnTypes.NS_BADINDEX, 
+        #                         'invalid index count')
+        #     if start_index < 0:
+        #         NeuroshareError(NSReturnTypes.NS_BADINDEX,
+        #                         'invalid start index')
         
         # initialize an array to return
         waveform = numpy.zeros(index_count)

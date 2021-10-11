@@ -116,6 +116,7 @@ def make_bmi(name, clsname, extractorname, entry, cells, channels, binlen, tslic
     elif ('lfp' in extractor_cls.feature_type) or ('ai_' in extractor_cls.feature_type):  # e.g., 'lfp_power'
         # look at "channels" argument (ignore "cells")
         channels = np.array(channels.split(', ')).astype(np.int32)  # convert str to list of numbers
+        print(channels)
         if len(channels) == 0:
             channels = [1, 2, 3, 4]  # use these channels by default
         else:
