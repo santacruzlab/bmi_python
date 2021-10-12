@@ -537,7 +537,7 @@ def create_onedimLFP(files, extractor_cls, extractor_kwargs, kin_extractor, ssm,
     from . import extractor
     f_extractor = extractor.LFPMTMPowerExtractor(None, **extractor_kwargs)
     from . import onedim_lfp_decoder as old
-    return old.create_decoder(units, ssm, extractor_cls, f_extractor.extractor_kwargs)
+    return [old.create_decoder(units, ssm, extractor_cls, f_extractor.extractor_kwargs)]
 
 def test_ratBMIdecoder(te_id=None, update_rate=0.1, tslice=None, kin_source='task', pos_key='cursor', vel_key=None, **kwargs):
     from db import dbfunctions as dbfn

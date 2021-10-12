@@ -23,4 +23,5 @@ chain_20_20.set_intrinsic_coordinates(init_pos)
 plantlist = dict(
 	cursor_14x14=cursor_14x14, 
 	chain_20_20=chain_20_20, 
-	chain_20_20_endpt=chain_20_20_endpt)
+	chain_20_20_endpt=chain_20_20_endpt,
+	onedimLFP_CursorPlant=plants.onedimLFP_CursorPlant(endpt_bounds=(-14, 14, 0., 0., -14, 14), lfp_cursor_rad=0.4, lfp_cursor_color=(.5, 0, .5, 1)))

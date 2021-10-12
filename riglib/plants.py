@@ -350,9 +350,10 @@ class onedimLFP_CursorPlant(CursorPlant):
         self.graphics_models = [self.cursor]
 
     def drive(self, decoder):
-        pos = decoder.filt.get_mean()
+        pos = decoder.filt.get_mean()[2]  # Question: there are 6 elements... which one is the one of interest?  10/12/21
+        
         pos = [-8, -2.2, pos]
-
+        
         if self.endpt_bounds is not None:
             if pos[2] < self.endpt_bounds[4]: 
                 pos[2] = self.endpt_bounds[4]
