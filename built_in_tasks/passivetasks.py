@@ -21,7 +21,7 @@ from riglib.experiment import traits, experiment
 from riglib.bmi import clda, assist, extractor, train, goal_calculators, ppfdecoder
 from riglib.bmi.bmi import Decoder, BMISystem, GaussianStateHMM, BMILoop, GaussianState, MachineOnlyFilter
 from riglib.bmi.extractor import DummyExtractor
-from riglib.stereo_opengl.window import WindowDispl2D, FakeWindow
+from riglib.stereo_opengl.window import Window, WindowDispl2D, FakeWindow
 
 
 from .bmimultitasks import BMIControlMulti
@@ -54,8 +54,9 @@ class TargetCaptureVisualFeedback(EndPostureFeedbackController, BMIControlMulti)
     def move_effector(self):
         pass
 
-class TargetCaptureVFB2DWindow(TargetCaptureVisualFeedback, WindowDispl2D):
+class TargetCaptureVFB2DWindow(TargetCaptureVisualFeedback, Window): #WindowDispl2D):
     fps = 20.
+    background = (0,0,0,1)
     is_bmi_seed = True
     def __init__(self,*args, **kwargs):
         super(TargetCaptureVFB2DWindow, self).__init__(*args, **kwargs)
