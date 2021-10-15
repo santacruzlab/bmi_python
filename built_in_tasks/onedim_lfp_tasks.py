@@ -399,8 +399,8 @@ class LFP_Mod(BMILoop, Sequence, Window):
         self.target_index = -1
 
     def _start_reward(self):
-        super(LFP_Mod, self)._start_reward()
-        #self.targets[self.target_index % 2].show()
+        #super(LFP_Mod, self)._start_reward()
+        self.targets[self.target_index % 2].show()
 
     def _start_powercap_penalty(self):
         for target in self.targets:
