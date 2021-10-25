@@ -55,7 +55,7 @@ class TargetCaptureVisualFeedback(EndPostureFeedbackController, BMIControlMulti)
         pass
 
 class TargetCaptureVFB2DWindow(TargetCaptureVisualFeedback, Window): #WindowDispl2D):
-    fps = 20.
+    fps = 60.#20.
     background = (0,0,0,1)
     is_bmi_seed = True
     def __init__(self,*args, **kwargs):
