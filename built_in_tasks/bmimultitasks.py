@@ -229,6 +229,7 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
         pass
 
     def create_assister(self):
+        print('HS:', (self.decoder.ssm))
         # Create the appropriate type of assister object
         start_level, end_level = self.assist_level
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
