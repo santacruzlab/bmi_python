@@ -1114,13 +1114,9 @@ class BMILoop(object):
         from . import accumulator
         feature_shape = [self.decoder.n_features, 1]
         feature_dtype = np.float64
-        print('HS update rate (1/60):', self.update_rate)
-        print('HS binlen (.1):', self.decoder.binlen)
-        print('YZ math',self.decoder.binlen / self.update_rate)
         acc_len = int(self.decoder.binlen / self.update_rate)
         acc_len = max(1, acc_len)
-        print('YZ update rate (1/60):', self.update_rate)
-        print('HS acc_len:', str(acc_len))
+        
         if self.extractor.feature_type in ['lfp_power', 'emg_amplitude']:
             self.feature_accumulator = accumulator.NullAccumulator(acc_len)
         else:
