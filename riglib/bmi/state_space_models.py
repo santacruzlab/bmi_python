@@ -195,7 +195,7 @@ class StateSpace(object):
 
 class LinearVelocityStateSpace(StateSpace):
     def __init__(self, states, vel_decay=0.8, w=7, Delta=0.1): # HMS and YZ change the w from 7 to 14 to 10
-        print('HS: LVSS, w', w)
+
         self.states = states 
         self.vel_decay = vel_decay
         self.w = w
