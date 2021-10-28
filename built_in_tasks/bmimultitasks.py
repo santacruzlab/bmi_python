@@ -229,7 +229,7 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
         pass
 
     def create_assister(self):
-        print('HS:', (self.decoder.ssm))
+        print('HS MADE IT TO THIS POINT \n\n\n\n:', type(self.decoder.ssm))
         # Create the appropriate type of assister object
         start_level, end_level = self.assist_level
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
@@ -251,7 +251,6 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
         else:
             raise NotImplementedError("Cannot assist for this type of statespace: %r" % self.decoder.ssm)        
         
-        print(self.assister)
 
     def create_goal_calculator(self):
         if isinstance(self.decoder.ssm, StateSpaceEndptVel2D):
@@ -277,7 +276,8 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
             self.goal_calculator = goal_calc_class(namelist.tentacle_2D_state_space, shoulder_anchor, 
                                                    chain, multiproc=multiproc, init_resp=x_init)
         else:
-            raise ValueError("Unrecognized decoder state space!")
+            self.goal_calculator = goal_calculators.ZeroVelocityGoal(self.decoder.ssm)
+            #!! raise ValueError("Unrecognized decoder state space!")
 
     def get_target_BMI_state(self, *args):
         '''
