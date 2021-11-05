@@ -86,15 +86,18 @@ class CursorErrorClamp(object):
 
         self.reportstats['Perturbation'] = str(self._gen_curl)
         self.reportstats['Error clamp'] = str(self._gen_error_clamp)
+        self.reportstats['Block Type'] = str(self._gen_block_type)
 
     def init(self):
         self.add_dtype('error_clamp', 'i', (1,))
         self.add_dtype('pert', 'i', (1,))
+        self.add_dtype('block_type', 'i', (1,))
         super(CursorErrorClamp, self).init()
 
     def _cycle(self):
         self.task_data['error_clamp'] = self._gen_error_clamp
         self.task_data['pert'] = self._gen_curl
+        self.task_data['block_type'] = self._gen_block_type
         super(CursorErrorClamp, self)._cycle()
 
     @staticmethod 
@@ -112,7 +115,7 @@ class CursorErrorClamp(object):
 
         target_angles = np.arange(-np.pi, np.pi, 2*np.pi/ntargets)
         targs = np.vstack([np.cos(target_angles), np.zeros_like(target_angles), np.sin(target_angles)]).T * distance
-        targ_seqs = [dict(targs=np.vstack([np.zeros(3), targ]), error_clamp=False, curl=False) for targ in targs]
+        targ_seqs = [dict(targs=np.vstack([np.zeros(3), targ]), error_clamp=False, curl=False, block_type=1) for targ in targs]
 
         metablock = []
         for k in range(n_meta_blocks):
@@ -140,6 +143,7 @@ class CursorErrorClamp(object):
                 for tr in row:
                     tr['curl'] = True
                     tr['error_clamp'] = False
+                    tr['block_type'] = 2
 
             shuffle(_metablock)
             for row in _metablock:
@@ -151,6 +155,7 @@ class CursorErrorClamp(object):
                 shuffle(row)
                 for tr in row:
                     tr['curl'] = True
+                    tr['block_type'] = 3
 
             shuffle(_metablock)
             for row in _metablock:
@@ -163,6 +168,7 @@ class CursorErrorClamp(object):
                 for tr in row:
                     tr['curl'] = False
                     tr['error_clamp'] = False
+                    tr['block_type'] = 4
 
             shuffle(_metablock)
             for row in _metablock:
@@ -182,7 +188,15 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_infrequent']    
-    rot_angle_deg = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees')    
+    rot_angle_deg = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees') 
+    
+    # ntargets = traits.Float(-1., desc='SEE PARAMETERS')    
+    # distance = traits.Float(-1., desc='SEE PARAMETERS')    
+    # n_baseline_blocks = traits.Float(-1., desc='SEE PARAMETERS')   
+    # n_pert_learning_blocks  = traits.Float(-1., desc='SEE PARAMETERS')
+    # n_pert_err_clamp_blocks = traits.Float(-1., desc='SEE PARAMETERS')
+    # n_washout_blocks = traits.Float(-1., desc='SEE PARAMETERS')    
+
     def _parse_next_trial(self):
         super(BMICursorVisRotErrorClamp, self)._parse_next_trial()
         self.decoder.filt.rot_angle_deg = self.rot_angle_deg * int(self._gen_curl)
