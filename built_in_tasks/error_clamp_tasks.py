@@ -3,6 +3,9 @@ from riglib.bmi import kfdecoder
 import numpy as np
 from riglib.experiment import traits
 from .bmimultitasks import SimpleEndpointAssister
+import pickle
+import os
+from datetime import date
 
 class CurlFieldKalmanFilter(kfdecoder.KalmanFilter):
     def _calc_kalman_gain(self, P):
@@ -21,6 +24,9 @@ class CurlFieldKalmanFilter(kfdecoder.KalmanFilter):
         return K
 
 class VisRotKalmanFilter(kfdecoder.KalmanFilter):
+    #def __init__(self, *args, **kwargs):
+    #    dir(self)        #self.fn = fn
+
     def _calc_kalman_gain(self, P):
         '''
         see KalmanFilter._calc_kalman_gain
@@ -28,11 +34,33 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         K = super(VisRotKalmanFilter, self)._calc_kalman_gain(P)
         theta = np.deg2rad(self.rot_angle_deg)
 
+
         R = np.mat([[np.cos(theta), -np.sin(theta)],
                       [np.sin(theta), np.cos(theta)]])
         K[[0,2],:] = R * K[[0,2],:]
         K[[3,5],:] = R * K[[3,5],:]
+
+        today = date.today()
+        d = today.strftime("%m/%d/%y")
+        fn = 'airp' + d[:2] + d[3:5]  + '_KG_VRKF.pkl'  #+ '_' + str(self.decoder.te_id)
+        
+
+        cwd = os.path.abspath(os.getcwd())
+        os.chdir('/storage/rawdata/bmi')
+        with open(fn, 'ab') as f:
+            pickle.dump(K, f)
+            f.close()
+        os.chdir(cwd)
+
         return K
+
+class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
+    def _calc_kalman_gain(self, P):
+
+        K = super(ShuffledKalmanFilter, self)._calc_kalman_gain(P)
+        #Shuffle function ...
+
+    #def _check_(K):    
 
 from .bmimultitasks import BMIControlMulti, BMIResetting
 class BMICursorKinematicCurlField(BMIResetting):
@@ -173,7 +201,7 @@ class CursorErrorClamp(object):
             shuffle(_metablock)
             for row in _metablock:
                 trials += row
-        print(np.shape(trials))
+        #print(np.shape(trials))
         return trials
 
 class BMICursorKinematicCurlErrorClamp(BMICursorKinematicCurlField, CursorErrorClamp):
@@ -188,14 +216,10 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_infrequent']    
-    rot_angle_deg = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees') 
-    
-    # ntargets = traits.Float(-1., desc='SEE PARAMETERS')    
-    # distance = traits.Float(-1., desc='SEE PARAMETERS')    
-    # n_baseline_blocks = traits.Float(-1., desc='SEE PARAMETERS')   
-    # n_pert_learning_blocks  = traits.Float(-1., desc='SEE PARAMETERS')
-    # n_pert_err_clamp_blocks = traits.Float(-1., desc='SEE PARAMETERS')
-    # n_washout_blocks = traits.Float(-1., desc='SEE PARAMETERS')    
+    rot_angle_deg = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees')    
+
+
+
 
     def _parse_next_trial(self):
         super(BMICursorVisRotErrorClamp, self)._parse_next_trial()
@@ -208,6 +232,7 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
         self.assister = SimpleEndpointAssister(**kwargs)
 
     def load_decoder(self):
+      
         super(BMICursorVisRotErrorClamp, self).load_decoder()
         # Convert the KF to a curl-field generating KF
         dec = self.decoder
