@@ -485,9 +485,6 @@ class Decoder(object):
         self.bmicount = 0
         self.bminum = int(self.binlen/(1/call_rate))
         self.spike_counts = np.zeros([len(units), 1])
-
-        print('HS call_rate bmi.py:', call_rate)
-
         self.set_call_rate(call_rate)
 
         self._pickle_init()
@@ -698,7 +695,6 @@ class Decoder(object):
         None
         '''
         self.call_rate = call_rate
-        print('HS bmi.py call_rate:', call_rate)
         self.bmicount = 0
         self.bminum = int(self.binlen/(1./self.call_rate))
         self.n_subbins = int(np.ceil(1./self.binlen /self.call_rate))
@@ -1060,6 +1056,7 @@ class BMILoop(object):
         self.add_dtype('internal_decoder_state', 'f8', self.decoder.state_shape_rt)
         self.add_dtype('target_state', 'f8', self.decoder.state_shape_rt)
         self.add_dtype('update_bmi', 'f8', (1,))
+
 
         # Construct the sub-pieces of the BMI system
         self.create_assister()
