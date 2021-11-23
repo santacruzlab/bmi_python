@@ -592,10 +592,10 @@ class BMIResetting(BMIControlMulti):
 
     def _while_premove(self):
         #HS: If you want the cursor to automatically jump back to center, then uncomment the first two lines and comment out "pass". (self.decoder.filt.state...was previously commented out.)
-        #self.plant.set_endpoint_pos(self.targs[0])
-        #self.decoder['q'] = self.plant.get_intrinsic_coordinates()
+        self.plant.set_endpoint_pos(self.targs[0])
+        self.decoder['q'] = self.plant.get_intrinsic_coordinates()
         # self.decoder.filt.state.mean = self.calc_perturbed_ik(self.targs[0])
-        pass
+        #pass
 
     def _start_premove(self):
 
