@@ -31,6 +31,7 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         '''
         see KalmanFilter._calc_kalman_gain
         '''
+        print('HS: ')
         K = super(VisRotKalmanFilter, self)._calc_kalman_gain(P)
         theta = np.deg2rad(self.rot_angle_deg)
 
@@ -126,6 +127,7 @@ class CursorErrorClamp(object):
         self.task_data['error_clamp'] = self._gen_error_clamp
         self.task_data['pert'] = self._gen_curl
         self.task_data['block_type'] = self._gen_block_type
+
         super(CursorErrorClamp, self)._cycle()
 
     @staticmethod 
