@@ -171,12 +171,12 @@ def format_timeorigin(header_list):
     year        = next(header_list)
     month       = next(header_list)
     _           = next(header_list)
-    day         = next(header_list)
+    day         = next(header_list)-1
     hour        = next(header_list)
     minute      = next(header_list)
     second      = next(header_list)
     millisecond = next(header_list)
-    return datetime(year, month, day, hour, minute, second, millisecond * 1000)
+    return datetime(year, month, day, hour, minute, second, millisecond * 1000) # day minuses one to avoid out of month range
 
 
 def format_stripstring(header_list):
