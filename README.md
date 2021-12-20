@@ -41,6 +41,7 @@ pip3 install -e . --use-deprecated=legacy-resolver
 ```
 - New python setuptool raise the error: *error in anyjson setup command: use_2to3 is invalid*, run the following code before the last line of code: 
 ```bash
+pip3 install --upgrade pip setuptools
 sudo apt install python3-anyjson
 ``` 
 
