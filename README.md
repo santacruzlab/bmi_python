@@ -35,6 +35,15 @@ pip3 install -r requirements.txt
 pip3 install -e .
 ```
 
+- Resolving new pip backtracking runtime issue: instead of running the last line of code, run the following code:
+```bash
+pip3 install -e . --use-deprecated=legacy-resolver
+```
+- New python setuptool raise the error: *error in anyjson setup command: use_2to3 is invalid*, run the following code before the last line of code: 
+```bash
+sudo apt install python3-anyjson
+``` 
+
 ## Installation in Docker
 - Set up docker on Ubuntu following these instructions: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04
 - In the `install` folder, execute `build_docker.sh` to build the image
