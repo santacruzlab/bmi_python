@@ -1,6 +1,6 @@
 import os
 def main():
-	b = os.path.isdir('/storage/')
+	b = os.path.isdir('/media/samantha/ssd/storage/')
 	return b
 
 if __name__=='__main__':

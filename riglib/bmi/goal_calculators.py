@@ -296,9 +296,9 @@ class PlanarMultiLinkJointGoalCached(GoalCalculator, mp_calc.FuncProxy):
         self.kin_chain = kin_chain
         if 0: #'goal_cache_block' in kwargs:
             goal_cache_block = kwargs.pop('goal_cache_block')
-            self.cached_data = pickle.load(open('/storage/assist_params/tentacle_cache_%d.pkl' % goal_cache_block))
+            self.cached_data = pickle.load(open('/media/samantha/ssd/storage/assist_params/tentacle_cache_%d.pkl' % goal_cache_block))
         else:
-            self.cached_data = pickle.load(open('/storage/assist_params/tentacle_cache3.pkl'))
+            self.cached_data = pickle.load(open('/media/samantha/ssd/storage/assist_params/tentacle_cache3.pkl'))
 
         def fn(target_pos, **kwargs):
             '''    Docstring    '''
