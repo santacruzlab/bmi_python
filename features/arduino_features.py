@@ -378,7 +378,7 @@ class RippleSerialDIORowByte(SerialDIORowByte):
 
     def __init__(self, *args, **kwargs):
         super(RippleSerialDIORowByte, self).__init__(*args, **kwargs)
-        self.data_root = '/storage/ripple/'
+        self.data_root = '/media/samantha/ssd/storage/ripple/'
         self.file_exts = [".nev", ".ns1", ".ns2", ".ns3", ".ns4", ".ns5", ".ns6"]
         self.file_pattern = []
         for file_ext in self.file_exts:

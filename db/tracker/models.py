@@ -316,7 +316,7 @@ class System(models.Model):
                 System.objects.get(name=name)
             except ObjectDoesNotExist:
                 print('HELLO WTF')
-                System(name=name, path="/storage/rawdata/%s"%name).save()
+                System(name=name, path="/media/samantha/ssd/storage/rawdata/%s"%name).save()
 
     def get_post_processor(self):
         if self.processor_path is not None and len(self.processor_path) > 0:
@@ -329,7 +329,7 @@ class System(models.Model):
         try:
             new_sys_rec = System.objects.get(name=name)
         except ObjectDoesNotExist:
-            data_dir = "/storage/rawdata/%s" % name
+            data_dir = "/media/samantha/ssd/storage/rawdata/%s" % name
             new_sys_rec = System(name=name, path=data_dir)
             new_sys_rec.save()
             os.popen('mkdir -p %s' % data_dir)
@@ -609,7 +609,7 @@ class TaskEntry(models.Model):
         ##    del data['bmi']
         return data
 
-    def plexfile(self, path='/storage/plexon/', search=False):
+    def plexfile(self, path='/media/samantha/ssd/storage/plexon/', search=False):
         rplex = Feature.objects.get(name='relay_plexon')
         rplexb = Feature.objects.get(name='relay_plexbyte')
         feats = self.feats.all()
@@ -761,6 +761,7 @@ class TaskEntry(models.Model):
 
                 
                 js['bmi'] = dict(_neuralinfo=_neuralinfo)
+                print(self.nev_file)
                 print("success with ripple js dictionary")
                 
             except MemoryError:
@@ -1025,7 +1026,7 @@ class Decoder(models.Model):
 
     def load(self, db_name=None, **kwargs):
         data_path = self.get_data_path()
-        data_path = '/storage/rawdata/bmi/'
+        data_path = '/media/samantha/ssd/storage/rawdata/bmi/'
         print(data_path)
         print(self.path)
         #decoder_fname = os.path.join(data_path, 'decoders', self.path)
@@ -1171,7 +1172,7 @@ def parse_blackrock_file(nev_fname, nsx_files, task_entry, nsx_chan = np.arange(
             files = [d.get_path() for d in datafiles]
         else:
             # Guess where the file shoudl be: 
-            files = ['/storage/rawdata/blackrock/'+nev_hdf_fname]
+            files = ['/media/samantha/ssd/storage/rawdata/blackrock/'+nev_hdf_fname]
         
         if nev_hdf_fname in files:
             hdf = tables.openFile(nev_hdf_fname)
@@ -1541,7 +1542,7 @@ class DataFile(models.Model):
         '''
         try:
             fname = self.get_path()
-            rel_datafile = os.path.relpath(fname, '/storage')
+            rel_datafile = os.path.relpath(fname, '/media/samantha/ssd/storage')
             backup_fname = os.path.join(backup_root, rel_datafile)
             return os.path.exists(backup_fname)
         except:

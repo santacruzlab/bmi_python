@@ -275,7 +275,7 @@ def conv_mm_dec_to_cm(decoder_record):
     from .tasktrack import Track
     from .tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
 
-    decoder_fname = os.path.join('/storage/decoders/', decoder_record.path)
+    decoder_fname = os.path.join('/media/samantha/ssd/storage/decoders/', decoder_record.path)
     print(decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
@@ -331,7 +331,7 @@ def conv_kfdecoder_to_ppfdecoder(decoder_record):
     from .tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
 
     # Load the decoder
-    decoder_fname = os.path.join('/storage/decoders/', decoder_record.path)
+    decoder_fname = os.path.join('/media/samantha/ssd/storage/decoders/', decoder_record.path)
     print(decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
@@ -379,7 +379,7 @@ def make_kfdecoder_interpolate(decoder_record):
     from .tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
         
     # Load the decoder
-    decoder_fname = os.path.join('/storage/decoders/', decoder_record.path)
+    decoder_fname = os.path.join('/media/samantha/ssd/storage/decoders/', decoder_record.path)
     print(decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))

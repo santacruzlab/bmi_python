@@ -30,7 +30,7 @@ class Spikes(DataSourceSystem):
     def __init__(self, channels):
         #self.conn = xp
 #        self.conn = cerelink.Connection()        
-        xp._open('tcp') #HS tcp vs udp mode
+        xp._open() #HS tcp vs udp mode
         self.channels = channels
         self.chan = itertools.cycle(self.channels)
         recChans = np.array(xp.list_elec('nano'))
@@ -110,7 +110,7 @@ class LFP(DataSourceSystem):
                       ("samples", np.float)])
 
     def __init__(self, channels):     
-        xp._open('tcp')
+        xp._open()
         self.channels = channels
         self.chan = itertools.cycle(self.channels)
         recChans = np.array(xp.list_elec('nano'))

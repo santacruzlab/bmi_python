@@ -608,9 +608,9 @@ def test_IsmoreSleepDecoder(te_id, e1_units, e2_units, nsteps=1, prob_t1 = 0.985
     
     decoder.extractor_cls = extractor_cls
     decoder.extractor_kwargs = extractor_kwargs
-    pickle.dump(decoder, open('/storage/decoders/sleep_from_te'+str(te_id)+'.pkl', 'wb'))
+    pickle.dump(decoder, open('/media/samantha/ssd/storage/decoders/sleep_from_te'+str(te_id)+'.pkl', 'wb'))
     from db.tracker import dbq
-    dbq.save_bmi('sleep_from_te'+str(te_id), te_id, '/storage/decoders/sleep_from_te'+str(te_id)+'.pkl')
+    dbq.save_bmi('sleep_from_te'+str(te_id), te_id, '/media/samantha/ssd/storage/decoders/sleep_from_te'+str(te_id)+'.pkl')
     return decoder, nrewards
 
 def create_ratBMIdecoder(task_params):

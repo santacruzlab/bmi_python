@@ -47,7 +47,7 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         
 
         cwd = os.path.abspath(os.getcwd())
-        os.chdir('/storage/rawdata/bmi')
+        os.chdir('/media/samantha/ssd/storage/rawdata/bmi')
         with open(fn, 'ab') as f:
             pickle.dump(K, f)
             f.close()
