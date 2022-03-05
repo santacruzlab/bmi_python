@@ -184,8 +184,8 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             counts = np.vstack([self.bin_spikes(ts[subbin_inds == k], self.units) for k in range(1, self.n_subbins+1)]).T
         else:
             counts = self.bin_spikes(ts, self.units).reshape(-1, 1)
-            print("Units", self.units)
-            print("Counts:", counts)
+            #print("Units", self.units)
+            #print("Counts:", counts)
 
         counts = np.array(counts, dtype=np.uint32)
         bin_edges = self.get_bin_edges(ts)
