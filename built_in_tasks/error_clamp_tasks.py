@@ -31,7 +31,7 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         '''
         see KalmanFilter._calc_kalman_gain
         '''
-        print('HS: ')
+        #print('HS: ')
         K = super(VisRotKalmanFilter, self)._calc_kalman_gain(P)
         theta = np.deg2rad(self.rot_angle_deg)
 
@@ -43,7 +43,7 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
 
         today = date.today()
         d = today.strftime("%m/%d/%y")
-        fn = 'airp' + d[:2] + d[3:5]  + '_KG_VRKF.pkl'  #+ '_' + str(self.decoder.te_id)
+        fn = 'airp' + d[:2] + d[3:5]  + '_KG_VRKF.pkl'  #VRKF: visuomotor rotation kalman filter
         
 
         cwd = os.path.abspath(os.getcwd())
@@ -59,9 +59,23 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
     def _calc_kalman_gain(self, P):
 
         K = super(ShuffledKalmanFilter, self)._calc_kalman_gain(P)
-        #Shuffle function ...
+        K[3,:] = np.random.shuffle(K[3,:]) #Need to check if the shuffling occurs each time and if we directly shuffle and save in one step !!HS
+        K[5,:] = np.random.shuffle(K[5,:])
 
-    #def _check_(K):    
+        today = date.today()
+        d = today.strftime("%m/%d/%y")
+        fn = 'airp' + d[:2] + d[3:5]  + '_KG_SHKF.pkl' #SHKF: shuffled kalman filter  
+
+        cwd = os.path.abspath(os.getcwd())
+        os.chdir('/media/samantha/ssd/storage/rawdata/bmi')
+        with open(fn, 'ab') as f:
+            pickle.dump(K, f)
+            f.close()
+        os.chdir(cwd)
+
+        return K
+
+        
 
 from .bmimultitasks import BMIControlMulti, BMIResetting
 class BMICursorKinematicCurlField(BMIResetting):
@@ -220,9 +234,6 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
     sequence_generators = ['center_out_error_clamp_infrequent']    
     rot_angle_deg = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees')    
 
-
-
-
     def _parse_next_trial(self):
         super(BMICursorVisRotErrorClamp, self)._parse_next_trial()
         self.decoder.filt.rot_angle_deg = self.rot_angle_deg * int(self._gen_curl)
@@ -243,3 +254,31 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
         filt.C_xpose_Q_inv_C = dec.filt.C_xpose_Q_inv_C
         filt.rot_angle_deg = self.rot_angle_deg
         self.decoder.filt = filt        
+
+class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
+    'HS: Added 20220218'
+    background = (0,0,0,1)
+    exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
+    sequence_generators = ['center_out_error_clamp_infrequent']    
+    
+
+    def _parse_next_trial(self):
+        super(BMICursorShuffleErrorClamp, self)._parse_next_trial()
+        #self.decoder.filt.rot_angle_deg = self.rot_angle_deg * int(self._gen_curl)
+
+    def create_assister(self):
+        kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
+        if hasattr(self, 'assist_speed'):
+            kwargs['assist_speed'] = self.assist_speed    
+        self.assister = SimpleEndpointAssister(**kwargs)
+
+    def load_decoder(self):
+      
+        super(BMICursorShuffleErrorClamp, self).load_decoder()
+        # Shuffle KF once at start of perturbation block.
+        dec = self.decoder
+        filt = ShuffledKalmanFilter(A=dec.filt.A, W=dec.filt.W, C=dec.filt.C, Q=dec.filt.Q, is_stochastic=dec.filt.is_stochastic)
+        filt.C_xpose_Q_inv = dec.filt.C_xpose_Q_inv
+        filt.C_xpose_Q_inv_C = dec.filt.C_xpose_Q_inv_C
+        filt.rot_angle_deg = self.rot_angle_deg
+        self.decoder.filt = filt  
