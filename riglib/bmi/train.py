@@ -401,14 +401,14 @@ def _get_neural_features_ripple(files, binlen, extractor_fn, extractor_kwargs, t
     tmask, rows = _get_tmask_ripple(nev_fname[0], tslice, sys_name=source)
     neurows = rows[tmask]
 
-    print('what is tmask')
-    print(tmask)
-    print('where is neurows....')
-    print(neurows)
-    print('what is extractor_kwargs..')
-    print(extractor_kwargs)
-    print('what is extractor_fn??')
-    print(extractor_fn)
+    #print('what is tmask')
+    #print(tmask)
+    #print('where is neurows....')
+    #print(neurows)
+    #print('what is extractor_kwargs..')
+    #print(extractor_kwargs)
+    #print('what is extractor_fn??')
+    #print(extractor_fn)
 
     neural_features, units, extractor_kwargs = extractor_fn(files, neurows, binlen, units, extractor_kwargs)
 
