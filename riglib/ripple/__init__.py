@@ -64,7 +64,7 @@ class Spikes(DataSourceSystem):
         if len(seg_data):
             for p in seg_data:
                 un = 2 ** (p.class_id + 0) # class_id's are 0,1,2,3,4, but self.unit is 2,4,8,16
-                print("Chan, Unit:", ch, un)
+                #print("Chan, Unit:", ch, un)
                 ts = p.timestamp
                 data = np.array([(ts / self.update_freq, 
                           ch, 

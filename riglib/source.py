@@ -103,10 +103,10 @@ class DataSource(mp.Process):
         # so, set send_data_to_sink_manager to False if you want to avoid this
         self.send_data_to_sink_manager = send_data_to_sink_manager
 
-        print("Im here")
-        print(self)
-        print(self.status)
-        print(self.status.value)
+        # print("Im here")
+        # print(self)
+        # print(self.status)
+        # print(self.status.value)
 
     def start(self, *args, **kwargs):
         '''

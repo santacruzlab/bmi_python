@@ -89,9 +89,9 @@ def make(exp_class, feats=()):
         # inherit from the features first, then the base class
         clslist = tuple(feats) + (exp_class,)
 
-        print("metaclass constructor")
-        print(clslist)
-        print(feats)
+        #print("metaclass constructor")
+        #print(clslist)
+        #print(feats)
 
         # return custom class
         return type(exp_class.__name__, clslist, dict())

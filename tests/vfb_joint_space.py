@@ -75,7 +75,7 @@ while True:
 	cursor_pos = chain.endpoint_pos(joint_pos)
 	cursor_pos_hist.append(cursor_pos)	
 	if np.linalg.norm(cursor_pos - target) < 2.:
-		print(target_idx)
+		#print(target_idx)
 		target_idx += 1
 		if target_idx >= n_targets: break
 		target = target_list[target_idx] - shoulder_anchor	

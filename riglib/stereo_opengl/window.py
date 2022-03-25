@@ -151,7 +151,7 @@ class Window(LogExperiment):
         self.renderer._queue_render(self.world)
 
     def _cycle(self):
-        print('CYCLING')
+        #print('CYCLING')
         self.requeue()
         self.draw_world()
         super(Window, self)._cycle()

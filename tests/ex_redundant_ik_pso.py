@@ -133,8 +133,8 @@ print(s.getvalue())
 
 
 # print planar_chain.endpoint_pos(pbest)
-print("target position")
-print(target_pos)
+#print("target position")
+#print(target_pos)
 print("error = %g" % np.linalg.norm(planar_chain.endpoint_pos(pbest) - target_pos))
 
 # print "q_start_constr"

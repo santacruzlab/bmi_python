@@ -394,8 +394,8 @@ def _get_neural_features_ripple(files, binlen, extractor_fn, extractor_kwargs, t
     #nev_fname = str(files['ripple'])
 
     print(files)
-    print(binlen)
-    print(units)
+    #print(binlen)
+    #print(units)
 
     nev_fname = files['ripple']
     tmask, rows = _get_tmask_ripple(nev_fname[0], tslice, sys_name=source)
@@ -463,7 +463,7 @@ def null_kin_extractor(files, binlen, tmask, update_rate_hz=60., pos_key='cursor
         inds = inds[::step]
         kin = kin[inds]
 
-    print(("kin.shape", kin.shape))
+    #print(("kin.shape", kin.shape))
     return kin
 
 

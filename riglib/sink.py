@@ -170,7 +170,7 @@ class SinkManager(object):
         Returns
         -------
         '''
-        print(("sinkmanager start %s"%output))
+        #print(("sinkmanager start %s"%output))
         sink = DataSink(output, **kwargs)
         sink.start()
         self.registrations[sink] = set()
