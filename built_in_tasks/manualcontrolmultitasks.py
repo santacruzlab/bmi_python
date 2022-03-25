@@ -383,7 +383,7 @@ class ManualControlMulti(Sequence, Window):
             pairs[k, 0, :] = np.zeros(3)
             pairs[k, 1, :] = target_locs[np.random.randint(0, n_corners_in_cube)]
 
-        print(pairs.shape)
+        #print(pairs.shape)
         return pairs
 
     @staticmethod
