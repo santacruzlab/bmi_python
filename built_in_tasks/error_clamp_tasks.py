@@ -6,6 +6,7 @@ from .bmimultitasks import SimpleEndpointAssister
 import pickle
 import os
 from datetime import date
+import copy
 
 class CurlFieldKalmanFilter(kfdecoder.KalmanFilter):
     def _calc_kalman_gain(self, P):
@@ -24,17 +25,12 @@ class CurlFieldKalmanFilter(kfdecoder.KalmanFilter):
         return K
 
 class VisRotKalmanFilter(kfdecoder.KalmanFilter):
-    #def __init__(self, *args, **kwargs):
-    #    dir(self)        #self.fn = fn
-
     def _calc_kalman_gain(self, P):
         '''
         see KalmanFilter._calc_kalman_gain
         '''
-        #print('HS: ')
         K = super(VisRotKalmanFilter, self)._calc_kalman_gain(P)
         theta = np.deg2rad(self.rot_angle_deg)
-
 
         R = np.mat([[np.cos(theta), -np.sin(theta)],
                       [np.sin(theta), np.cos(theta)]])
@@ -56,12 +52,68 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         return K
 
 class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
+
     def _calc_kalman_gain(self, P):
 
-        K = super(ShuffledKalmanFilter, self)._calc_kalman_gain(P)
-        K[3,:] = np.random.shuffle(K[3,:]) #Need to check if the shuffling occurs each time and if we directly shuffle and save in one step !!HS
-        K[5,:] = np.random.shuffle(K[5,:])
+        if self.shuffle_state == True:
 
+            if self.flag == 0:
+                '''Block 2 - First Update ONLY | Should only run once.'''
+                print("SHUFFLE")
+
+                self.flag = 1
+                
+                K = super(ShuffledKalmanFilter, self)._calc_kalman_gain(P)
+
+                #Make option for only shuffling a certain amount of Ks.
+                ind1 = self.inds_toShuffle[0]
+                ind2 = self.inds_toShuffle[1]
+
+                if ind1 == ind2:
+                    s = 0
+                    e = np.shape(K[3,:])[1]
+                    print('LENGTH OF K:', e)
+                else:
+                    s = ind1 
+                    e = ind2
+
+                shuffledKx_pos = np.ravel((copy.deepcopy(K[0,s:e])))
+                shuffledKy_pos = np.ravel((copy.deepcopy(K[2,s:e])))
+                shuffledKx_vel = np.ravel((copy.deepcopy(K[3,s:e])))
+                shuffledKy_vel = np.ravel((copy.deepcopy(K[5,s:e])))
+
+                np.random.shuffle(shuffledKx_pos)
+                np.random.shuffle(shuffledKy_pos)
+                np.random.shuffle(shuffledKx_vel)
+                np.random.shuffle(shuffledKy_vel)
+
+                K[0,s:e] = shuffledKx_pos
+                K[2,s:e] = shuffledKy_pos
+                K[3,s:e] = shuffledKx_vel
+                K[5,s:e] = shuffledKy_vel
+
+                self.shuffledK = K 
+
+            elif self.flag == 1:
+                '''REMAINING PERTURBATION: Block 2 (after the shuffle) and Block 3 | Maintain shuffled decoder from single instance of shuffling at start of Block 2.'''
+                K = self.shuffledK
+
+        elif self.shuffle_state == False:
+            '''BLock 1 - Baseline Decoder'''
+            try: 
+                temp = self.flag
+            except: 
+                self.flag = None
+            
+            if (self.flag == None) or (self.flag == 0): 
+                K = super(ShuffledKalmanFilter, self)._calc_kalman_gain(P)
+                self.baseline_decoder = K #This will overwrite the baseline decoder until it reaches steady state (first few bins).
+                self.flag = 0
+
+            elif self.flag == 1:
+                '''Block 4 - Washout | Reinstate intial decoder'''
+                K = self.baseline_decoder
+ 
         today = date.today()
         d = today.strftime("%m/%d/%y")
         fn = 'airp' + d[:2] + d[3:5]  + '_KG_SHKF.pkl' #SHKF: shuffled kalman filter  
@@ -75,8 +127,6 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
 
         return K
 
-        
-
 from .bmimultitasks import BMIControlMulti, BMIResetting
 class BMICursorKinematicCurlField(BMIResetting):
     rot_factor = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees')
@@ -89,7 +139,6 @@ class BMICursorKinematicCurlField(BMIResetting):
         filt.C_xpose_Q_inv_C = dec.filt.C_xpose_Q_inv_C
         filt.rot_factor = self.rot_factor
         self.decoder.filt = filt
-
 
 from riglib import plants
 class CursorErrorClampPlant(plants.CursorPlant):
@@ -116,6 +165,7 @@ class CursorErrorClamp(object):
         self.plant = CursorErrorClampPlant(endpt_bounds=(-25, 25, 0., 0., -14, 14))
         super(CursorErrorClamp, self).__init__(*args, **kwargs)
 
+
     def _parse_next_trial(self):
         if isinstance(self.next_trial, dict):
             for key in self.next_trial:
@@ -135,12 +185,15 @@ class CursorErrorClamp(object):
         self.add_dtype('error_clamp', 'i', (1,))
         self.add_dtype('pert', 'i', (1,))
         self.add_dtype('block_type', 'i', (1,))
+        self.add_dtype('toShuffle', 'i', (1,))
         super(CursorErrorClamp, self).init()
+
 
     def _cycle(self):
         self.task_data['error_clamp'] = self._gen_error_clamp
         self.task_data['pert'] = self._gen_curl
         self.task_data['block_type'] = self._gen_block_type
+        self.task_data['toShuffle'] = self._gen_toShuffle
 
         super(CursorErrorClamp, self)._cycle()
 
@@ -179,6 +232,8 @@ class CursorErrorClamp(object):
             shuffle(_metablock)
             for row in _metablock:
                 trials += row
+                for tr in row:
+                    tr['toShuffle'] = False
 
         for _ in range(n_pert_learning_metablocks):
             _metablock = copy.deepcopy(metablock)
@@ -188,6 +243,8 @@ class CursorErrorClamp(object):
                     tr['curl'] = True
                     tr['error_clamp'] = False
                     tr['block_type'] = 2
+                    tr['toShuffle'] = True
+
 
             shuffle(_metablock)
             for row in _metablock:
@@ -200,6 +257,7 @@ class CursorErrorClamp(object):
                 for tr in row:
                     tr['curl'] = True
                     tr['block_type'] = 3
+                    tr['toShuffle'] = False
 
             shuffle(_metablock)
             for row in _metablock:
@@ -213,11 +271,12 @@ class CursorErrorClamp(object):
                     tr['curl'] = False
                     tr['error_clamp'] = False
                     tr['block_type'] = 4
+                    tr['toShuffle'] = False
 
             shuffle(_metablock)
             for row in _metablock:
                 trials += row
-        #print(np.shape(trials))
+       
         return trials
 
 class BMICursorKinematicCurlErrorClamp(BMICursorKinematicCurlField, CursorErrorClamp):
@@ -232,7 +291,7 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_infrequent']    
-    rot_angle_deg = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees')    
+    rot_angle_deg = traits.Float(-90., desc='scaling factor from speed to rotation angle in degrees')    
 
     def _parse_next_trial(self):
         super(BMICursorVisRotErrorClamp, self)._parse_next_trial()
@@ -256,15 +315,31 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
         self.decoder.filt = filt        
 
 class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
-    'HS: Added 20220218'
+    '''
+        This task is designed to shuffle the Kalman gain (K) within each row (e.g., x-velocity Kalman gain (row 3) for each unit is randomized).
+            This createsa completely random (i.e., shuffled) decoder in the perturbation blocks.
+        
+        The single instance of shuffling occurs on the first KF update of block 2 (first perturbation block) and is reverted at the start of block 4 (washout block).
+        
+        Tasked added by HS on 20220218
+    '''
+    from riglib.bmi.bmi import Decoder 
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_infrequent']    
     
+    #Option to Load Previous Day's Decoder; Need to add feature?
+    #decoder_shuffled = traits.InstanceFromDB(Decoder, bmi3d_db_model='Decoder', bmi3d_query_kwargs=dict())
 
+    
+    #Make option for only shuffling a certain amount of Ks.  Specify indices in list?
+    inds_toShuffle = traits.Tuple((0,0), desc='First and last-1 ind of units to shuffle')    
+    
+    
     def _parse_next_trial(self):
         super(BMICursorShuffleErrorClamp, self)._parse_next_trial()
-        #self.decoder.filt.rot_angle_deg = self.rot_angle_deg * int(self._gen_curl)
+        self.decoder.filt.shuffle_state = int(self._gen_toShuffle)
+        self.decoder.filt.inds_toShuffle = self.inds_toShuffle 
 
     def create_assister(self):
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
@@ -273,12 +348,19 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
         self.assister = SimpleEndpointAssister(**kwargs)
 
     def load_decoder(self):
-      
+
+        '''The decoder is loaded every 0.1ms (10Hz).'''
+
         super(BMICursorShuffleErrorClamp, self).load_decoder()
         # Shuffle KF once at start of perturbation block.
-        dec = self.decoder
+
+        #print("DECODERS EQUAL?", self.decoder.te_id == self.decoder_shuffled.te_id)
+        #self.decoder.equalShuffle = (self.decoder.te_id == self.decoder_shuffled.te_id)
+
+        dec = self.decoder 
+              
+        #if (self.decoder.te_id == self.decoder_shuffled.te_id):
         filt = ShuffledKalmanFilter(A=dec.filt.A, W=dec.filt.W, C=dec.filt.C, Q=dec.filt.Q, is_stochastic=dec.filt.is_stochastic)
         filt.C_xpose_Q_inv = dec.filt.C_xpose_Q_inv
         filt.C_xpose_Q_inv_C = dec.filt.C_xpose_Q_inv_C
-        filt.rot_angle_deg = self.rot_angle_deg
         self.decoder.filt = filt  
