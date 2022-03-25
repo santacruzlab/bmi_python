@@ -276,7 +276,7 @@ def conv_mm_dec_to_cm(decoder_record):
     from .tracker.models import TaskEntry, Feature, Sequence, Task, Generator, Subject, DataFile, System, Decoder
 
     decoder_fname = os.path.join('/media/samantha/ssd/storage/decoders/', decoder_record.path)
-    print(decoder_fname)
+    print("Decoder Filename:", decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
     from riglib.bmi import train
@@ -288,7 +288,7 @@ def conv_mm_dec_to_cm(decoder_record):
 
     new_decoder_name = decoder_name + '_cm'
     training_block_id = decoder_record.entry_id
-    print(new_decoder_name)
+    print("New Decoder Name:", new_decoder_name)
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 
 def zero_out_SSKF_bias(decoder_record):
@@ -332,7 +332,7 @@ def conv_kfdecoder_to_ppfdecoder(decoder_record):
 
     # Load the decoder
     decoder_fname = os.path.join('/media/samantha/ssd/storage/decoders/', decoder_record.path)
-    print(decoder_fname)
+    print("Decoder Filename:", decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
 
@@ -345,7 +345,7 @@ def conv_kfdecoder_to_ppfdecoder(decoder_record):
 
     new_decoder_name = decoder_name + '_ppf'
     training_block_id = decoder_record.entry_id
-    print(new_decoder_name)
+    print("New Decoder Name:", new_decoder_name)
     from .tracker import dbq
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 
@@ -380,7 +380,7 @@ def make_kfdecoder_interpolate(decoder_record):
         
     # Load the decoder
     decoder_fname = os.path.join('/media/samantha/ssd/storage/decoders/', decoder_record.path)
-    print(decoder_fname)
+    print("Decoder Filename:", decoder_fname)
     decoder_name = decoder_record.name
     dec = pickle.load(open(decoder_fname))
 
@@ -393,7 +393,7 @@ def make_kfdecoder_interpolate(decoder_record):
 
     new_decoder_name = decoder_name + '_60hz'
     training_block_id = decoder_record.entry_id
-    print(new_decoder_name)
+    print("New Decoder Name:", new_decoder_name)
     from .tracker import dbq
     dbq.save_bmi(new_decoder_name, training_block_id, new_decoder_fname)
 
