@@ -1,4 +1,3 @@
-#Copied from bmi_tasks_analysis (same filename) - HS 20211026
 from riglib.bmi import kfdecoder
 import numpy as np
 from riglib.experiment import traits
@@ -7,6 +6,9 @@ import pickle
 import os
 from datetime import date
 import copy
+import random
+import pandas as pd
+
 
 class CurlFieldKalmanFilter(kfdecoder.KalmanFilter):
     def _calc_kalman_gain(self, P):
@@ -55,6 +57,10 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
 
     def _calc_kalman_gain(self, P):
 
+        today = date.today()
+        d = today.strftime("%m/%d/%y")
+
+
         if self.shuffle_state == True:
 
             if self.flag == 0:
@@ -65,34 +71,65 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
                 
                 K = super(ShuffledKalmanFilter, self)._calc_kalman_gain(P)
 
-                #Make option for only shuffling a certain amount of Ks.
-                ind1 = self.inds_toShuffle[0]
-                ind2 = self.inds_toShuffle[1]
+                shuffleInds = self.shuffleInds
 
-                if ind1 == ind2:
-                    s = 0
-                    e = np.shape(K[3,:])[1]
-                    print('LENGTH OF K:', e)
-                else:
-                    s = ind1 
-                    e = ind2
+                print('ORIGINAL:',  K[[0,2,3,5],:][:,shuffleInds] ) 
+                
+                dfShuffle = pd.DataFrame({ 'Kx_pos':np.ravel((copy.deepcopy(K[0,shuffleInds]))),
+                                           'Ky_pos':np.ravel((copy.deepcopy(K[2,shuffleInds]))),
+                                           'Kx_vel':np.ravel((copy.deepcopy(K[3,shuffleInds]))),
+                                           'Ky_vel':np.ravel((copy.deepcopy(K[5,shuffleInds])))}) 
 
-                shuffledKx_pos = np.ravel((copy.deepcopy(K[0,s:e])))
-                shuffledKy_pos = np.ravel((copy.deepcopy(K[2,s:e])))
-                shuffledKx_vel = np.ravel((copy.deepcopy(K[3,s:e])))
-                shuffledKy_vel = np.ravel((copy.deepcopy(K[5,s:e])))
+                
+                temp = dfShuffle.sample(frac=1).reset_index(drop=True).to_numpy().T
+                
 
-                np.random.shuffle(shuffledKx_pos)
-                np.random.shuffle(shuffledKy_pos)
-                np.random.shuffle(shuffledKx_vel)
-                np.random.shuffle(shuffledKy_vel)
+                #K[[0,2,3,5],:][:,shuffleInds] = temp #WHY DOES THIS NOT WORK???
 
-                K[0,s:e] = shuffledKx_pos
-                K[2,s:e] = shuffledKy_pos
-                K[3,s:e] = shuffledKx_vel
-                K[5,s:e] = shuffledKy_vel
+                # K[0, shuffleInds] = temp[0,:]
+                # K[2, shuffleInds] = temp[1,:]
+                # K[3, shuffleInds] = temp[2,:]
+                # K[5, shuffleInds] = temp[3,:]
+
+                print('SHUFFLE:', K[[0,2,3,5],:][:,shuffleInds])
+
+                #K[[0,2,3,5],:][:,shuffleInds] = dfShuffle.sample(frac=1).reset_index(drop=True).to_numpy().T
+
+
+                #(dfShuffled[['Kx_pos', 'Ky_pos', 'Kx_vel', 'Ky_vel']].to_numpy()).reshape((4,len(shuffleInds))) 
+                
+
+                #print('SHUFFLED:', K[[0,2,3,5],:][:,shuffleInds] )
+
+
+                #print('Kx (original):', K[0,:])
+                #print("SHUFFLE INDS:", shuffleInds)
+                
+                # Kx_pos = np.ravel((copy.deepcopy(K[0,shuffleInds])))
+                # Ky_pos = np.ravel((copy.deepcopy(K[2,shuffleInds])))
+                # Kx_vel = np.ravel((copy.deepcopy(K[3,shuffleInds])))
+                # Ky_vel = np.ravel((copy.deepcopy(K[5,shuffleInds])))
+
+                #print("Kx (to shuffle):", Kx_pos)
+
+                # np.random.shuffle(Kx_pos)
+                # np.random.shuffle(Ky_pos)
+                # np.random.shuffle(Kx_vel)
+                # np.random.shuffle(Ky_vel)
+
+                #print("Kx (shuffled):", Kx_pos)
+
+                # K[0,shuffleInds] = Kx_pos
+                # K[2,shuffleInds] = Ky_pos
+                # K[3,shuffleInds] = Kx_vel
+                # K[5,shuffleInds] = Ky_vel
+
+                #print("Kx end:", K[0,:])
+
+                #print("SHAPE OF SHUFFLED K:", np.shape(K))
 
                 self.shuffledK = K 
+                self.shuffledInds = shuffleInds #saved in HDF file under 'hdf.root.task._v_attrs.indsToShuffle'
 
             elif self.flag == 1:
                 '''REMAINING PERTURBATION: Block 2 (after the shuffle) and Block 3 | Maintain shuffled decoder from single instance of shuffling at start of Block 2.'''
@@ -100,6 +137,7 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
 
         elif self.shuffle_state == False:
             '''BLock 1 - Baseline Decoder'''
+            
             try: 
                 temp = self.flag
             except: 
@@ -113,10 +151,8 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
             elif self.flag == 1:
                 '''Block 4 - Washout | Reinstate intial decoder'''
                 K = self.baseline_decoder
- 
-        today = date.today()
-        d = today.strftime("%m/%d/%y")
-        fn = 'airp' + d[:2] + d[3:5]  + '_KG_SHKF.pkl' #SHKF: shuffled kalman filter  
+
+        fn = 'airp{}{}_{}_KG_SHKF.pkl'.format(d[:2], d[3:5], self.trial_run) #SHKF: SHuffled Kalman Filter  
 
         cwd = os.path.abspath(os.getcwd())
         os.chdir('/media/samantha/ssd/storage/rawdata/bmi')
@@ -316,8 +352,8 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
 
 class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
     '''
-        This task is designed to shuffle the Kalman gain (K) within each row (e.g., x-velocity Kalman gain (row 3) for each unit is randomized).
-            This createsa completely random (i.e., shuffled) decoder in the perturbation blocks.
+        This task is designed to shuffle 50% of the Kalman gains (K) within each row (e.g., x-velocity Kalman gain (row 3) for each unit is randomized).
+            This creates a completely random (i.e., shuffled) decoder in the perturbation blocks.
         
         The single instance of shuffling occurs on the first KF update of block 2 (first perturbation block) and is reverted at the start of block 4 (washout block).
         
@@ -326,20 +362,30 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
     from riglib.bmi.bmi import Decoder 
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
-    sequence_generators = ['center_out_error_clamp_infrequent']    
-    
-    #Option to Load Previous Day's Decoder; Need to add feature?
-    #decoder_shuffled = traits.InstanceFromDB(Decoder, bmi3d_db_model='Decoder', bmi3d_query_kwargs=dict())
+    sequence_generators = ['center_out_error_clamp_infrequent'] 
+    ordered_traits = ['indsToShuffle', 'trial_run', 'reward_time_SHUFFLE', 'reward_time', 'timeout_time']  
 
-    
-    #Make option for only shuffling a certain amount of Ks.  Specify indices in list?
-    inds_toShuffle = traits.Tuple((0,0), desc='First and last-1 ind of units to shuffle')    
-    
-    
+    reward_time_SHUFFLE = traits.Float(0.5, desc="Length of juice reward AFTER BASELINE") 
+    trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
+    indsToShuffle = traits.String('', desc="String of indices to shuffle (tuningCurve_HDF.py)")
+  
+ 
     def _parse_next_trial(self):
         super(BMICursorShuffleErrorClamp, self)._parse_next_trial()
         self.decoder.filt.shuffle_state = int(self._gen_toShuffle)
-        self.decoder.filt.inds_toShuffle = self.inds_toShuffle 
+
+        self.decoder.filt.trial_run = self.trial_run 
+
+        if self.decoder.filt.shuffle_state == 1:
+            self.reward_time = self.reward_time_SHUFFLE
+
+        if self.indsToShuffle == '':
+            print("NO INDICES TO SHUFFLE!!")
+            self.decoder.filt.shuffleInds = [0]
+            
+        else:
+            temp = self.indsToShuffle.split(', ')
+            self.decoder.filt.shuffleInds = [int(i) for i in temp]
 
     def create_assister(self):
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
@@ -353,13 +399,7 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
 
         super(BMICursorShuffleErrorClamp, self).load_decoder()
         # Shuffle KF once at start of perturbation block.
-
-        #print("DECODERS EQUAL?", self.decoder.te_id == self.decoder_shuffled.te_id)
-        #self.decoder.equalShuffle = (self.decoder.te_id == self.decoder_shuffled.te_id)
-
         dec = self.decoder 
-              
-        #if (self.decoder.te_id == self.decoder_shuffled.te_id):
         filt = ShuffledKalmanFilter(A=dec.filt.A, W=dec.filt.W, C=dec.filt.C, Q=dec.filt.Q, is_stochastic=dec.filt.is_stochastic)
         filt.C_xpose_Q_inv = dec.filt.C_xpose_Q_inv
         filt.C_xpose_Q_inv_C = dec.filt.C_xpose_Q_inv_C
