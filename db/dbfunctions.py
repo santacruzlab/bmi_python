@@ -136,6 +136,8 @@ def get_decoder_name(entry):
 def get_decoder_name_full(entry):
     entry = lookup_task_entries(entry)
     decoder_basename = get_decoder_name(entry)
+
+    print("DBNAME:", dbname)
     return os.path.join(db.paths.pathdict[dbname], 'decoders', decoder_basename)
 
 def get_decoder(entry):
@@ -413,6 +415,7 @@ class TaskEntry(object):
         TaskEntry instance
         '''
         self.dbname = dbname
+
         if isinstance(task_entry_id, models.TaskEntry):
             self.record = task_entry_id
         else:

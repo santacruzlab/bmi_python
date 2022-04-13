@@ -60,7 +60,6 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
         today = date.today()
         d = today.strftime("%m/%d/%y")
 
-
         if self.shuffle_state == True:
 
             if self.flag == 0:
@@ -86,47 +85,12 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
 
                 #K[[0,2,3,5],:][:,shuffleInds] = temp #WHY DOES THIS NOT WORK???
 
-                # K[0, shuffleInds] = temp[0,:]
-                # K[2, shuffleInds] = temp[1,:]
-                # K[3, shuffleInds] = temp[2,:]
-                # K[5, shuffleInds] = temp[3,:]
+                K[0, shuffleInds] = temp[0,:]
+                K[2, shuffleInds] = temp[1,:]
+                K[3, shuffleInds] = temp[2,:]
+                K[5, shuffleInds] = temp[3,:]
 
                 print('SHUFFLE:', K[[0,2,3,5],:][:,shuffleInds])
-
-                #K[[0,2,3,5],:][:,shuffleInds] = dfShuffle.sample(frac=1).reset_index(drop=True).to_numpy().T
-
-
-                #(dfShuffled[['Kx_pos', 'Ky_pos', 'Kx_vel', 'Ky_vel']].to_numpy()).reshape((4,len(shuffleInds))) 
-                
-
-                #print('SHUFFLED:', K[[0,2,3,5],:][:,shuffleInds] )
-
-
-                #print('Kx (original):', K[0,:])
-                #print("SHUFFLE INDS:", shuffleInds)
-                
-                # Kx_pos = np.ravel((copy.deepcopy(K[0,shuffleInds])))
-                # Ky_pos = np.ravel((copy.deepcopy(K[2,shuffleInds])))
-                # Kx_vel = np.ravel((copy.deepcopy(K[3,shuffleInds])))
-                # Ky_vel = np.ravel((copy.deepcopy(K[5,shuffleInds])))
-
-                #print("Kx (to shuffle):", Kx_pos)
-
-                # np.random.shuffle(Kx_pos)
-                # np.random.shuffle(Ky_pos)
-                # np.random.shuffle(Kx_vel)
-                # np.random.shuffle(Ky_vel)
-
-                #print("Kx (shuffled):", Kx_pos)
-
-                # K[0,shuffleInds] = Kx_pos
-                # K[2,shuffleInds] = Ky_pos
-                # K[3,shuffleInds] = Kx_vel
-                # K[5,shuffleInds] = Ky_vel
-
-                #print("Kx end:", K[0,:])
-
-                #print("SHAPE OF SHUFFLED K:", np.shape(K))
 
                 self.shuffledK = K 
                 self.shuffledInds = shuffleInds #saved in HDF file under 'hdf.root.task._v_attrs.indsToShuffle'
@@ -134,6 +98,7 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
             elif self.flag == 1:
                 '''REMAINING PERTURBATION: Block 2 (after the shuffle) and Block 3 | Maintain shuffled decoder from single instance of shuffling at start of Block 2.'''
                 K = self.shuffledK
+                #print('K1 == K3?: ', np.mean(self.shuffledK == self.baseline_decoder))
 
         elif self.shuffle_state == False:
             '''BLock 1 - Baseline Decoder'''
@@ -230,7 +195,6 @@ class CursorErrorClamp(object):
         self.task_data['pert'] = self._gen_curl
         self.task_data['block_type'] = self._gen_block_type
         self.task_data['toShuffle'] = self._gen_toShuffle
-
         super(CursorErrorClamp, self)._cycle()
 
     @staticmethod 
@@ -293,7 +257,7 @@ class CursorErrorClamp(object):
                 for tr in row:
                     tr['curl'] = True
                     tr['block_type'] = 3
-                    tr['toShuffle'] = False
+                    tr['toShuffle'] = True#previously False HANNAH
 
             shuffle(_metablock)
             for row in _metablock:
@@ -314,6 +278,45 @@ class CursorErrorClamp(object):
                 trials += row
        
         return trials
+
+    @staticmethod 
+    def center_out_error_clamp_NONE(ntargets=8, distance=10, n_baseline_blocks=48):
+        # need to return: 1) target sequences
+        #HMS: added 20220411
+
+        #error_clamp_trials_per_block = 0
+
+        n_meta_blocks = 8 #int(ntargets/error_clamp_trials_per_block)
+        n_baseline_metablocks = int(n_baseline_blocks/n_meta_blocks)
+
+        target_angles = np.arange(-np.pi, np.pi, 2*np.pi/ntargets)
+        targs = np.vstack([np.cos(target_angles), np.zeros_like(target_angles), np.sin(target_angles)]).T * distance
+        targ_seqs = [dict(targs=np.vstack([np.zeros(3), targ]), error_clamp=False, curl=False, block_type=1) for targ in targs]
+
+        metablock = []
+        for k in range(n_meta_blocks):
+            metablock.append([x.copy() for x in targ_seqs])
+
+        trials = []
+        import copy
+        from random import shuffle
+
+        for _ in range(n_baseline_metablocks):
+            _metablock = copy.deepcopy(metablock)
+            for row in _metablock:
+                shuffle(row)
+                for tr in row:
+                    tr['curl'] = False
+                    tr['error_clamp'] = False
+                    tr['block_type'] = 1
+                    tr['toShuffle'] = False
+
+            shuffle(_metablock)
+            for row in _metablock:
+                trials += row
+       
+        return trials
+
 
 class BMICursorKinematicCurlErrorClamp(BMICursorKinematicCurlField, CursorErrorClamp):
     exclude_parent_traits = ['plant_type']
@@ -359,7 +362,7 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
         
         Tasked added by HS on 20220218
     '''
-    from riglib.bmi.bmi import Decoder 
+    #from riglib.bmi.bmi import Decoder 
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_infrequent'] 
@@ -404,3 +407,20 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
         filt.C_xpose_Q_inv = dec.filt.C_xpose_Q_inv
         filt.C_xpose_Q_inv_C = dec.filt.C_xpose_Q_inv_C
         self.decoder.filt = filt  
+
+class BASELINE_BMICursorShuffle(BMICursorShuffleErrorClamp):
+
+    '''Task for collecting data to compute tuning curves prior to running shuffle task.'''
+
+    exclude_parent_traits = ['indsToShuffle', 'reward_time_SHUFFLE']#plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
+    sequence_generators = ['center_out_error_clamp_NONE']#['center_out_error_clamp_infrequent'] #['centerout_2D_discrete']#
+    ordered_traits = ['trial_run', 'reward_time', 'timeout_time']  
+
+    #trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
+
+    def _parse_next_trial(self):
+        super(BASELINE_BMICursorShuffle, self)._parse_next_trial()        
+        self.decoder.filt.trial_run = self.trial_run 
+        self.decoder.filt.shuffle_state = False
+
+            

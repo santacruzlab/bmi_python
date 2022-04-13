@@ -18,7 +18,8 @@ class KalmanFilter(bmi.GaussianStateHMM):
            y_t = Cx_t + q_t;   q_t ~ N(0, Q)
     """
     model_attrs = ['A', 'W', 'C', 'Q', 'C_xpose_Q_inv', 'C_xpose_Q_inv_C']
-    attrs_to_pickle = ['A', 'W', 'C', 'Q', 'C_xpose_Q_inv', 'C_xpose_Q_inv_C', 'R', 'S', 'T', 'ESS']
+    attrs_to_pickle = ['A', 'W', 'C', 'Q', 'C_xpose_Q_inv', 'C_xpose_Q_inv_C', 'R', 'S', 'T', 'ESS'] 
+
 
     def __init__(self, A=None, W=None, C=None, Q=None, is_stochastic=None):
         '''

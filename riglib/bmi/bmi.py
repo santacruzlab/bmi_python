@@ -1391,6 +1391,7 @@ class BMILoop(object):
 
             # Link the pickled decoder file to the associated task entry in the database
             dbname = kwargs['dbname'] if 'dbname' in kwargs else 'default'
+            
             if dbname == 'default':
                 database.save_bmi(decoder_name, saveid, decoder_tempfilename)
             else:

@@ -311,6 +311,7 @@ class BMIControlMulti(BMILoop, LinearlyDecreasingAssist, manualcontrolmultitasks
     #     d = np.linalg.norm(cursor_pos - self.target_location)
     #     return d <= self.target_radius
 
+
 class BMIControlMulti2DWindow(BMIControlMulti, Window): # YZ changed the WindowDispl2D into Window so that the experimental screen is shown on both monitors
     fps = 60. # YZ the original fps is set to 60, not sure why here change into 20
     background = (0,0,0,1)
@@ -595,10 +596,10 @@ class BMIResetting(BMIControlMulti):
 
     def _while_premove(self):
         #HS: If you want the cursor to automatically jump back to center, then uncomment the first two lines and comment out "pass". (self.decoder.filt.state...was previously commented out.)
-        self.plant.set_endpoint_pos(self.targs[0])
-        self.decoder['q'] = self.plant.get_intrinsic_coordinates()
+        self.plant.set_endpoint_pos(self.targs[0]) #Line 1
+        self.decoder['q'] = self.plant.get_intrinsic_coordinates() #Line 2
         # self.decoder.filt.state.mean = self.calc_perturbed_ik(self.targs[0])
-        #pass
+        #pass #Line 3
 
     def _start_premove(self):
 
@@ -673,6 +674,7 @@ class BMIResetting(BMIControlMulti):
         pairs[:,1,:] = np.vstack([x, y, z]).T
         
         return pairs
+
 
 
 class BaselineControl(BMIControlMulti):
