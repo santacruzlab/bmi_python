@@ -9,6 +9,8 @@ import copy
 import random
 import pandas as pd
 
+import time 
+from tracker.models import TaskEntry
 
 class CurlFieldKalmanFilter(kfdecoder.KalmanFilter):
     def _calc_kalman_gain(self, P):
@@ -39,9 +41,19 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         K[[0,2],:] = R * K[[0,2],:]
         K[[3,5],:] = R * K[[3,5],:]
 
-        today = date.today()
-        d = today.strftime("%m/%d/%y")
-        fn = 'airp' + d[:2] + d[3:5]  + '_KG_VRKF.pkl'  #VRKF: visuomotor rotation kalman filter
+        '''Naming convention based on task entry in Django interface. (Not pretty, but it works, I guess.)'''
+        #(1) Obtain information for all entries.
+        db_name='default'
+        entry    = TaskEntry.objects.using(db_name)
+        #(2) Determine the total number of entries.
+        lenEntry = len(entry)
+        #(3) Assign entry to be the current task entry.
+        entry    = entry[lenEntry-1]
+        #(4) Pull desired entry information.
+        subj     = entry.subject.name[:4].lower()
+        te_id    = entry.id
+        date     = time.strftime('%Y%m%d')
+        fn = "{}{}_te{}_KG_VRKF.pkl".format(subj, date, te_id) #VRKF: Visuomotor Rotation Kalman Filter
         
 
         cwd = os.path.abspath(os.getcwd())
@@ -117,8 +129,20 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
                 '''Block 4 - Washout | Reinstate intial decoder'''
                 K = self.baseline_decoder
 
-        fn = 'airp{}{}_{}_KG_SHKF.pkl'.format(d[:2], d[3:5], self.trial_run) #SHKF: SHuffled Kalman Filter  
-
+        '''Naming convention based on task entry in Django interface. (Not pretty, but it works, I guess.)'''
+        #(1) Obtain information for all entries.
+        db_name='default'
+        entry    = TaskEntry.objects.using(db_name)
+        #(2) Determine the total number of entries.
+        lenEntry = len(entry)
+        #(3) Assign entry to be the current task entry.
+        entry    = entry[lenEntry-1]
+        #(4) Pull desired entry information.
+        subj     = entry.subject.name[:4].lower()
+        te_id    = entry.id
+        date     = time.strftime('%Y%m%d')
+        fn = "{}{}_te{}_KG_SHKF.pkl".format(subj, date, te_id) #SHKF: SHuffled Kalman Filter
+        
         cwd = os.path.abspath(os.getcwd())
         os.chdir('/media/samantha/ssd/storage/rawdata/bmi')
         with open(fn, 'ab') as f:
