@@ -442,7 +442,7 @@ class CLDAControlMulti(BMIControlMulti, LinearlyDecreasingHalfLife):
     window_size = traits.Tuple((1920*2, 1080), desc='window size')
 
     batch_time = traits.Float(0.1, desc='The length of the batch in seconds')
-    decoder_sequence = traits.String('airp', desc='signifier to group together sequences of decoders')
+    decoder_sequence = traits.String('test', desc='signifier to group together sequences of decoders')
     assist_level = traits.Tuple((0.1,0), desc='starting and ending assist level (min:0, max:1)')
     half_life = traits.Tuple((300,300), desc='starting and ending half life time (seconds)')
 
