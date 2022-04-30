@@ -69,9 +69,6 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
 
     def _calc_kalman_gain(self, P):
 
-        today = date.today()
-        d = today.strftime("%m/%d/%y")
-
         if self.shuffle_state == True:
 
             if self.flag == 0:
@@ -390,10 +387,10 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
     background = (0,0,0,1)
     exclude_parent_traits = ['plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_infrequent'] 
-    ordered_traits = ['indsToShuffle', 'trial_run', 'reward_time_SHUFFLE', 'reward_time', 'timeout_time']  
+    ordered_traits = ['indsToShuffle',  'reward_time_SHUFFLE', 'reward_time', 'timeout_time']  
 
     reward_time_SHUFFLE = traits.Float(0.5, desc="Length of juice reward AFTER BASELINE") 
-    trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
+    #trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
     indsToShuffle = traits.String('', desc="String of indices to shuffle (tuningCurve_HDF.py)")
   
  
@@ -401,7 +398,7 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
         super(BMICursorShuffleErrorClamp, self)._parse_next_trial()
         self.decoder.filt.shuffle_state = int(self._gen_toShuffle)
 
-        self.decoder.filt.trial_run = self.trial_run 
+        #self.decoder.filt.trial_run = self.trial_run 
 
         if self.decoder.filt.shuffle_state == 1:
             self.reward_time = self.reward_time_SHUFFLE
@@ -438,13 +435,13 @@ class BASELINE_BMICursorShuffle(BMICursorShuffleErrorClamp):
 
     exclude_parent_traits = ['indsToShuffle', 'reward_time_SHUFFLE']#plant_type', 'timeout_penalty_time', 'marker_num', 'plant_hide_rate', 'plant_visible', 'cursor_radius', 'show_environment', 'rand_start', 'hold_penalty_time']
     sequence_generators = ['center_out_error_clamp_NONE']#['center_out_error_clamp_infrequent'] #['centerout_2D_discrete']#
-    ordered_traits = ['trial_run', 'reward_time', 'timeout_time']  
+    ordered_traits = ['reward_time', 'timeout_time']  
 
     #trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
 
     def _parse_next_trial(self):
         super(BASELINE_BMICursorShuffle, self)._parse_next_trial()        
-        self.decoder.filt.trial_run = self.trial_run 
+        #self.decoder.filt.trial_run = self.trial_run 
         self.decoder.filt.shuffle_state = False
 
             
