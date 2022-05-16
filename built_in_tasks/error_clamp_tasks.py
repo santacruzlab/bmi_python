@@ -126,20 +126,8 @@ class ShuffledKalmanFilter(kfdecoder.KalmanFilter):
                 '''Block 4 - Washout | Reinstate intial decoder'''
                 K = self.baseline_decoder
 
-        '''Naming convention based on task entry in Django interface. (Not pretty, but it works, I guess.)'''
-        #(1) Obtain information for all entries.
-        db_name='default'
-        entry    = TaskEntry.objects.using(db_name)
-        #(2) Determine the total number of entries.
-        lenEntry = len(entry)
-        #(3) Assign entry to be the current task entry.
-        entry    = entry[lenEntry-1]
-        #(4) Pull desired entry information.
-        subj     = entry.subject.name[:4].lower()
-        te_id    = entry.id
-        date     = time.strftime('%Y%m%d')
-        fn = "{}{}_te{}_KG_SHKF.pkl".format(subj, date, te_id) #SHKF: SHuffled Kalman Filter
         
+        fn = self.filename_KG
         cwd = os.path.abspath(os.getcwd())
         os.chdir('/media/samantha/ssd/storage/rawdata/bmi')
         with open(fn, 'ab') as f:
@@ -187,6 +175,21 @@ class CursorErrorClamp(object):
         self.plant = CursorErrorClampPlant(endpt_bounds=(-25, 25, 0., 0., -14, 14))
         super(CursorErrorClamp, self).__init__(*args, **kwargs)
 
+        #print('HS: CursorErrorClamp INIT Function')
+        '''Naming convention based on task entry in Django interface. (Not pretty, but it works, I guess.)'''
+        #(1) Obtain information for all entries.
+        db_name='default'
+        entry    = TaskEntry.objects.using(db_name)
+        #(2) Determine the total number of entries.
+        lenEntry = len(entry)
+        #(3) Assign entry to be the current task entry.
+        entry    = entry[lenEntry-1]
+        #(4) Pull desired entry information.
+        subj     = entry.subject.name[:4].lower()
+        te_id    = entry.id
+        date     = time.strftime('%Y%m%d')
+        self.fn = "{}{}_te{}_KG_SHKF.pkl".format(subj, date, te_id) #SHKF: SHuffled Kalman Filter
+        
 
     def _parse_next_trial(self):
         if isinstance(self.next_trial, dict):
@@ -390,6 +393,7 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
     ordered_traits = ['indsToShuffle',  'reward_time_SHUFFLE', 'reward_time', 'timeout_time']  
 
     reward_time_SHUFFLE = traits.Float(0.5, desc="Length of juice reward AFTER BASELINE") 
+    #subject = traits.String('test', desc="Four-character identifier for NHP")
     #trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
     indsToShuffle = traits.String('', desc="String of indices to shuffle (tuningCurve_HDF.py)")
   
@@ -398,7 +402,10 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
         super(BMICursorShuffleErrorClamp, self)._parse_next_trial()
         self.decoder.filt.shuffle_state = int(self._gen_toShuffle)
 
-        #self.decoder.filt.trial_run = self.trial_run 
+        # self.decoder.filt.trial_run = self.trial_run 
+        # self.decoder.filt.subject = self.subject
+
+        self.decoder.filt.filename_KG = self.fn
 
         if self.decoder.filt.shuffle_state == 1:
             self.reward_time = self.reward_time_SHUFFLE
@@ -410,6 +417,7 @@ class BMICursorShuffleErrorClamp(CursorErrorClamp, BMIResetting):
         else:
             temp = self.indsToShuffle.split(', ')
             self.decoder.filt.shuffleInds = [int(i) for i in temp]
+        
 
     def create_assister(self):
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
@@ -437,11 +445,9 @@ class BASELINE_BMICursorShuffle(BMICursorShuffleErrorClamp):
     sequence_generators = ['center_out_error_clamp_NONE']#['center_out_error_clamp_infrequent'] #['centerout_2D_discrete']#
     ordered_traits = ['reward_time', 'timeout_time']  
 
-    #trial_run = traits.String('0000', desc="Experiment ID of shuffle task (te_id)")
-
     def _parse_next_trial(self):
         super(BASELINE_BMICursorShuffle, self)._parse_next_trial()        
-        #self.decoder.filt.trial_run = self.trial_run 
+        self.decoder.filt.filename_KG = self.fn
         self.decoder.filt.shuffle_state = False
 
             
