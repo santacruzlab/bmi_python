@@ -41,21 +41,7 @@ class VisRotKalmanFilter(kfdecoder.KalmanFilter):
         K[[0,2],:] = R * K[[0,2],:]
         K[[3,5],:] = R * K[[3,5],:]
 
-        '''Naming convention based on task entry in Django interface. (Not pretty, but it works, I guess.)'''
-        #(1) Obtain information for all entries.
-        db_name='default'
-        entry    = TaskEntry.objects.using(db_name)
-        #(2) Determine the total number of entries.
-        lenEntry = len(entry)
-        #(3) Assign entry to be the current task entry.
-        entry    = entry[lenEntry-1]
-        #(4) Pull desired entry information.
-        subj     = entry.subject.name[:4].lower()
-        te_id    = entry.id
-        date     = time.strftime('%Y%m%d')
-        fn = "{}{}_te{}_KG_VRKF.pkl".format(subj, date, te_id) #VRKF: Visuomotor Rotation Kalman Filter
-        
-
+        fn = self.filename_KG
         cwd = os.path.abspath(os.getcwd())
         os.chdir('/media/samantha/ssd/storage/rawdata/bmi')
         with open(fn, 'ab') as f:
@@ -359,6 +345,7 @@ class BMICursorVisRotErrorClamp(CursorErrorClamp, BMIResetting):
     def _parse_next_trial(self):
         super(BMICursorVisRotErrorClamp, self)._parse_next_trial()
         self.decoder.filt.rot_angle_deg = self.rot_angle_deg * int(self._gen_curl)
+        self.decoder.filt.filename_KG = self.fn
 
     def create_assister(self):
         kwargs = dict(decoder_binlen=self.decoder.binlen, target_radius=self.target_radius)
