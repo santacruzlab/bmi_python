@@ -363,7 +363,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             spike_entities = [e for e in nevfile.get_entities() if e.entity_type ==3]
             spike_entities = [e for e in spike_entities if int(e.label[4:]) in electrode_list]
 
-            print('checkpoint1')
+            print('bmi_python/riglib/bmi/extractor.py - checkpoint1')
             print(units)
             print(units.shape[0])
             print(electrode_list)
@@ -376,7 +376,7 @@ class BinnedSpikeCountsExtractor(FeatureExtractor):
             # insert value interp_rows[0]-step to beginning of interp_rows array
             interp_rows_ = np.insert(interp_rows, 0, interp_rows[0]-step)
             i = 0
-            print('checkpoint2')
+            print('bmi_python/riglib/bmi/extractor.py - checkpoint2')
             print(n_bins)
             print(interp_rows_)
             for entity in spike_entities:
@@ -456,12 +456,13 @@ class LFPMTMPowerExtractor(object):
         self.channels = channels
         self.bands = bands
         self.win_len = win_len
+        print(win_len)
         self.NW = NW
         if source is not None:
             self.fs = source.source.update_freq
         else:
             self.fs = fs
-
+        print(fs)
         extractor_kwargs = dict()
         extractor_kwargs['channels'] = self.channels
         extractor_kwargs['bands']    = self.bands
@@ -525,7 +526,6 @@ class LFPMTMPowerExtractor(object):
         
         if ('no_mean' in self.extractor_kwargs) and (self.extractor_kwargs['no_mean'] is True):
             return psd_est.reshape(psd_est.shape[0]*psd_est.shape[1], 1)
-
         else:
             # compute average power of each band of interest
             n_chan = len(self.channels)
@@ -554,7 +554,7 @@ class LFPMTMPowerExtractor(object):
             Extracted features to be saved in the task.         
         '''
         cont_samples = self.get_cont_samples(*args, **kwargs)  # dims of channels x time
-        print(cont_samples)
+        #print(cont_samples)
         lfp_power = self.extract_features(cont_samples['samples'])
 
         return dict(lfp_power=lfp_power)

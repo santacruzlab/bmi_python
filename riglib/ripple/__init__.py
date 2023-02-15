@@ -110,7 +110,7 @@ class LFP(DataSourceSystem):
                       ("samples", np.float)])
 
     def __init__(self, channels):     
-        xp._open()
+        xp._open("tcp")#YZ tcp vs udp mode
         self.channels = channels
         self.chan = itertools.cycle(self.channels)
         recChans = np.array(xp.list_elec('nano'))

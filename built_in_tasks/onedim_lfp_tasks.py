@@ -92,23 +92,23 @@ class LFP_Mod(BMILoop, Sequence, Window):
     plant_visible = traits.Bool(True, desc='Specifies whether entire plant is displayed or just endpoint')
     
     lfp_cursor_rad = traits.Float(.5, desc="length of LFP cursor")
-    lfp_cursor_color = (.5,0,.5,.75)  
+    lfp_cursor_color = (0,0,0,1)#(.5,0,.5,.75)  YZ
      
     lfp_plant_type_options = list(plantlist.keys())
     lfp_plant_type = traits.OptionsList(*plantlist, bmi3d_input_options=list(plantlist.keys()))
 
     window_size = traits.Tuple((1920*2, 1080), desc='window size')
 
-    lfp_frac_lims = traits.Tuple((0., 0.35), desc='fraction limits')
+    lfp_frac_lims = traits.Tuple((0., 0.68), desc='fraction limits')
     xlfp_frac_lims = traits.Tuple((-.7, 1.7), desc = 'x dir fraction limits')
-    lfp_control_band = traits.Tuple((25, 40), desc='beta power band limits')
+    lfp_control_band = traits.Tuple((12, 35), desc='beta power band limits')
     lfp_totalpw_band = traits.Tuple((1, 100), desc='total power band limits')
     xlfp_control_band = traits.Tuple((0, 5), desc = 'x direction band limits')
     n_steps = traits.Int(2, desc='moving average for decoder')
 
     is_bmi_seed = True
 
-    powercap = traits.Float(1, desc="Timeout for total power above this")
+    powercap = traits.Float(10000, desc="Timeout for total power above this")
 
     zboundaries=(-12,12)
 
@@ -128,12 +128,12 @@ class LFP_Mod(BMILoop, Sequence, Window):
     state = "wait"
 
     #create settable traits
-    reward_time = traits.Float(.5, desc="Length of juice reward")
+    reward_time = traits.Float(1., desc="Length of juice reward")
 
-    lfp_target_rad = traits.Float(3.6, desc="Length of targets in cm")
+    lfp_target_rad = traits.Float(2.6, desc="Length of targets in cm")
     
     lfp_hold_time = traits.Float(.2, desc="Length of hold required at lfp targets")
-    lfp_hold_var = traits.Float(.05, desc="Length of hold variance required at lfp targets")
+    lfp_hold_var = traits.Float(0.0, desc="Length of hold variance required at lfp targets")
 
     hold_penalty_time = traits.Float(1, desc="Length of penalty time for target hold error")
     
@@ -151,7 +151,7 @@ class LFP_Mod(BMILoop, Sequence, Window):
     target_index = -1 # Helper variable to keep track of which target to display within a trial
     #tries = 0 # Helper variable to keep track of the number of failed attempts at a given trial.
     
-    cursor_visible = False # Determines when to hide the cursor.
+    cursor_visible = True#False # Determines when to hide the cursor.
     no_data_count = 0 # Counter for number of missing data frames in a row
     
     sequence_generators = ['lfp_mod_4targ']
@@ -160,7 +160,6 @@ class LFP_Mod(BMILoop, Sequence, Window):
         super(LFP_Mod, self).__init__(*args, **kwargs)
         self.cursor_visible = True
 
-        print('INIT FRAC LIMS: ', self.lfp_frac_lims)
         
         dec_params = dict(lfp_frac_lims = self.lfp_frac_lims,
                           xlfp_frac_lims = self.xlfp_frac_lims,
@@ -266,6 +265,7 @@ class LFP_Mod(BMILoop, Sequence, Window):
     ##### HELPER AND UPDATE FUNCTIONS ####
     def update_cursor_visibility(self):
         ''' Update cursor visible flag to hide cursor if there has been no good data for more than 3 frames in a row'''
+
         prev = self.cursor_visible
         if self.no_data_count < 3:
             self.cursor_visible = True
@@ -441,7 +441,12 @@ class LFP_Mod(BMILoop, Sequence, Window):
         new_zero = (boundaries[3]+boundaries[2]) / 2.
         new_scale = (boundaries[3] - boundaries[2]) / 2.
 
-        kin_targs = np.array([-0.40625,  0.     ,  0.40625,  0.8125 ])
+
+        #kin_targs = np.array([-0.33, -0.17, 0.17, 0.33]) #2/10/23 & 2/11/23
+        #kin_targs  = np.array([-0.44, -0.29, 0.29, 0.44]) #2/11/23 - run 2 - readjusted to higher mean lfp_power frac
+        #kin_targs  = np.array([-0.41, -0.27, 0.27, 0.41]) #2/14/23 & 2/15/23 run 1
+        kin_targs = np.array([-0.55, -0.41, 0.41, 0.55])
+
 
         lfp_targ_y = (new_scale*kin_targs) + new_zero
 

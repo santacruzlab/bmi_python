@@ -339,7 +339,7 @@ class onedimLFP_CursorPlant(CursorPlant):
 
     def __init__(self, endpt_bounds, *args, **kwargs):
         self.lfp_cursor_rad = kwargs['lfp_cursor_rad']
-        self.lfp_cursor_color = kwargs['lfp_cursor_color']
+        self.lfp_cursor_color = kwargs['lfp_cursor_color'] #change the cursor color 
         args=[(), kwargs['lfp_cursor_color']]
         super(onedimLFP_CursorPlant, self).__init__(endpt_bounds, *args, **kwargs)
 
@@ -350,7 +350,7 @@ class onedimLFP_CursorPlant(CursorPlant):
         self.graphics_models = [self.cursor]
 
     def drive(self, decoder):
-        pos = decoder.filt.get_mean()  # Question: there are 7 elements... which one is the one of interest?  10/12/21
+        pos = decoder.filt.get_mean() 
         
         pos = [-8, -2.2, pos[2]]
         
@@ -362,7 +362,7 @@ class onedimLFP_CursorPlant(CursorPlant):
                 pos[2] = self.endpt_bounds[5]
                
             self.position = pos
-            self.draw()
+            self.draw() # Hide the cursor 2/14/23
 
     def turn_off(self):
         self.cursor.detach()

@@ -585,7 +585,7 @@ class ManualControlMulti(Sequence, Window):
             theta = theta + [temp]
         theta = np.hstack(theta)
 
-
+        #!!HS
         x = distance*np.cos(theta)
         y = np.zeros(len(theta))
         z = distance*np.sin(theta)
@@ -1199,6 +1199,7 @@ class JoystickMulti(ManualControlMulti):
     joystick_method = traits.Float(1,desc="1: Normal velocity, 0: Position control")
     random_rewards = traits.Float(0,desc="Add randomness to reward, 1: yes, 0: no")
     joystick_speed = traits.Float(20, desc="Radius of cursor")
+    rot_factor = traits.Float(10., desc='scaling factor from speed to rotation angle in degrees')
 
     is_bmi_seed = True
 
@@ -1251,12 +1252,12 @@ class JoystickMulti(ManualControlMulti):
         if len(pt) > 0:
 
             pt = pt[-1][0]
-            x = pt[1]
-            y = 1-pt[0]
+            x = pt[1] #L/R axes
+            y = 1-pt[0]#U/D axes pt[0]#1-pt[0]
 
 
-            pt[0]=1-pt[0]; #Switch L / R axes
-            calib = [0.5,0.5] #Sometimes zero point is subject to drift this is the value of the incoming joystick when at 'rest' 
+            #pt[0]= 1-pt[0]; #; #1-pt[0]; #Switch L / R axes
+            calib = [0.35,0.55] #Sometimes zero point is subject to drift this is the value of the incoming joystick when at 'rest' 
             # calib = [ 0.487,  0.   ]
 
             #if self.joystick_method==0:                
@@ -1271,7 +1272,7 @@ class JoystickMulti(ManualControlMulti):
                 vel = np.array([x-calib[0], 0., y-calib[1]])
                 epsilon = 2*(10**-2) #Define epsilon to stabilize cursor movement
                 if sum((vel)**2) > epsilon:
-                    self.current_pt=self.last_pt+20*vel*(1/60) #60 Hz update rate, dt = 1/60
+                    self.current_pt=self.last_pt+self.joystick_speed*vel*(1/60) #60 Hz update rate, dt = 1/60
                 else:
                     self.current_pt = self.last_pt
 
@@ -1281,6 +1282,31 @@ class JoystickMulti(ManualControlMulti):
                 if self.current_pt[0] > 25: self.current_pt[0] = 25
                 if self.current_pt[-1] < -14: self.current_pt[-1] = -14
                 if self.current_pt[-1] > 14: self.current_pt[-1] = 14
+
+            # elif self.joystick_method==2:
+            #     'Method Added on Monday, December 19, 2022'
+            #     'This method is meant to be compared with the BMI visuomotor rotation task (built_in_tasks > error_clamp_tasks.py -> class BMICursorVisRotErrorClamp)'
+            
+            #     vel = np.array([x-calib[0], 0., y-calib[1]])
+
+            #     theta = np.deg2rad(self.rot_factor)
+
+            #     R = np.array([np.cos(theta), 0, -np.sin(theta)])
+                
+            #     epsilon = 2*(10**-2) #Define epsilon to stabilize cursor movement
+            #     if sum((vel)**2) > epsilon:
+
+            #         Rvel = R*vel
+            #         self.current_pt=self.last_pt+self.joystick_speed*Rvel*(1/60) #60 Hz update rate, dt = 1/60
+            #         print(np.shape(Rvel), np.shape(self.current_pt))
+            #     else:
+            #         self.current_pt = self.last_pt
+
+                
+                # if self.current_pt[0] < -25: self.current_pt[0] = -25
+                # if self.current_pt[0] > 25: self.current_pt[0] = 25
+                # if self.current_pt[-1] < -14: self.current_pt[-1] = -14
+                # if self.current_pt[-1] > 14: self.current_pt[-1] = 14
 
             self.plant.set_endpoint_pos(self.current_pt)
             self.last_pt = self.current_pt.copy()
@@ -1294,7 +1320,7 @@ class JoystickMulti(ManualControlMulti):
                 reward_count += 1
         return "{} rewarded trials in {} min".format(reward_count, duration)
 
-class JoystickMulti2DWindow(JoystickMulti, WindowDispl2D):
+class JoystickMulti2DWindow(JoystickMulti, Window): #WindowDispl2D):
     fps = 20.
     def __init__(self,*args, **kwargs):
         super(JoystickMulti2DWindow, self).__init__(*args, **kwargs)

@@ -200,9 +200,9 @@ class One_Dim_LFP_Decoder(Decoder):
             self.filt.x_control_band_ind, self.extractor_kwargs['bands'], self.extractor_kwargs['fft_inds'] = \
             self._get_band_ind(self.extractor_kwargs['fft_freqs'], kwargs['xlfp_control_band'], self.extractor_kwargs['bands'])
 
-        c_txt = open('/storage/txt_write/control.txt','w')
-        p_txt = open('/storage/txt_write/tot.txt','w')
-        xc_txt = open('/storage/txt_write/x_cont.txt','w')
+        c_txt = open('/media/samantha/ssd/storage/txt_write/control.txt','w')
+        p_txt = open('/media/samantha/ssd/storage/txt_write/tot.txt','w')
+        xc_txt = open('/media/samantha/ssd/storage/txt_write/x_cont.txt','w')
         self.filt.files = [c_txt, p_txt, xc_txt]
 
     def _get_band_ind(self, freq_pts, band, band_set):
