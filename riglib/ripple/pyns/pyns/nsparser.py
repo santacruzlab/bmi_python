@@ -516,11 +516,19 @@ class Nsx22Parser:
         # hold a tuple of (timestamps, data points until end of file or next pause)
         self.data_packet_list = []
         self.fid.seek(self.bytes_headers, os.SEEK_SET)
-        while True:
+        while True: 
+            
             buf = self.fid.read(9)
             if len(buf) != 9:
                 break
             (head, ts, n_data_points) = struct.unpack('<B2I', buf)
+            
+            if n_data_points == 0: #fix packet loss error
+                n_data_points = int( (self.size - self.fid.tell()) / (self.channel_count * 2) )
+                print('Caught packet loss error!')
+                print(f'Assigned n_data_points: {n_data_points}')
+
+
             if not head == 1:
                 raise NeuroshareError(NSReturnTypes.NS_BADFILE,
                                       "Invalid data packet header: {0}".format(head))

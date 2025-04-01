@@ -1150,11 +1150,42 @@ class NsxFile:
             timestamp    = TIMESTAMP_NULL_21
             num_data_pts = output['data_headers'][0]['NumDataPoints']
         else:
+			
+            
+            
+            
+            
+            
+            
+            start_pos = self.datafile.tell()
+            # num_data_pts = int(5e7-1)
+            
             while self.datafile.tell() != ospath.getsize(self.datafile.name):
+
                 self.datafile.seek(1, 1)  # skip header byte value
-                timestamp    = unpack('<I', self.datafile.read(4))[0]
+                timestamp = unpack('<I', self.datafile.read(4))[0]
                 num_data_pts = unpack('<I', self.datafile.read(4))[0]
+                
+                if num_data_pts == 0:
+                    num_data_pts = int((ospath.getsize(self.datafile.name) - start_pos - 9 ) / (self.basic_header['ChannelCount'] * DATA_BYTE_SIZE))
+                    print('Caught packet loss error!')
+                    print(f'Assigned n_data_points: {num_data_pts}')
+                    
                 self.datafile.seek(num_data_pts * self.basic_header['ChannelCount'] * DATA_BYTE_SIZE, 1)
+                
+                # if self.datafile.tell() != ospath.getsize(self.datafile.name): #if it didn't work
+                #     self.datafile.seek(start_pos, 0)
+                #     num_data_pts +=1
+                #     if num_data_pts%1e6 == 0: print(num_data_pts)
+                #     # print(num_data_pts)
+                # else:
+                #     print(num_data_pts)
+                    
+                    
+                    
+                    
+                    
+                    
 
         stop_idx_output = ceil(timestamp / self.basic_header['Period']) + num_data_pts
         if data_time_s != DATA_TIME_DEF and stop_idx < stop_idx_output:  stop_idx_output = stop_idx
@@ -1181,6 +1212,7 @@ class NsxFile:
             # be skipped, including any tiny packets that have less samples than downsample
             if self.basic_header['FileSpec'] != '2.1':
                 output['data_headers'].append(processheaders(self.datafile, nsx_header_dict['data']))
+                output['data_headers'][-1]['NumDataPoints'] = num_data_pts
                 if output['data_headers'][-1]['Header'] == 0:  print('Invalid Header.  File may be corrupt')
                 if output['data_headers'][-1]['NumDataPoints'] < downsample:
                     self.datafile.seek(self.basic_header['ChannelCount'] * output['data_headers'][-1]['NumDataPoints']
